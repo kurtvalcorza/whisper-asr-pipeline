@@ -1,6 +1,6 @@
 """Static release-asset validation for the Whisper ASR DIMER pipeline.
 
-Checks the tutorial notebook, tutorial registry, model card, README, STATUS.md and
+Checks the tutorial notebooks, tutorial registry, model card, README, STATUS.md and
 weight documentation for DIMER Notebook Specification 1.0 / Model Card Specification 1.0
 source conformance and cross-document identity consistency.
 
@@ -51,6 +51,74 @@ FORBIDDEN_CODE_EXTRA = (
     'from transformers import',
     'AutoModelForSpeechSeq2Seq',
 )
+
+# The E2E fine-tuning notebook: same bootstrap, BYOD gate and identity rules, plus the
+# training/export/reload path it must exercise through the public API.
+FINETUNE_NOTEBOOK_NAME = "whisper_asr_finetune_colab.ipynb"
+FINETUNE_PROFILE = "E2E"
+FINETUNE_EXPECTED_OUTPUTS = (
+    'outputs/whisper_asr_finetune_result.json',
+    'outputs/whisper-asr-lora-adapter.zip',
+)
+FINETUNE_CODE_MARKERS = (
+    'from whisper_asr_pipeline import MODEL_ID, MODEL_REVISION, WhisperASRPipeline, load_model, '
+    'word_error_count, word_error_rate',
+    "load_dataset('PolyAI/minds14', LOCALE, split='train')",
+    "ds.cast_column('audio', Audio(decode=False))",
+    'sf.read(io.BytesIO(',
+    'torchaudio.functional.resample(',
+    'pipe = WhisperASRPipeline.from_pretrained()',
+    'baseline_wer = corpus_wer(eval_references, baseline_transcripts)',
+    'base_model, processor = load_model(device=DEVICE)',
+    'model = get_peft_model(base_model, lora_config)',
+    'scaler.scale(loss / window).backward()',
+    "model.save_pretrained(str(ADAPTER_DIR), safe_serialization=True)",
+    "raise RuntimeError('Saved adapter weights are zero or missing')",
+    "adapted = WhisperASRPipeline.from_model(model, processor, adapter='in-memory LoRA')",
+    'reloaded = WhisperASRPipeline.from_pretrained(adapter_dir=ADAPTER_DIR)',
+    "raise RuntimeError(f'Reloaded weights differ from base + scaled B@A by {merge_error:.2e}",
+    "raise RuntimeError(f'Reloaded adapter reproduces only {agreement}/{len(eval_clips)}",
+    "raise RuntimeError(f'epoch {epoch} took {epoch_steps} optimizer steps, expected {expected_steps}",
+    "'split_digest': SPLIT_DIGEST",
+    "'model_revision'",
+    'transformers.__version__',
+    "'device': reloaded.device",
+)
+FINETUNE_MARKDOWN_MARKERS = (
+    '**Capability:** parameter-efficient (LoRA) domain adaptation',
+    'catastrophic forgetting',
+    'no diarization, speaker identity, biometric inference',
+    'CC-BY-4.0',
+)
+
+
+class NotebookSpec:
+    """Profile-specific expectations for one tutorial notebook in ``tutorials/``."""
+
+    def __init__(
+        self, profile, byod_gates, expected_outputs, code_markers, markdown_markers, forbidden_code_extra
+    ):
+        self.profile = profile
+        self.byod_gates = byod_gates
+        self.expected_outputs = expected_outputs
+        self.code_markers = code_markers
+        self.markdown_markers = markdown_markers
+        self.forbidden_code_extra = forbidden_code_extra
+
+
+NOTEBOOKS = {
+    NOTEBOOK_NAME: NotebookSpec(
+        EXPECTED_PROFILE, BYOD_GATES, EXPECTED_OUTPUTS, CODE_MARKERS, MARKDOWN_MARKERS, FORBIDDEN_CODE_EXTRA
+    ),
+    FINETUNE_NOTEBOOK_NAME: NotebookSpec(
+        FINETUNE_PROFILE,
+        BYOD_GATES,
+        FINETUNE_EXPECTED_OUTPUTS,
+        FINETUNE_CODE_MARKERS,
+        FINETUNE_MARKDOWN_MARKERS,
+        FORBIDDEN_CODE_EXTRA,
+    ),
+}
 
 # ---------------------------------------------------------------------------
 # Shared checks. Everything below is source/structure validation only. Passing
@@ -291,13 +359,15 @@ def validate_release_status() -> None:
     )
 
 
-def _validate_notebook_structure(path: Path, notebook: dict) -> tuple[list[tuple[int, str, ast.Module]], str]:
+def _validate_notebook_structure(
+    path: Path, notebook: dict, spec: NotebookSpec
+) -> tuple[list[tuple[int, str, ast.Module]], str]:
     _check(notebook.get("nbformat") == 4, f"{path.name}: nbformat must be 4")
     dimer = notebook.get("metadata", {}).get("dimer")
     _check(isinstance(dimer, dict), f"{path.name}: metadata.dimer block is required")
     profile = dimer.get("notebook_profile")
     _check(profile in ALLOWED_PROFILES, f"{path.name}: invalid metadata.dimer.notebook_profile {profile!r}")
-    _check(profile == EXPECTED_PROFILE, f"{path.name}: profile {profile!r} != declared {EXPECTED_PROFILE!r}")
+    _check(profile == spec.profile, f"{path.name}: profile {profile!r} != declared {spec.profile!r}")
     # NOTEBOOK_SPEC prescribes the profile declaration but not the spec-version key; accept the
     # `notebook_spec` spelling used here and the `_version` spelling used by sibling repositories.
     spec = dimer.get("notebook_spec", dimer.get("notebook_spec_version"))
@@ -335,9 +405,11 @@ def _validate_notebook_structure(path: Path, notebook: dict) -> tuple[list[tuple
     return code_cells, markdown
 
 
-def _validate_gates(path: Path, code_cells: list[tuple[int, str, ast.Module]]) -> None:
+def _validate_gates(
+    path: Path, code_cells: list[tuple[int, str, ast.Module]], gates: tuple[str, ...]
+) -> None:
     """Each BYOD gate is assigned exactly once, to the constant False, on a Colab form line."""
-    for gate in BYOD_GATES:
+    for gate in gates:
         assignments = []
         for index, source, tree in code_cells:
             lines = source.splitlines()
@@ -400,7 +472,7 @@ def _validate_bootstrap_guard(path: Path, code_cells: list[tuple[int, str, ast.M
 
 
 def _validate_notebook_content(
-    path: Path, code_cells: list[tuple[int, str, ast.Module]], markdown: str
+    path: Path, code_cells: list[tuple[int, str, ast.Module]], markdown: str, spec: NotebookSpec
 ) -> None:
     model_id, revision = _package_identity()
     code = "\n".join(_strip_comments(source) for _, source, _ in code_cells)
@@ -409,35 +481,40 @@ def _validate_notebook_content(
         f"{path.name}: bootstrap must clone this repository by its canonical URL",
     )
     _check(f"REPO_NAME = '{REPO_NAME}'" in code, f"{path.name}: REPO_NAME must be {REPO_NAME}")
-    missing = [marker for marker in COMMON_CODE_MARKERS + CODE_MARKERS if marker not in code]
+    missing = [marker for marker in COMMON_CODE_MARKERS + spec.code_markers if marker not in code]
     _check(not missing, f"{path.name}: missing required source markers: {missing}")
     present = [label for label, pattern in FORBIDDEN_PATTERNS if pattern.search(code)]
-    extra = [marker for marker in FORBIDDEN_CODE_EXTRA if marker in code]
+    extra = [marker for marker in spec.forbidden_code_extra if marker in code]
     _check(not present and not extra, f"{path.name}: forbidden/insecure source: {present + extra}")
-    _validate_gates(path, code_cells)
+    _validate_gates(path, code_cells, spec.byod_gates)
     _validate_identity_import(path, code_cells, revision)
     _validate_bootstrap_guard(path, code_cells)
-    for filename in EXPECTED_OUTPUTS:
+    for filename in spec.expected_outputs:
         _check(filename in code, f"{path.name}: must export {filename}")
-    missing_md = [marker for marker in COMMON_MARKDOWN_MARKERS + MARKDOWN_MARKERS if marker not in markdown]
+    required_md = COMMON_MARKDOWN_MARKERS + spec.markdown_markers
+    missing_md = [marker for marker in required_md if marker not in markdown]
     _check(not missing_md, f"{path.name}: missing learner-facing markers: {missing_md}")
-    _check(f"**Profile:** `{EXPECTED_PROFILE}`" in markdown, f"{path.name}: markdown must state the profile")
+    _check(f"**Profile:** `{spec.profile}`" in markdown, f"{path.name}: markdown must state the profile")
     _check(f"https://huggingface.co/{model_id}" in markdown, f"{path.name}: references must link {model_id}")
 
 
 def validate_notebooks() -> None:
+    """Every notebook in tutorials/ is one of the declared notebooks, and each is validated."""
     tutorials = ROOT / "tutorials"
-    notebooks = sorted(tutorials.glob("*.ipynb"))
-    _check(len(notebooks) == 1, f"exactly one tutorial notebook is expected, found {len(notebooks)}")
-    path = notebooks[0]
-    _check(path.name == NOTEBOOK_NAME, f"tutorial notebook must be named {NOTEBOOK_NAME}, found {path.name}")
-    notebook = json.loads(_read(path))
-    code_cells, markdown = _validate_notebook_structure(path, notebook)
-    _validate_notebook_content(path, code_cells, markdown)
+    found = {path.name for path in tutorials.glob("*.ipynb")}
+    unexpected = sorted(found - set(NOTEBOOKS))
+    _check(not unexpected, f"unexpected tutorial notebooks (declare them in NOTEBOOKS): {unexpected}")
+    absent = sorted(set(NOTEBOOKS) - found)
+    _check(not absent, f"declared tutorial notebooks are missing: {absent}")
     registry = _read(tutorials / "README.md")
-    _check(f"`{path.name}`" in registry, f"{path.name} missing from tutorials/README.md")
-    _check(f"`{EXPECTED_PROFILE}`" in registry, f"tutorials/README.md must record `{EXPECTED_PROFILE}`")
     _check("DIMER Notebook Specification 1.0" in registry, "tutorials/README.md must name the notebook spec")
+    for name, spec in NOTEBOOKS.items():
+        path = tutorials / name
+        notebook = json.loads(_read(path))
+        code_cells, markdown = _validate_notebook_structure(path, notebook, spec)
+        _validate_notebook_content(path, code_cells, markdown, spec)
+        _check(f"`{name}`" in registry, f"{name} missing from tutorials/README.md")
+        _check(f"`{spec.profile}`" in registry, f"tutorials/README.md must record `{spec.profile}`")
 
 
 def validate_all() -> list[str]:

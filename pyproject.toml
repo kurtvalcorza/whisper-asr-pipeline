@@ -9,6 +9,7 @@ authors = [{ name = "Kurt Valcorza" }]
 dependencies = [
   "torch==2.6.0",
   "torchvision==0.21.0",
+  "torchaudio==2.6.0",
   "transformers==4.52.1",
   "accelerate==1.3.0",
   "numpy==1.26.4",

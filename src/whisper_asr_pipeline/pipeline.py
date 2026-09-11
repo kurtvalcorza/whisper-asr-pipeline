@@ -10,13 +10,16 @@ MODEL_ID = "openai/whisper-large-v3-turbo"
 MODEL_REVISION = "41f01f3fe87f28c78e2fbf8b568835947dd65ed9"
 MODEL_LICENSE = "MIT"
 # Basic WER normalization: case-fold and drop punctuation so that "classes," and "gospel."
-# match an unpunctuated reference. Word-internal apostrophes and hyphens are kept. Numbers,
-# abbreviations and spelled-out forms are NOT normalized ("Mr." vs "Mister" is an error).
+# match an unpunctuated reference. Curly apostrophes are folded to the straight form first;
+# word-internal apostrophes and hyphens are kept (a hyphenated compound stays one token).
+# Numbers, abbreviations and spelled-out forms are NOT normalized ("Mr." vs "Mister" is an
+# error).
+_APOSTROPHES = str.maketrans({"\u2019": "'", "\u2018": "'", "\u02bc": "'"})
 _PUNCTUATION = re.compile(r"[^\w\s'-]|(?<!\w)['-]|['-](?!\w)", re.UNICODE)
 
 
 def _tokens(text: str) -> list[str]:
-    return _PUNCTUATION.sub(" ", text.lower()).split()
+    return _PUNCTUATION.sub(" ", text.casefold().translate(_APOSTROPHES)).split()
 
 
 def word_error_rate(reference: str, hypothesis: str) -> float:

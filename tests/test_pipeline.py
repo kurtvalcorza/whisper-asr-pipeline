@@ -11,6 +11,9 @@ def test_wer_ignores_case_and_punctuation_but_not_spelling():
     hypothesis = "Mr. Quilter is the apostle of the middle classes, and we are glad."
     assert word_error_rate("hello world", "Hello, world.") == 0.0
     assert word_error_rate("don't stop", "Don't stop!") == 0.0
+    assert word_error_rate("don't stop", "Don\u2019t stop") == 0.0
+    assert word_error_rate("stra\u00dfe", "STRASSE") == 0.0
+    assert word_error_rate("well-known", "well known") == 2.0  # one reference token, two errors
     assert word_error_rate(reference, hypothesis) == 1 / 13
 
 

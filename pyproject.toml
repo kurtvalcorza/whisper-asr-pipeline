@@ -17,6 +17,7 @@ dependencies = [
 ]
 [project.optional-dependencies]
 tutorial = ["datasets==4.4.0", "pandas==2.2.3"]
+finetune = ["peft==0.17.1"]
 dev = ["pytest==9.0.2", "ruff==0.12.10"]
 [build-system]
 requires = ["hatchling"]

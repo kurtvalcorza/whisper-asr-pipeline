@@ -1,10 +1,11 @@
 # Release verification
 
-`tutorials/whisper_asr_colab.ipynb` (`TASK-INFERENCE`) is a **release candidate** until the exact
-notebook revision has executed top-to-bottom in a clean supported runtime. Unit tests, JSON
+`tutorials/whisper_asr_colab.ipynb` (`TASK-INFERENCE`) and `tutorials/whisper_asr_finetune_colab.ipynb`
+(`E2E`) are each a **release candidate** until the exact notebook revision has executed
+top-to-bottom in a clean supported runtime. Unit tests, JSON
 validation, code-cell compilation, and `tools/validate_release_assets.py` are necessary
 checks but are **not** runtime evidence under DIMER Notebook Specification 1.0. This file is
-the durable release-gate record for the notebook.
+the durable release-gate record for both notebooks; each is promoted on its own evidence.
 
 ## Automatic coverage (static, every pull request)
 
@@ -13,8 +14,9 @@ CI runs `tools/validate_release_assets.py`, which checks:
 - notebook JSON parses; every code cell compiles as plain Python (no `%`/`!` magics); no
   persisted outputs or execution counts; no unresolved placeholder markers; every code cell
   is preceded by an explanatory markdown cell;
-- exactly one tutorial notebook, named in `tutorials/README.md` with its `TASK-INFERENCE`
-  profile and the notebook-spec version; `metadata.dimer` declares that profile and spec `1.0`;
+- every notebook in `tutorials/` is one of the two declared notebooks, each named in
+  `tutorials/README.md` with its profile (`TASK-INFERENCE`, `E2E`) and the notebook-spec version;
+  `metadata.dimer` declares that profile and spec `1.0`;
 - the fresh-runtime bootstrap (clone by canonical URL, `DIMER_TUTORIAL_REF`, detached checkout of
   the requested revision, restart-on-stale-import guard) and the recorded `REPO_SHA` in exports;
 - `MODEL_ID`/`MODEL_REVISION` are imported from the package rather than hard-coded, the revision is
@@ -63,12 +65,31 @@ Before changing the registry status from `Candidate` to `Release-grade`:
    outputs, and any warning or applicable `SHOULD` deviation in the table below;
 8. record no access tokens or other secrets.
 
+For `whisper_asr_finetune_colab.ipynb` the same procedure applies with a CUDA runtime (Colab or
+Kaggle T4), form parameters at their defaults (`en-US`, 400/100 clips, 2 epochs, rank 32), and the
+default-path stages are instead:
+
+- fresh bootstrap at the candidate revision with the `tutorial` and `finetune` extras;
+- pinned base acquisition, `PolyAI/minds14` ingestion with 8→16 kHz resampling and the recorded
+  `split_digest`;
+- zero-shot baseline corpus WER on the held-out clips through `WhisperASRPipeline`;
+- LoRA attachment through `load_model`, mixed-precision training with per-epoch train/validation
+  loss, peak GPU memory and wall time;
+- adapted corpus WER on the same held-out clips;
+- `outputs/whisper-asr-lora-adapter.zip` with `artifact-manifest.json`, non-zero saved LoRA
+  weights, and a fresh reload through `WhisperASRPipeline.from_pretrained(adapter_dir=...)` whose
+  probe-module weight equals base + scaled `B @ A` from the bundle, and whose transcripts agree
+  with the in-memory adapted transcripts (same pipeline, via `WhisperASRPipeline.from_model`) on
+  at least 95% of the held-out clips; the number of clips changed versus the baseline is recorded;
+- `outputs/whisper_asr_finetune_result.json` with baseline/adapted/reloaded WER, training
+  configuration, repository SHA, model revision, runtime and device.
+
 A known-failing default path in the supported runtime blocks release.
 
 ## Recorded executions
 
-Notebook identity is the Git blob id of `tutorials/whisper_asr_colab.ipynb` (verify with
-`git rev-parse <commit>:tutorials/whisper_asr_colab.ipynb`). Wall times are the sum of per-cell
+Notebook identity is the Git blob id of the notebook file (verify with
+`git rev-parse <commit>:tutorials/<notebook>.ipynb`); rows name the notebook they cover. Wall times are the sum of per-cell
 times reported by the executor and include installs and the model download; they are
 measurements for the stated runtime, not general estimates.
 

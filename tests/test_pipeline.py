@@ -6,6 +6,14 @@ def test_wer():
     assert word_error_rate("hello world", "hello") == 0.5
 
 
+def test_wer_ignores_case_and_punctuation_but_not_spelling():
+    reference = "MISTER QUILTER IS THE APOSTLE OF THE MIDDLE CLASSES AND WE ARE GLAD"
+    hypothesis = "Mr. Quilter is the apostle of the middle classes, and we are glad."
+    assert word_error_rate("hello world", "Hello, world.") == 0.0
+    assert word_error_rate("don't stop", "Don't stop!") == 0.0
+    assert word_error_rate(reference, hypothesis) == 1 / 13
+
+
 def test_normalized_output():
     calls = {}
 

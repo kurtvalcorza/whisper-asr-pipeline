@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
@@ -8,13 +9,18 @@ from typing import Any
 MODEL_ID = "openai/whisper-large-v3-turbo"
 MODEL_REVISION = "41f01f3fe87f28c78e2fbf8b568835947dd65ed9"
 MODEL_LICENSE = "MIT"
+# Basic WER normalization: case-fold and drop punctuation so that "classes," and "gospel."
+# match an unpunctuated reference. Word-internal apostrophes and hyphens are kept. Numbers,
+# abbreviations and spelled-out forms are NOT normalized ("Mr." vs "Mister" is an error).
+_PUNCTUATION = re.compile(r"[^\w\s'-]|(?<!\w)['-]|['-](?!\w)", re.UNICODE)
 
 
 def _tokens(text: str) -> list[str]:
-    return " ".join(text.lower().strip().split()).split()
+    return _PUNCTUATION.sub(" ", text.lower()).split()
 
 
 def word_error_rate(reference: str, hypothesis: str) -> float:
+    """Word error rate after basic normalization (lowercase, punctuation removed)."""
     reference_tokens = _tokens(reference)
     hypothesis_tokens = _tokens(hypothesis)
     if not reference_tokens:

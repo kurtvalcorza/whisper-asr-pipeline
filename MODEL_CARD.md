@@ -48,7 +48,7 @@ The reference runtime is Python 3.12 with pinned PyTorch, Transformers, Accelera
 
 ###### Performance Measures
 
-The repository reports `word_error_rate` when a reference transcript is supplied. WER measures token-level substitutions, insertions, and deletions relative to reference words, making it interpretable for ASR but insensitive to some semantic and punctuation differences. The tutorial labels its WER as sample/tutorial evidence from a single public example; the repository does not reproduce or claim upstream benchmark scores as measurements made by this pipeline.
+The repository reports `word_error_rate` when a reference transcript is supplied. WER measures token-level substitutions, insertions, and deletions relative to reference words after basic normalization (lower-casing and punctuation removal; numbers, abbreviations and spelled-out forms are not normalized, so `Mr.` versus `Mister` counts as an error), making it interpretable for ASR but insensitive to some semantic differences. The tutorial labels its WER as sample/tutorial evidence from a single public example; the repository does not reproduce or claim upstream benchmark scores as measurements made by this pipeline.
 
 ###### Decision thresholds
 

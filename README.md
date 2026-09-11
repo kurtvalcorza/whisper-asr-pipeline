@@ -21,7 +21,7 @@ print(result["text"])
 
 ## Tutorial
 
-`tutorials/whisper_asr_colab.ipynb` is declared `TASK-INFERENCE`. Its default path uses a public LibriSpeech dummy sample, validates runtime/model provenance, transcribes through the public API, computes tutorial WER against the supplied reference, and exports JSON. BYOD is optional and gated off by default.
+`tutorials/whisper_asr_colab.ipynb` is declared `TASK-INFERENCE`. Its default path uses a public LibriSpeech dummy sample, validates runtime/model provenance, transcribes through the public API, computes tutorial WER against the supplied reference (lower-cased, punctuation removed; abbreviations are not normalized), and exports JSON. BYOD is optional and gated off by default.
 
 ## Release status
 

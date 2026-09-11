@@ -42,7 +42,7 @@ Input audio may originate from microphones, telephony systems, meeting platforms
 
 ###### Environment
 
-The reference runtime is Python 3.12 with pinned PyTorch, Transformers, Accelerate, NumPy, and SoundFile versions. CUDA is recommended for practical large-v3-turbo inference; CPU is permitted but may be substantially slower. The data environment assumes intelligible speech reasonably represented by Whisper's upstream training distribution. Domain jargon, heavy overlap, severe noise, unusual recording conditions, or languages with weaker upstream coverage can increase transcription error and require local evaluation.
+The reference runtime is Python 3.12 with pinned PyTorch, torchvision, Transformers, Accelerate, NumPy, and SoundFile versions. torchvision is pinned to the build that matches the pinned PyTorch because hosted runtimes ship a torchvision compiled against their own PyTorch; once PyTorch is pinned, an orphaned torchvision breaks the Transformers processor imports (`operator torchvision::nms does not exist`). CUDA is recommended for practical large-v3-turbo inference; CPU is permitted but may be substantially slower. The data environment assumes intelligible speech reasonably represented by Whisper's upstream training distribution. Domain jargon, heavy overlap, severe noise, unusual recording conditions, or languages with weaker upstream coverage can increase transcription error and require local evaluation.
 
 #### Metrics
 

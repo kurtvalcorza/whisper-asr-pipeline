@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 MODEL_ID = "openai/whisper-large-v3-turbo"
 MODEL_REVISION = "41f01f3fe87f28c78e2fbf8b568835947dd65ed9"
@@ -40,7 +41,7 @@ class WhisperASRPipeline:
     device: str
 
     @classmethod
-    def from_pretrained(cls, device: str | None = None) -> "WhisperASRPipeline":
+    def from_pretrained(cls, device: str | None = None) -> WhisperASRPipeline:
         import torch
         from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
 
@@ -81,11 +82,12 @@ class WhisperASRPipeline:
     ) -> dict[str, Any]:
         if task not in {"transcribe", "translate"}:
             raise ValueError("task must be 'transcribe' or 'translate'")
-        if isinstance(audio, (str, Path)) and not str(audio).startswith(
-            ("http://", "https://")
+        if (
+            isinstance(audio, str | Path)
+            and not str(audio).startswith(("http://", "https://"))
+            and not Path(audio).is_file()
         ):
-            if not Path(audio).is_file():
-                raise FileNotFoundError(f"audio file not found: {audio}")
+            raise FileNotFoundError(f"audio file not found: {audio}")
         if not 1 <= chunk_length_s <= 30:
             raise ValueError("chunk_length_s must be between 1 and 30 seconds")
 

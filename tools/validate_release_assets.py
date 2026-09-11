@@ -10,8 +10,10 @@ the release gate is defined in docs/release-verification.md.
 from __future__ import annotations
 
 import ast
+import io
 import json
 import re
+import tokenize
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -54,12 +56,18 @@ FORBIDDEN_CODE_EXTRA = (
 # Shared checks. Everything below is source/structure validation only. Passing
 # these checks is NOT clean-runtime execution evidence under DIMER Notebook
 # Specification 1.0; see docs/release-verification.md for the release gate.
+#
+# Structural rules (BYOD gate, identity import, stale-import guard, forbidden
+# install/trust forms) are checked on the parsed AST or on comment-stripped
+# source, so a marker hidden in a comment or an alternative spelling does not
+# satisfy or evade them.
 # ---------------------------------------------------------------------------
 
 ALLOWED_PROFILES = {"E2E", "ARTIFACT-INFERENCE", "TASK-INFERENCE", "MULTI-CAPABILITY", "SMOKE"}
 STATUS_TOKENS = ("Candidate", "Release-grade")
 PLACEHOLDER = re.compile(r"\b(TODO|TBD|FIXME)\b|Insert text here|Tooltip:", re.I)
 SHA40 = re.compile(r"^[0-9a-f]{40}$")
+IDENTITY_NAMES = ("MODEL_ID", "MODEL_REVISION")
 # Affirmative claims that tutorial execution cannot support (Notebook Spec: no unsupported
 # release-grade, benchmark, or deployment claims). Negated/comparative phrasing is allowed.
 UNSUPPORTED_CLAIMS = re.compile(
@@ -88,14 +96,16 @@ REQUIRED_CARD_HEADINGS = [
     (6, "Risks and harms"),
     (6, "Use cases"),
 ]
-# Markers every DIMER tutorial in this fleet must carry, independent of profile.
+# Markers every DIMER tutorial in this fleet must carry, independent of profile. Matched on
+# comment-stripped code, so a commented-out call does not count.
 COMMON_CODE_MARKERS = (
     "REPO_REF = os.environ.get('DIMER_TUTORIAL_REF', 'main')",
     "if not (ROOT / 'pyproject.toml').exists():",
     "'git', 'clone'",
     "'checkout', '--detach', 'FETCH_HEAD'",
     "REPO_SHA = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()",
-    "Restart the runtime, then rerun from the top.",
+    "importlib.metadata.packages_distributions()",
+    "importlib.invalidate_caches()",
     "platform.python_version()",
     "torch.__version__",
     "'repository_revision': REPO_SHA",
@@ -116,21 +126,20 @@ COMMON_MARKDOWN_MARKERS = (
     "## References",
     "- Repository model card: `../MODEL_CARD.md`",
 )
-# Patterns that must never appear in tutorial code: credential-in-URL, unpinned trust,
-# unsafe deserialization, notebook magics (the executable harness runs plain Python), and an
-# editable self-install, which is not importable in the same interpreter until it restarts.
-FORBIDDEN_CODE = (
-    "https://x-access-token:",
-    "@github.com/",
-    "trust_remote_code=True",
-    "pickle.load",
-    "torch.load(",
-    "extractall(",
-    "pip install -e ",
-    "'install', '-e'",
-    "'install', '-q', '-e'",
-    "%pip",
-    "!pip",
+# Patterns that must never appear in tutorial code (comment-stripped): credential-in-URL,
+# unpinned trust, unsafe deserialization, notebook magics (the executable harness runs plain
+# Python), and an editable self-install in any spelling, which is not importable in the same
+# interpreter until it restarts.
+FORBIDDEN_PATTERNS = (
+    ("credential in clone URL", re.compile(r"https://[^/'\"\s]*@github\.com/|x-access-token:")),
+    ("editable self-install", re.compile(r"""['"](?:-e|--editable)['"]|pip install (?:-e|--editable)\b""")),
+    ("trust_remote_code enabled", re.compile(r"trust_remote_code\s*[=:]\s*True")),
+    (
+        "unsafe deserialization",
+        re.compile(r"\bpickle\.load|\btorch\.load\s*\(|getattr\(\s*torch\s*,\s*['\"]load['\"]"),
+    ),
+    ("archive extractall", re.compile(r"\.extractall\s*\(")),
+    ("notebook magic or shell escape", re.compile(r"(?m)^\s*[%!]|get_ipython\(\)")),
 )
 
 
@@ -150,6 +159,47 @@ def _read(path: Path) -> str:
 def _cell_source(cell: dict) -> str:
     value = cell.get("source", "")
     return "".join(value) if isinstance(value, list) else value
+
+
+def _strip_comments(source: str) -> str:
+    """Return the source without comment tokens (string contents are preserved)."""
+    out: list[str] = []
+    last_row, last_col = 1, 0
+    lines = source.splitlines(keepends=True)
+    try:
+        tokens = list(tokenize.generate_tokens(io.StringIO(source).readline))
+    except (tokenize.TokenError, SyntaxError):
+        return source
+    for token in tokens:
+        (srow, scol), (erow, ecol) = token.start, token.end
+        if srow > last_row:
+            out.append(lines[last_row - 1][last_col:] if last_row - 1 < len(lines) else "")
+            for row in range(last_row, srow - 1):
+                out.append(lines[row])
+            last_row, last_col = srow, 0
+        if srow - 1 < len(lines):
+            out.append(lines[srow - 1][last_col:scol])
+        if token.type != tokenize.COMMENT:
+            out.append(token.string)
+        last_row, last_col = erow, ecol
+    return "".join(out)
+
+
+def _assignment_targets(node: ast.AST):
+    if isinstance(node, ast.Assign):
+        targets = node.targets
+    elif isinstance(node, (ast.AnnAssign, ast.AugAssign, ast.NamedExpr, ast.For, ast.comprehension)):
+        targets = [node.target]
+    elif isinstance(node, ast.withitem) and node.optional_vars is not None:
+        targets = [node.optional_vars]
+    else:
+        return []
+    names = []
+    for target in targets:
+        for sub in ast.walk(target):
+            if isinstance(sub, ast.Name):
+                names.append(sub.id)
+    return names
 
 
 def _package_identity() -> tuple[str, str]:
@@ -241,7 +291,7 @@ def validate_release_status() -> None:
     )
 
 
-def _validate_notebook_structure(path: Path, notebook: dict) -> tuple[str, str]:
+def _validate_notebook_structure(path: Path, notebook: dict) -> tuple[list[tuple[int, str, ast.Module]], str]:
     _check(notebook.get("nbformat") == 4, f"{path.name}: nbformat must be 4")
     dimer = notebook.get("metadata", {}).get("dimer")
     _check(isinstance(dimer, dict), f"{path.name}: metadata.dimer block is required")
@@ -257,7 +307,7 @@ def _validate_notebook_structure(path: Path, notebook: dict) -> tuple[str, str]:
         bool(cells) and cells[0].get("cell_type") == "markdown",
         f"{path.name}: first cell must be markdown",
     )
-    code_parts: list[str] = []
+    code_cells: list[tuple[int, str, ast.Module]] = []
     markdown_parts: list[str] = []
     for index, cell in enumerate(cells):
         source = _cell_source(cell)
@@ -274,39 +324,99 @@ def _validate_notebook_structure(path: Path, notebook: dict) -> tuple[str, str]:
         for line in source.splitlines():
             _check(not line.lstrip().startswith(("%", "!")), f"{path.name}: cell {index} uses a magic")
         try:
-            ast.parse(source)
+            tree = ast.parse(source)
         except SyntaxError as exc:
             raise ValidationError(f"{path.name}: code cell {index} does not compile: {exc}") from exc
-        code_parts.append(source)
-    code = "\n".join(code_parts)
+        code_cells.append((index, source, tree))
     markdown = "\n".join(markdown_parts)
-    _check(not PLACEHOLDER.search(code + markdown), f"{path.name}: placeholder text found")
+    raw_code = "\n".join(source for _, source, _ in code_cells)
+    _check(not PLACEHOLDER.search(raw_code + markdown), f"{path.name}: placeholder text found")
     _check(not UNSUPPORTED_CLAIMS.search(markdown), f"{path.name}: unsupported release/benchmark claim")
-    return code, markdown
+    return code_cells, markdown
 
 
-def _validate_notebook_content(path: Path, code: str, markdown: str) -> None:
+def _validate_gates(path: Path, code_cells: list[tuple[int, str, ast.Module]]) -> None:
+    """Each BYOD gate is assigned exactly once, to the constant False, on a Colab form line."""
+    for gate in BYOD_GATES:
+        assignments = []
+        for index, source, tree in code_cells:
+            lines = source.splitlines()
+            for node in ast.walk(tree):
+                if gate in _assignment_targets(node):
+                    line = lines[node.lineno - 1] if node.lineno - 1 < len(lines) else ""
+                    assignments.append((index, node, line))
+        _check(
+            len(assignments) == 1,
+            f"{path.name}: {gate} must be assigned exactly once, found {len(assignments)}",
+        )
+        index, node, line = assignments[0]
+        is_false = (
+            isinstance(node, ast.Assign)
+            and len(node.targets) == 1
+            and isinstance(node.value, ast.Constant)
+            and node.value.value is False
+        )
+        _check(is_false, f"{path.name}: {gate} must be assigned the constant False (cell {index})")
+        _check("# @param" in line, f"{path.name}: {gate} must be a Colab form parameter (`# @param`)")
+    for index, _source, tree in code_cells:
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                _check(
+                    not any(alias.name.startswith("google.colab") for alias in node.names),
+                    f"{path.name}: google.colab must only be imported inside the BYOD gate (cell {index})",
+                )
+
+
+def _validate_identity_import(
+    path: Path, code_cells: list[tuple[int, str, ast.Module]], revision: str
+) -> None:
+    """MODEL_ID/MODEL_REVISION come from the package import only; nothing rebinds them."""
+    imported = False
+    for index, _source, tree in code_cells:
+        for node in ast.walk(tree):
+            if isinstance(node, ast.ImportFrom) and node.module == PACKAGE:
+                names = {alias.asname or alias.name for alias in node.names}
+                if set(IDENTITY_NAMES) <= names:
+                    imported = True
+            rebound = [name for name in _assignment_targets(node) if name in IDENTITY_NAMES]
+            _check(not rebound, f"{path.name}: {rebound} must not be rebound (cell {index})")
+    _check(imported, f"{path.name}: must import MODEL_ID and MODEL_REVISION from {PACKAGE}")
+    raw_code = "\n".join(source for _, source, _ in code_cells)
+    _check(revision not in raw_code, f"{path.name}: model revision must be imported, not hard-coded")
+
+
+def _validate_bootstrap_guard(path: Path, code_cells: list[tuple[int, str, ast.Module]]) -> None:
+    """The stale-import guard must actually raise: `if stale:` whose body raises RuntimeError."""
+    raises = False
+    for _, _, tree in code_cells:
+        for node in ast.walk(tree):
+            if isinstance(node, ast.If) and isinstance(node.test, ast.Name) and node.test.id == "stale":
+                for sub in ast.walk(node):
+                    if isinstance(sub, ast.Raise) and isinstance(sub.exc, ast.Call):
+                        func = sub.exc.func
+                        if isinstance(func, ast.Name) and func.id == "RuntimeError":
+                            raises = True
+    _check(raises, f"{path.name}: bootstrap must raise RuntimeError when already-imported packages change")
+
+
+def _validate_notebook_content(
+    path: Path, code_cells: list[tuple[int, str, ast.Module]], markdown: str
+) -> None:
     model_id, revision = _package_identity()
+    code = "\n".join(_strip_comments(source) for _, source, _ in code_cells)
     _check(
-        f"REPO_URL = 'https://github.com/kurtvalcorza/{ROOT.name}.git'" in code
-        or f"REPO_URL = 'https://github.com/kurtvalcorza/{REPO_NAME}.git'" in code,
+        f"REPO_URL = 'https://github.com/kurtvalcorza/{REPO_NAME}.git'" in code,
         f"{path.name}: bootstrap must clone this repository by its canonical URL",
     )
     _check(f"REPO_NAME = '{REPO_NAME}'" in code, f"{path.name}: REPO_NAME must be {REPO_NAME}")
     missing = [marker for marker in COMMON_CODE_MARKERS + CODE_MARKERS if marker not in code]
     _check(not missing, f"{path.name}: missing required source markers: {missing}")
-    present = [marker for marker in FORBIDDEN_CODE + FORBIDDEN_CODE_EXTRA if marker in code]
-    _check(not present, f"{path.name}: forbidden/insecure source markers: {present}")
-    for gate in BYOD_GATES:
-        _check(f"{gate} = False" in code, f"{path.name}: {gate} must default to False")
-        _check(f"{gate} = True" not in code, f"{path.name}: {gate} must not be enabled in committed source")
-    _check("from google.colab import files" in code, f"{path.name}: BYOD path must use google.colab.files")
-    _check("import google.colab" not in code, f"{path.name}: google.colab import must stay inside the gate")
-    _check(
-        "MODEL_REVISION" in code and "MODEL_ID" in code,
-        f"{path.name}: must use MODEL_ID and MODEL_REVISION",
-    )
-    _check(revision not in code, f"{path.name}: model revision must be imported, not hard-coded")
+    present = [label for label, pattern in FORBIDDEN_PATTERNS if pattern.search(code)]
+    extra = [marker for marker in FORBIDDEN_CODE_EXTRA if marker in code]
+    _check(not present and not extra, f"{path.name}: forbidden/insecure source: {present + extra}")
+    _validate_gates(path, code_cells)
+    _validate_identity_import(path, code_cells, revision)
+    _validate_bootstrap_guard(path, code_cells)
     for filename in EXPECTED_OUTPUTS:
         _check(filename in code, f"{path.name}: must export {filename}")
     missing_md = [marker for marker in COMMON_MARKDOWN_MARKERS + MARKDOWN_MARKERS if marker not in markdown]
@@ -322,8 +432,8 @@ def validate_notebooks() -> None:
     path = notebooks[0]
     _check(path.name == NOTEBOOK_NAME, f"tutorial notebook must be named {NOTEBOOK_NAME}, found {path.name}")
     notebook = json.loads(_read(path))
-    code, markdown = _validate_notebook_structure(path, notebook)
-    _validate_notebook_content(path, code, markdown)
+    code_cells, markdown = _validate_notebook_structure(path, notebook)
+    _validate_notebook_content(path, code_cells, markdown)
     registry = _read(tutorials / "README.md")
     _check(f"`{path.name}`" in registry, f"{path.name} missing from tutorials/README.md")
     _check(f"`{EXPECTED_PROFILE}`" in registry, f"tutorials/README.md must record `{EXPECTED_PROFILE}`")

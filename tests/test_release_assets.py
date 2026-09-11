@@ -2,8 +2,10 @@
 
 A validator that passes on the committed tree proves little unless a mutated tree fails,
 so each negative control below re-runs the validator against a copy carrying one defect
-that has actually shipped in DIMER tutorials (editable self-install, hard-coded revision,
-persisted outputs, drifting identity, conflicting release status, enabled BYOD gate).
+that has actually shipped in, or been found to evade the checks of, DIMER tutorials:
+editable self-install in either spelling, hard-coded or rebound revision, persisted
+outputs, drifting identity, conflicting release status, an enabled or non-form BYOD gate,
+a required call surviving only in a comment, and a stale-import guard that no longer raises.
 """
 
 from __future__ import annotations
@@ -66,15 +68,28 @@ def _replace_in_code(module, old: str, new: str) -> None:
     _edit_notebook(module, mutate)
 
 
+def _first_marker_line(module) -> str:
+    """A required profile-specific call that appears as a whole source line."""
+    notebook = json.loads(_notebook_path(module).read_text(encoding="utf-8"))
+    for cell in notebook["cells"]:
+        if cell["cell_type"] != "code":
+            continue
+        for line in "".join(cell["source"]).splitlines():
+            if any(line.strip() == marker for marker in module.CODE_MARKERS):
+                return line
+    raise AssertionError("no whole-line CODE_MARKER found to use as a control")
+
+
 def test_committed_tree_passes() -> None:
     module = _load_validator(ROOT)
     assert module.validate_all() == ["model-card", "identity-consistency", "release-status", "notebook"]
 
 
-def test_control_editable_self_install_is_rejected(tree: Path) -> None:
+@pytest.mark.parametrize("flag", ["'-e', ", "'--editable', "])
+def test_control_editable_self_install_is_rejected(tree: Path, flag: str) -> None:
     module = _load_validator(tree)
-    _replace_in_code(module, "'pip', 'install', '-q',", "'pip', 'install', '-q', '-e',")
-    with pytest.raises(module.ValidationError, match="forbidden/insecure"):
+    _replace_in_code(module, "'pip', 'install', '-q', ", f"'pip', 'install', '-q', {flag}")
+    with pytest.raises(module.ValidationError, match="editable self-install"):
         module.validate_notebooks()
 
 
@@ -105,11 +120,50 @@ def test_control_hard_coded_revision_is_rejected(tree: Path) -> None:
         module.validate_notebooks()
 
 
-def test_control_enabled_byod_gate_is_rejected(tree: Path) -> None:
+def test_control_rebound_identity_is_rejected(tree: Path) -> None:
+    module = _load_validator(tree)
+    _replace_in_code(
+        module,
+        "print({'model_id': MODEL_ID, 'revision': MODEL_REVISION",
+        "MODEL_REVISION = 'abc1234'\nprint({'model_id': MODEL_ID, 'revision': MODEL_REVISION",
+    )
+    with pytest.raises(module.ValidationError, match="must not be rebound"):
+        module.validate_notebooks()
+
+
+@pytest.mark.parametrize("spelling", ["{gate} = True", "{gate}=True"])
+def test_control_enabled_byod_gate_is_rejected(tree: Path, spelling: str) -> None:
     module = _load_validator(tree)
     gate = module.BYOD_GATES[0]
-    _replace_in_code(module, f"{gate} = False", f"{gate} = True")
-    with pytest.raises(module.ValidationError, match="must default to False"):
+    _replace_in_code(module, f"{gate} = False", f"{gate} = False\n{spelling.format(gate=gate)}")
+    with pytest.raises(module.ValidationError, match="assigned exactly once"):
+        module.validate_notebooks()
+
+
+def test_control_byod_gate_without_form_annotation_is_rejected(tree: Path) -> None:
+    module = _load_validator(tree)
+    gate = module.BYOD_GATES[0]
+    _replace_in_code(module, f'{gate} = False  # @param {{type:"boolean"}}', f"{gate} = False")
+    with pytest.raises(module.ValidationError, match="Colab form parameter"):
+        module.validate_notebooks()
+
+
+def test_control_required_call_only_in_comment_is_rejected(tree: Path) -> None:
+    module = _load_validator(tree)
+    line = _first_marker_line(module)
+    _replace_in_code(module, line, f"# {line}")
+    with pytest.raises(module.ValidationError, match="missing required source markers"):
+        module.validate_notebooks()
+
+
+def test_control_guard_that_no_longer_raises_is_rejected(tree: Path) -> None:
+    module = _load_validator(tree)
+    _replace_in_code(
+        module,
+        "    if stale:\n        raise RuntimeError(",
+        "    if stale:\n        print(  # Restart the runtime, then rerun from the top.\n            ",
+    )
+    with pytest.raises(module.ValidationError, match="must raise RuntimeError"):
         module.validate_notebooks()
 
 

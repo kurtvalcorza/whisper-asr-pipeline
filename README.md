@@ -48,8 +48,8 @@ the public `PolyAI/minds14` corpus (CC-BY-4.0, 8 kHz telephone speech, resampled
 a zero-shot corpus WER on a held-out split through the public API, trains LoRA adapters on the
 attention query/value projections with float16 mixed precision, measures the adapted WER, exports a
 manifested adapter bundle, and proves the bundle reloads through
-`WhisperASRPipeline.from_pretrained(adapter_dir=...)` with the same effect. It needs a CUDA GPU of
-T4 class for the default configuration. BYOD (`transcripts.csv` + audio files) is optional and gated
+`WhisperASRPipeline.from_pretrained(adapter_dir=...)` with the same effect. It needs a 16 GiB-class
+CUDA GPU for the default configuration (measured: 4.5 GiB peak, 27 minutes on a Kaggle P100). BYOD (`transcripts.csv` + audio files) is optional and gated
 off by default.
 
 ## Release status

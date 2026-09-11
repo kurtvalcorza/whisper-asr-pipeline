@@ -188,7 +188,7 @@ def _strip_comments(source: str) -> str:
 def _assignment_targets(node: ast.AST):
     if isinstance(node, ast.Assign):
         targets = node.targets
-    elif isinstance(node, (ast.AnnAssign, ast.AugAssign, ast.NamedExpr, ast.For, ast.comprehension)):
+    elif isinstance(node, ast.AnnAssign | ast.AugAssign | ast.NamedExpr | ast.For | ast.comprehension):
         targets = [node.target]
     elif isinstance(node, ast.withitem) and node.optional_vars is not None:
         targets = [node.optional_vars]

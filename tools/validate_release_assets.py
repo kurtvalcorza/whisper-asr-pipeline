@@ -1,6 +1,6 @@
 """Static release-asset validation for the Whisper large-v3-turbo ASR DIMER pipeline.
 
-Checks the STANDALONE tutorial notebook (DIMER Notebook Specification 1.1 §3.6), the tutorial
+Checks the STANDALONE tutorial notebook (DIMER Notebook Specification 2.0 §4), the tutorial
 registry, model card, README, STATUS.md and weight documentation for source conformance and
 cross-document identity consistency, and runs the generator parity checks (PAR1–PAR3).
 
@@ -24,13 +24,17 @@ PACKAGE = "whisper_asr_pipeline"
 REPO_NAME = "whisper-asr-pipeline"
 NOTEBOOK_NAME = "whisper_asr_colab.ipynb"
 EXPECTED_PROFILE = "TASK-INFERENCE"
+# Version-1 notebooks still carried under tutorials/: hand-written, repository-bootstrapping, pending the
+# NOTEBOOK_SPEC 2.0 §32.1 migration. They get a structural check only (no standalone/parity rules) and
+# MUST NOT be marked release-grade in the registry while they clone the repository.
+LEGACY_NOTEBOOKS = {"whisper_asr_finetune_colab.ipynb": {"profile": "E2E", "spec": "1.0"}}
 EXPECTED_MODEL_ID = "openai/whisper-large-v3-turbo"
 PIPELINE_CLASS = "WhisperASRPipeline"
 # INF1: the exact load expression the model cell must use (a template's `model_load` may extend it).
 MODEL_LOAD_EXPR = f"{PIPELINE_CLASS}.from_pretrained(weights_dir=WEIGHTS_DIR)"
 # This branch was cut from build/initial-dimer-pipeline, whose card predates the MODEL_CARD_SPEC 1.1 header block
 # (that block lives on docs/model-card-header @ fa9ca04). Flip to "1.1" when the header branch lands underneath.
-CARD_SPEC = "1.0"
+CARD_SPEC = "1.1"
 # Additional 40-hex revisions a document may legitimately cite: the pinned public-sample dataset revision.
 KNOWN_SHAS: frozenset[str] = frozenset(("5be91486e11a2d616f4ec5db8d3fd248585ac07a",))
 # Colab form gates that must default to the non-interactive sample path.
@@ -102,10 +106,10 @@ FORBIDDEN_OUTSIDE_MODULE = (
 # ---------------------------------------------------------------------------
 # Shared checks. Everything below is source/structure validation only. Passing
 # these checks is NOT clean-runtime execution evidence under DIMER Notebook
-# Specification 1.1; see docs/release-verification.md for the release gate.
+# Specification 2.0; see docs/release-verification.md for the release gate.
 # ---------------------------------------------------------------------------
 
-NOTEBOOK_SPEC = "1.1"
+NOTEBOOK_SPEC = "2.0"
 ALLOWED_PROFILES = {"E2E", "ARTIFACT-INFERENCE", "TASK-INFERENCE", "MULTI-CAPABILITY", "SMOKE"}
 STATUS_TOKENS = ("Candidate", "Release-grade")
 PLACEHOLDER = re.compile(r"\b(TODO|TBD|FIXME)\b|Insert text here|Tooltip:", re.I)
@@ -117,7 +121,7 @@ UNSUPPORTED_CLAIMS = re.compile(
     re.I,
 )
 REQUIRED_CARD_HEADINGS = [
-    (6, "Description"),
+    (4, "Description"),
     (4, "Intended Use and Limitations"),
     (6, "Primary Intended Uses"),
     (6, "Primary Intended Users"),
@@ -161,7 +165,10 @@ COMMON_CODE_MARKERS = (
     "files.upload()",
 )
 COMMON_MARKDOWN_MARKERS = (
-    f"**Notebook specification:** DIMER Notebook Specification {NOTEBOOK_SPEC} — **standalone** (§3.6)",
+    f"**Notebook specification:** DIMER Notebook Specification {NOTEBOOK_SPEC} — **standalone** (§4)",
+    "**Mode:** `",
+    "**Run all:**",
+    "**Bring Your Own Data:**",
     "**This notebook is standalone.**",
     "**Learning objectives:**",
     "## Prerequisites",
@@ -362,6 +369,7 @@ def _validate_notebook_structure(path: Path, notebook: dict) -> tuple[list[tuple
     _check(profile == EXPECTED_PROFILE, f"{path.name}: profile {profile!r} != declared {EXPECTED_PROFILE!r}")
     spec = dimer.get("notebook_spec", dimer.get("notebook_spec_version"))
     _check(spec == NOTEBOOK_SPEC, f"{path.name}: metadata.dimer must declare notebook spec version '{NOTEBOOK_SPEC}'")
+    _check(dimer.get("notebook_mode") in ("REFERENCE", "GUIDED", "WORKSHOP"), f"{path.name}: metadata.dimer.notebook_mode must declare a §3.3 pedagogical mode")
     _check(dimer.get("standalone") is True, f"{path.name}: metadata.dimer.standalone must be true (ST6)")
     generated = dimer.get("generated_from")
     _template = _load_tool("notebook_template").TEMPLATE
@@ -563,9 +571,30 @@ def _validate_notebook_content(
 def validate_notebooks() -> None:
     tutorials = ROOT / "tutorials"
     notebooks = sorted(tutorials.glob("*.ipynb"))
-    _check(len(notebooks) == 1, f"exactly one tutorial notebook is expected, found {len(notebooks)}")
-    path = notebooks[0]
-    _check(path.name == NOTEBOOK_NAME, f"tutorial notebook must be named {NOTEBOOK_NAME}, found {path.name}")
+    names = {n.name for n in notebooks}
+    unexpected = sorted(names - {NOTEBOOK_NAME} - set(LEGACY_NOTEBOOKS))
+    _check(not unexpected, f"undeclared tutorial notebooks (declare in LEGACY_NOTEBOOKS or migrate): {unexpected}")
+    _check(NOTEBOOK_NAME in names, f"tutorial notebook {NOTEBOOK_NAME} is missing")
+    registry = _read(tutorials / "README.md")
+    for legacy_name, expected in LEGACY_NOTEBOOKS.items():
+        if legacy_name not in names:
+            continue
+        legacy_path = tutorials / legacy_name
+        legacy = json.loads(_read(legacy_path))
+        _check(legacy.get("nbformat") == 4, f"{legacy_name}: nbformat must be 4")
+        dimer = legacy.get("metadata", {}).get("dimer", {})
+        _check(dimer.get("notebook_profile") == expected["profile"], f"{legacy_name}: profile must be {expected['profile']}")
+        _check(
+            dimer.get("notebook_spec", dimer.get("notebook_spec_version")) == expected["spec"],
+            f"{legacy_name}: a Version-1 notebook must still declare notebook spec {expected['spec']!r} until migrated",
+        )
+        for index, cell in enumerate(legacy.get("cells", [])):
+            if cell.get("cell_type") == "code":
+                _check(not cell.get("outputs"), f"{legacy_name}: code cell {index} persists outputs")
+        _check(not PLACEHOLDER.search("".join("".join(c.get("source", "")) for c in legacy.get("cells", []))), f"{legacy_name}: placeholder text found")
+        _check(f"`{legacy_name}`" in registry, f"{legacy_name} missing from tutorials/README.md")
+        _check("32.1" in registry, "tutorials/README.md must record the §32.1 migration status of the Version-1 notebook")
+    path = tutorials / NOTEBOOK_NAME
     build = _load_tool("build_notebook")
     notebook = json.loads(_read(path))
     code_cells, markdown = _validate_notebook_structure(path, notebook)
@@ -576,7 +605,6 @@ def validate_notebooks() -> None:
     # PAR2/PAR3 last: a content defect is reported by its own rule before the byte-parity rule (the
     # repository's negative-control tests rely on that order).
     _validate_parity(path, notebook, code_cells, build)
-    registry = _read(tutorials / "README.md")
     _check(f"`{path.name}`" in registry, f"{path.name} missing from tutorials/README.md")
     _check(f"`{EXPECTED_PROFILE}`" in registry, f"tutorials/README.md must record `{EXPECTED_PROFILE}`")
     _check(

@@ -399,6 +399,8 @@ class WhisperASRPipeline:
             adapter=None if adapter_path is None else str(adapter_path),
             adapter_sha256=None if adapter_path is None else adapter_digest(adapter_path),
             source=source,
+            device=resolved_device,
+            dtype=dtype,
         )
 
     @classmethod
@@ -409,6 +411,8 @@ class WhisperASRPipeline:
         adapter: str | None = None,
         adapter_sha256: str | None = None,
         source: str = "injected",
+        device: str | None = None,
+        dtype: Any | None = None,
     ) -> WhisperASRPipeline:
         """Wrap an already-loaded Whisper model (plain or PEFT-wrapped) in the same decoding path.
 
@@ -418,13 +422,13 @@ class WhisperASRPipeline:
         """
         from transformers import pipeline
 
-        resolved_device = str(model.device)
+        resolved_device = device or str(model.device)
         runner = pipeline(
             "automatic-speech-recognition",
             model=model,
             tokenizer=processor.tokenizer,
             feature_extractor=processor.feature_extractor,
-            torch_dtype=model.dtype,
+            torch_dtype=model.dtype if dtype is None else dtype,
             device=resolved_device,
         )
         return cls(runner, resolved_device, adapter, adapter_sha256, source)

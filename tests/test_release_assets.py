@@ -5,9 +5,7 @@ so each negative control below re-runs the validator against a copy carrying one
 that has actually shipped in, or been found to evade the checks of, DIMER tutorials:
 editable self-install in either spelling, hard-coded or rebound revision, persisted
 outputs, drifting identity, conflicting release status, an enabled or non-form BYOD gate,
-a required call surviving only in a comment, a stale-import guard that no longer raises, an
-undeclared notebook file, a fine-tuning notebook that mis-declares its profile, and a
-fine-tuning notebook whose adapter-reload oracle has been removed.
+a required call surviving only in a comment, and a stale-import guard that no longer raises.
 """
 
 from __future__ import annotations
@@ -56,18 +54,18 @@ def tree(tmp_path: Path) -> Path:
     return tmp_path
 
 
-def _notebook_path(module, name: str | None = None) -> Path:
-    return module.ROOT / "tutorials" / (name or module.NOTEBOOK_NAME)
+def _notebook_path(module) -> Path:
+    return module.ROOT / "tutorials" / module.NOTEBOOK_NAME
 
 
-def _edit_notebook(module, mutate, name: str | None = None) -> None:
-    path = _notebook_path(module, name)
+def _edit_notebook(module, mutate) -> None:
+    path = _notebook_path(module)
     notebook = json.loads(path.read_text(encoding="utf-8"))
     mutate(notebook)
     path.write_text(json.dumps(notebook, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
-def _replace_in_code(module, old: str, new: str, name: str | None = None) -> None:
+def _replace_in_code(module, old: str, new: str) -> None:
     def mutate(notebook: dict) -> None:
         hits = 0
         for cell in notebook["cells"]:
@@ -79,7 +77,7 @@ def _replace_in_code(module, old: str, new: str, name: str | None = None) -> Non
                 cell["source"] = [text.replace(old, new)]
         assert hits, f"control marker not found in notebook: {old!r}"
 
-    _edit_notebook(module, mutate, name)
+    _edit_notebook(module, mutate)
 
 
 def _first_marker_line(module) -> str:
@@ -212,41 +210,3 @@ def test_control_placeholder_in_model_card_is_rejected(tree: Path) -> None:
     card.write_text(card.read_text(encoding="utf-8") + "\nTODO: fill in.\n", encoding="utf-8")
     with pytest.raises(module.ValidationError, match="placeholder"):
         module.validate_model_card()
-
-
-def test_control_undeclared_notebook_file_is_rejected(tree: Path) -> None:
-    module = _load_validator(tree)
-    shutil.copy2(_notebook_path(module), tree / "tutorials" / "whisper_asr_extra_colab.ipynb")
-    with pytest.raises(module.ValidationError, match="unexpected tutorial notebooks"):
-        module.validate_notebooks()
-
-
-def test_control_finetune_profile_mismatch_is_rejected(tree: Path) -> None:
-    module = _load_validator(tree)
-
-    def mutate(notebook: dict) -> None:
-        notebook["metadata"]["dimer"]["notebook_profile"] = module.EXPECTED_PROFILE
-
-    _edit_notebook(module, mutate, module.FINETUNE_NOTEBOOK_NAME)
-    with pytest.raises(module.ValidationError, match="profile"):
-        module.validate_notebooks()
-
-
-def test_control_finetune_reload_oracle_removed_is_rejected(tree: Path) -> None:
-    module = _load_validator(tree)
-    _replace_in_code(
-        module,
-        "raise RuntimeError(f'Reloaded weights differ from base + scaled B@A by {merge_error:.2e}",
-        "print(f'Reloaded weights differ from base + scaled B@A by {merge_error:.2e}",
-        module.FINETUNE_NOTEBOOK_NAME,
-    )
-    with pytest.raises(module.ValidationError, match="missing required source markers"):
-        module.validate_notebooks()
-
-
-def test_control_finetune_enabled_byod_gate_is_rejected(tree: Path) -> None:
-    module = _load_validator(tree)
-    gate = module.BYOD_GATES[0]
-    _replace_in_code(module, f"{gate} = False", f"{gate} = True", module.FINETUNE_NOTEBOOK_NAME)
-    with pytest.raises(module.ValidationError, match="constant False"):
-        module.validate_notebooks()

@@ -19,7 +19,19 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 VALIDATOR = ROOT / "tools" / "validate_release_assets.py"
-COPIED = ("MODEL_CARD.md", "README.md", "STATUS.md", "docs", "tutorials", "src")
+COPIED = (
+    "MODEL_CARD.md",
+    "README.md",
+    "STATUS.md",
+    "pyproject.toml",
+    "docs",
+    "tutorials",
+    "src",
+    "tools",
+    "weights",
+)
+# weights/ is copied for its committed manifest only; the git-ignored checkpoints never enter the tmp tree.
+IGNORED = shutil.ignore_patterns("__pycache__", ".cache", "*.ckpt", "*.safetensors", "*.bin", "*.pt", "*.pth")
 
 
 def _load_validator(root: Path):
@@ -36,7 +48,7 @@ def tree(tmp_path: Path) -> Path:
     for name in COPIED:
         source = ROOT / name
         if source.is_dir():
-            shutil.copytree(source, tmp_path / name, ignore=shutil.ignore_patterns("__pycache__"))
+            shutil.copytree(source, tmp_path / name, ignore=IGNORED)
         else:
             shutil.copy2(source, tmp_path / name)
     return tmp_path
@@ -82,13 +94,20 @@ def _first_marker_line(module) -> str:
 
 def test_committed_tree_passes() -> None:
     module = _load_validator(ROOT)
-    assert module.validate_all() == ["model-card", "identity-consistency", "release-status", "notebook"]
+    expected = ["model-card", "identity-consistency", "release-status", "notebook+parity"]
+    assert module.validate_all() == expected
 
 
 @pytest.mark.parametrize("flag", ["'-e', ", "'--editable', "])
 def test_control_editable_self_install_is_rejected(tree: Path, flag: str) -> None:
     module = _load_validator(tree)
-    _replace_in_code(module, "'pip', 'install', '-q', ", f"'pip', 'install', '-q', {flag}")
+    # A second pip call that installs the tree editably; the pinned-install marker line stays intact.
+    _replace_in_code(
+        module,
+        "    importlib.invalidate_caches()\n",
+        f"    subprocess.run([sys.executable, '-m', 'pip', 'install', '-q', {flag}'.'], check=True)\n"
+        "    importlib.invalidate_caches()\n",
+    )
     with pytest.raises(module.ValidationError, match="editable self-install"):
         module.validate_notebooks()
 

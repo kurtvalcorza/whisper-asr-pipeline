@@ -24,10 +24,8 @@ PACKAGE = "whisper_asr_pipeline"
 REPO_NAME = "whisper-asr-pipeline"
 NOTEBOOK_NAME = "whisper_asr_colab.ipynb"
 EXPECTED_PROFILE = "TASK-INFERENCE"
-# Version-1 notebooks still carried under tutorials/: hand-written, repository-bootstrapping, pending the
-# NOTEBOOK_SPEC 2.0 §32.1 migration. They get a structural check only (no standalone/parity rules) and
-# MUST NOT be marked release-grade in the registry while they clone the repository.
-LEGACY_NOTEBOOKS = {"whisper_asr_finetune_colab.ipynb": {"profile": "E2E", "spec": "1.0"}}
+FINETUNE_NOTEBOOK_NAME = "whisper_asr_finetune_colab.ipynb"
+FINETUNE_PROFILE = "E2E"
 EXPECTED_MODEL_ID = "openai/whisper-large-v3-turbo"
 PIPELINE_CLASS = "WhisperASRPipeline"
 # INF1: the exact load expression the model cell must use (a template's `model_load` may extend it).
@@ -39,6 +37,7 @@ CARD_SPEC = "1.1"
 KNOWN_SHAS: frozenset[str] = frozenset(("5be91486e11a2d616f4ec5db8d3fd248585ac07a",))
 # Colab form gates that must default to the non-interactive sample path.
 BYOD_GATES = ("USE_BYOD",)
+FINETUNE_BYOD_GATES = ("USE_BYOD",)
 # Machine-readable artifacts the notebook must write (OUT1-OUT3, DAT24, EVAL21).
 EXPECTED_OUTPUTS = (
     "outputs/whisper_asr_input_manifest.json",
@@ -81,6 +80,76 @@ MARKDOWN_MARKERS = (
     "speaker diarization, speaker identification or any biometric inference",
     "pinned dataset revision `5be91486e11a2d616f4ec5db8d3fd248585ac07a`",
 )
+# --- the standalone E2E fine-tuning notebook (tools/notebook_template_finetune.py) ---
+FINETUNE_EXPECTED_OUTPUTS = (
+    "outputs/whisper_asr_finetune_input_manifest.json",
+    "outputs/whisper_asr_finetune_evaluation_report.json",
+    "outputs/whisper_asr_finetune_result.json",
+    "outputs/whisper_asr_finetune_metrics.json",
+    "outputs/whisper-asr-lora-adapter.zip",
+)
+FINETUNE_CODE_MARKERS = (
+    "SAMPLE_DATASET_REVISION = '40ce77cb32a384e4d50a568e1ec39ac804019d33'",
+    "load_dataset(SAMPLE_DATASET, LOCALE, split='train', revision=SAMPLE_DATASET_REVISION)",
+    "ds.cast_column('audio', Audio(decode=False))",
+    "torchaudio.functional.resample(torch.from_numpy(waveform), rate, TARGET_RATE)",
+    "random.Random(SEED).shuffle(order)",
+    "SPLIT_DIGEST = hashlib.sha256(",
+    "entry = validate_inputs(audio_input, language=LANGUAGE, task='transcribe', names=[clip['id']])['inputs'][0]",
+    "if entry['seconds'] > MAX_CHUNK_LENGTH_S:",
+    "validate_inputs({'array': eval_clips[0]['audio'], 'sampling_rate': TARGET_RATE}, chunk_length_s=MAX_CHUNK_LENGTH_S + 1)",
+    "baseline_transcripts = transcribe_all(pipe, eval_clips)",
+    "baseline_wer = corpus_word_error_rate(eval_references, baseline_transcripts)",
+    "base_model, processor = load_model(device=DEVICE, weights_dir=WEIGHTS_DIR, allow_download=False)",
+    "from peft import LoraConfig, get_peft_model",
+    "model = get_peft_model(base_model, lora_config)",
+    "optimizer = torch.optim.AdamW([p for p in model.parameters() if p.requires_grad], lr=LEARNING_RATE)",
+    "scaler = torch.amp.GradScaler('cuda', enabled=use_amp)",
+    "validation_loss = evaluate_loss(eval_clips)",
+    "adapted = WhisperASRPipeline.from_model(model, processor, adapter='in-memory LoRA')",
+    "adapted_wer = corpus_word_error_rate(eval_references, adapted_transcripts)",
+    "report = adaptation_report(baseline_wer=round(baseline_wer, 4), adapted_wer=round(adapted_wer, 4), reloaded_wer=None, n_eval=len(eval_clips), history=history, dataset=DATASET, sample_kind=sample_kind)",
+    "manifest = export_adapter_bundle(model, ADAPTER_DIR, metrics=metrics, provenance=PROVENANCE)",
+    "reloaded = WhisperASRPipeline.from_pretrained(device=DEVICE, weights_dir=WEIGHTS_DIR, allow_download=False, adapter_dir=ADAPTER_DIR)",
+    "reload_weight_check = verify_adapter_merge(ADAPTER_DIR, PROBE_MODULE, probe_base_weight, reloaded.model.get_submodule(PROBE_MODULE).weight, rank=LORA_RANK, alpha=LORA_ALPHA, tolerance=weight_tolerance)",
+    "if agreement < math.ceil(0.95 * len(eval_clips)):",
+    "'baseModelRevision': MODEL_REVISION",
+    "'model_license': MODEL_LICENSE",
+    "peft.__version__",
+    "'device': reloaded.device",
+)
+FINETUNE_MARKDOWN_MARKERS = (
+    "**Capability:** parameter-efficient (LoRA) domain adaptation of the pinned",
+    "**What is trained and what is not.**",
+    "**Training loss and validation loss are optimisation evidence only**",
+    "pinned dataset revision `40ce77cb32a384e4d50a568e1ec39ac804019d33`",
+    "`zh-CN` and `ko-KR`",
+    "**AdamW at a constant learning rate**",
+    "`W_reloaded == W_base + (alpha / r) * B @ A`",
+    "at least 95% of the clips",
+    "`sample-sanity`",
+    "catastrophic forgetting",
+    "CC-BY-4.0",
+)
+# Every standalone notebook this repository ships: name -> (template module, profile, gates, outputs, markers).
+NOTEBOOKS = {
+    NOTEBOOK_NAME: {
+        "template": "notebook_template",
+        "profile": EXPECTED_PROFILE,
+        "byod_gates": BYOD_GATES,
+        "expected_outputs": EXPECTED_OUTPUTS,
+        "code_markers": CODE_MARKERS,
+        "markdown_markers": MARKDOWN_MARKERS,
+    },
+    FINETUNE_NOTEBOOK_NAME: {
+        "template": "notebook_template_finetune",
+        "profile": FINETUNE_PROFILE,
+        "byod_gates": FINETUNE_BYOD_GATES,
+        "expected_outputs": FINETUNE_EXPECTED_OUTPUTS,
+        "code_markers": FINETUNE_CODE_MARKERS,
+        "markdown_markers": FINETUNE_MARKDOWN_MARKERS,
+    },
+}
 # FORBIDDEN_PATTERNS labels that are checked outside the carried module cells only (a loader that must
 # deserialise a PyTorch checkpoint or enable remote code does so inside the package, with the trust
 # boundary stated in the notebook; none by default).
@@ -269,9 +338,9 @@ def _load_tool(name: str):
     return module
 
 
-def _package_identity() -> tuple[str, str]:
+def _package_identity(template: dict | None = None) -> tuple[str, str]:
     """Read MODEL_ID / MODEL_REVISION from the package source without importing torch."""
-    template = _load_tool("notebook_template").TEMPLATE
+    template = template or _load_tool("notebook_template").TEMPLATE
     entry = ROOT / template.get("package_dir", f"src/{PACKAGE}") / template.get("entry_module", "pipeline.py")
     text = _read(entry)
     model_id = re.search(r'^MODEL_ID = "([^"]+)"$', text, re.M)
@@ -360,19 +429,20 @@ def validate_release_status() -> None:
     )
 
 
-def _validate_notebook_structure(path: Path, notebook: dict) -> tuple[list[tuple[int, str, ast.Module]], str]:
+def _validate_notebook_structure(
+    path: Path, notebook: dict, spec: dict, _template: dict
+) -> tuple[list[tuple[int, str, ast.Module]], str]:
     _check(notebook.get("nbformat") == 4, f"{path.name}: nbformat must be 4")
     dimer = notebook.get("metadata", {}).get("dimer")
     _check(isinstance(dimer, dict), f"{path.name}: metadata.dimer block is required")
     profile = dimer.get("notebook_profile")
     _check(profile in ALLOWED_PROFILES, f"{path.name}: invalid metadata.dimer.notebook_profile {profile!r}")
-    _check(profile == EXPECTED_PROFILE, f"{path.name}: profile {profile!r} != declared {EXPECTED_PROFILE!r}")
+    _check(profile == spec["profile"], f"{path.name}: profile {profile!r} != declared {spec['profile']!r}")
     spec = dimer.get("notebook_spec", dimer.get("notebook_spec_version"))
     _check(spec == NOTEBOOK_SPEC, f"{path.name}: metadata.dimer must declare notebook spec version '{NOTEBOOK_SPEC}'")
     _check(dimer.get("notebook_mode") in ("REFERENCE", "GUIDED", "WORKSHOP"), f"{path.name}: metadata.dimer.notebook_mode must declare a §3.3 pedagogical mode")
     _check(dimer.get("standalone") is True, f"{path.name}: metadata.dimer.standalone must be true (ST6)")
     generated = dimer.get("generated_from")
-    _template = _load_tool("notebook_template").TEMPLATE
     _check(isinstance(generated, dict), f"{path.name}: metadata.dimer.generated_from is required (ST5)")
     _check(generated.get("repository") == REPO_NAME, f"{path.name}: generated_from.repository must be {REPO_NAME}")
     _check(
@@ -420,9 +490,9 @@ def _validate_notebook_structure(path: Path, notebook: dict) -> tuple[list[tuple
     return code_cells, markdown
 
 
-def _validate_gates(path: Path, code_cells: list[tuple[int, str, ast.Module]]) -> None:
+def _validate_gates(path: Path, code_cells: list[tuple[int, str, ast.Module]], gates: tuple[str, ...]) -> None:
     """Each BYOD gate is assigned exactly once, to the constant False, on a Colab form line."""
-    for gate in BYOD_GATES:
+    for gate in gates:
         assignments = []
         for index, source, tree in code_cells:
             lines = source.splitlines()
@@ -452,7 +522,7 @@ def _validate_gates(path: Path, code_cells: list[tuple[int, str, ast.Module]]) -
                 )
 
 
-def _validate_embedded_modules(path: Path, notebook: dict, build) -> list[int]:
+def _validate_embedded_modules(path: Path, notebook: dict, build, template: dict) -> list[int]:
     """PAR1: one tagged cell per carried module, in dependency order, each equal to its module after
     the documented rewrites (generator /2 multi-module carrier; ST2 applied per module)."""
     tagged = [
@@ -460,7 +530,6 @@ def _validate_embedded_modules(path: Path, notebook: dict, build) -> list[int]:
         for index, cell in enumerate(notebook.get("cells", []))
         if cell.get("cell_type") == "code" and cell.get("metadata", {}).get("dimer", {}).get("embedded_module")
     ]
-    template = _load_tool("notebook_template").TEMPLATE
     recorded = notebook["metadata"]["dimer"]["generated_from"]["revision"]
     context = build.load_context(ROOT, template, recorded)
     expected_rels = context["module_rels"]
@@ -501,16 +570,17 @@ def _validate_identity(
     )
 
 
-def _validate_parity(path: Path, notebook: dict, code_cells: list[tuple[int, str, ast.Module]], build) -> None:
+def _validate_parity(
+    path: Path, notebook: dict, code_cells: list[tuple[int, str, ast.Module]], build, template: dict
+) -> None:
     """PAR2/PAR3: inline manifest and pins equal the repository's; the generator reproduces the file."""
-    template = _load_tool("notebook_template").TEMPLATE
     code = "\n".join(source for _, source, _ in code_cells)
     manifest = json.loads(_read(ROOT / "weights" / template["weights_key"] / "dimer-base-manifest.json"))
     inline = re.search(r"^MANIFEST = (\{.*?^\})$", code, re.M | re.S)
     _check(inline is not None and json.loads(inline.group(1)) == manifest, f"{path.name}: inline MANIFEST != committed manifest (PAR2)")
     pins_block = re.search(r"^PINS = \[(.*?)^\]", code, re.M | re.S)
     _check(pins_block is not None, f"{path.name}: install cell must carry PINS = [...] (ENV2)")
-    _check(re.findall(r"'([^']+)'", pins_block.group(1)) == build._pins(ROOT), f"{path.name}: inline PINS != pyproject runtime pins (PAR2)")
+    _check(re.findall(r"'([^']+)'", pins_block.group(1)) == build._pins(ROOT, template), f"{path.name}: inline PINS != the repository's runtime pins (PAR2)")
     recorded = notebook["metadata"]["dimer"]["generated_from"]["revision"]
     rendered = build.to_bytes(build.render(ROOT, template, recorded))
     current = path.read_bytes().replace(b"\r\n", b"\n")  # autocrlf checkouts are CRLF
@@ -532,13 +602,18 @@ def _validate_bootstrap_guard(path: Path, code_cells: list[tuple[int, str, ast.M
 
 
 def _validate_notebook_content(
-    path: Path, code_cells: list[tuple[int, str, ast.Module]], markdown: str, embedded: list[int]
+    path: Path,
+    code_cells: list[tuple[int, str, ast.Module]],
+    markdown: str,
+    embedded: list[int],
+    spec: dict,
+    template: dict,
 ) -> None:
-    model_id, _revision = _package_identity()
+    model_id, _revision = _package_identity(template)
     stripped = {index: _strip_comments(source) for index, source, _ in code_cells}
     code = "\n".join(stripped.values())
     outside = "\n".join(text for index, text in stripped.items() if index not in embedded)
-    missing = [marker for marker in COMMON_CODE_MARKERS + CODE_MARKERS if marker not in code]
+    missing = [marker for marker in COMMON_CODE_MARKERS + spec["code_markers"] if marker not in code]
     _check(not missing, f"{path.name}: missing required source markers: {missing}")
     present = [
         label
@@ -558,60 +633,46 @@ def _validate_notebook_content(
         f"pipe = {MODEL_LOAD_EXPR}" in outside,
         f"{path.name}: must load through {MODEL_LOAD_EXPR} (INF1)",
     )
-    _validate_gates(path, code_cells)
+    _validate_gates(path, code_cells, spec["byod_gates"])
     _validate_bootstrap_guard(path, code_cells)
-    for filename in EXPECTED_OUTPUTS:
+    for filename in spec["expected_outputs"]:
         _check(filename in code, f"{path.name}: must export {filename}")
-    missing_md = [marker for marker in COMMON_MARKDOWN_MARKERS + MARKDOWN_MARKERS if marker not in markdown]
+    missing_md = [marker for marker in COMMON_MARKDOWN_MARKERS + spec["markdown_markers"] if marker not in markdown]
     _check(not missing_md, f"{path.name}: missing learner-facing markers: {missing_md}")
-    _check(f"**Profile:** `{EXPECTED_PROFILE}`" in markdown, f"{path.name}: markdown must state the profile")
+    _check(f"**Profile:** `{spec['profile']}`" in markdown, f"{path.name}: markdown must state the profile")
     _check(f"https://huggingface.co/{model_id}" in markdown, f"{path.name}: references must link {model_id}")
 
 
 def validate_notebooks() -> None:
     tutorials = ROOT / "tutorials"
-    notebooks = sorted(tutorials.glob("*.ipynb"))
-    names = {n.name for n in notebooks}
-    unexpected = sorted(names - {NOTEBOOK_NAME} - set(LEGACY_NOTEBOOKS))
-    _check(not unexpected, f"undeclared tutorial notebooks (declare in LEGACY_NOTEBOOKS or migrate): {unexpected}")
-    _check(NOTEBOOK_NAME in names, f"tutorial notebook {NOTEBOOK_NAME} is missing")
+    names = {n.name for n in sorted(tutorials.glob("*.ipynb"))}
+    unexpected = sorted(names - set(NOTEBOOKS))
+    _check(not unexpected, f"undeclared tutorial notebooks (declare them in NOTEBOOKS): {unexpected}")
+    absent = sorted(set(NOTEBOOKS) - names)
+    _check(not absent, f"tutorial notebooks missing: {absent}")
     registry = _read(tutorials / "README.md")
-    for legacy_name, expected in LEGACY_NOTEBOOKS.items():
-        if legacy_name not in names:
-            continue
-        legacy_path = tutorials / legacy_name
-        legacy = json.loads(_read(legacy_path))
-        _check(legacy.get("nbformat") == 4, f"{legacy_name}: nbformat must be 4")
-        dimer = legacy.get("metadata", {}).get("dimer", {})
-        _check(dimer.get("notebook_profile") == expected["profile"], f"{legacy_name}: profile must be {expected['profile']}")
-        _check(
-            dimer.get("notebook_spec", dimer.get("notebook_spec_version")) == expected["spec"],
-            f"{legacy_name}: a Version-1 notebook must still declare notebook spec {expected['spec']!r} until migrated",
-        )
-        for index, cell in enumerate(legacy.get("cells", [])):
-            if cell.get("cell_type") == "code":
-                _check(not cell.get("outputs"), f"{legacy_name}: code cell {index} persists outputs")
-        _check(not PLACEHOLDER.search("".join("".join(c.get("source", "")) for c in legacy.get("cells", []))), f"{legacy_name}: placeholder text found")
-        _check(f"`{legacy_name}`" in registry, f"{legacy_name} missing from tutorials/README.md")
-        _check("32.1" in registry, "tutorials/README.md must record the §32.1 migration status of the Version-1 notebook")
-    path = tutorials / NOTEBOOK_NAME
     build = _load_tool("build_notebook")
-    notebook = json.loads(_read(path))
-    code_cells, markdown = _validate_notebook_structure(path, notebook)
-    embedded = _validate_embedded_modules(path, notebook, build)
-    _model_id, revision = _package_identity()
-    _validate_identity(path, code_cells, embedded, revision)
-    _validate_notebook_content(path, code_cells, markdown, embedded)
-    # PAR2/PAR3 last: a content defect is reported by its own rule before the byte-parity rule (the
-    # repository's negative-control tests rely on that order).
-    _validate_parity(path, notebook, code_cells, build)
-    _check(f"`{path.name}`" in registry, f"{path.name} missing from tutorials/README.md")
-    _check(f"`{EXPECTED_PROFILE}`" in registry, f"tutorials/README.md must record `{EXPECTED_PROFILE}`")
+    for name, spec in NOTEBOOKS.items():
+        path = tutorials / name
+        template = _load_tool(spec["template"]).TEMPLATE
+        _check(template["notebook_name"] == name, f"tools/{spec['template']}.py must name {name}")
+        _check(template["profile"] == spec["profile"], f"tools/{spec['template']}.py profile must be {spec['profile']}")
+        notebook = json.loads(_read(path))
+        code_cells, markdown = _validate_notebook_structure(path, notebook, spec, template)
+        embedded = _validate_embedded_modules(path, notebook, build, template)
+        _model_id, revision = _package_identity(template)
+        _validate_identity(path, code_cells, embedded, revision)
+        _validate_notebook_content(path, code_cells, markdown, embedded, spec, template)
+        # PAR2/PAR3 last: a content defect is reported by its own rule before the byte-parity rule (the
+        # repository's negative-control tests rely on that order).
+        _validate_parity(path, notebook, code_cells, build, template)
+        _check(f"`{name}`" in registry, f"{name} missing from tutorials/README.md")
+        _check(f"`{spec['profile']}`" in registry, f"tutorials/README.md must record `{spec['profile']}`")
     _check(
         f"DIMER Notebook Specification {NOTEBOOK_SPEC}" in registry,
         "tutorials/README.md must name the notebook spec version",
     )
-    _check("standalone" in registry.lower(), "tutorials/README.md must record that the notebook is standalone")
+    _check("standalone" in registry.lower(), "tutorials/README.md must record that the notebooks are standalone")
 
 
 def validate_all() -> list[str]:
@@ -619,7 +680,7 @@ def validate_all() -> list[str]:
     validate_identity_consistency()
     validate_release_status()
     validate_notebooks()
-    return ["model-card", "identity-consistency", "release-status", "notebook+parity"]
+    return ["model-card", "identity-consistency", "release-status", "notebooks+parity"]
 
 
 def main() -> int:

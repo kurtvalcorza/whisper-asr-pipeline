@@ -161,34 +161,45 @@ def adapter_digest(adapter_dir: str | Path) -> str:
     return digest.hexdigest()
 
 
-def load_model(device: str | None = None, adapter_dir: str | Path | None = None) -> tuple[Any, Any]:
-    """Return ``(model, processor)`` for the pinned upstream revision, on ``device``.
+def _load_base(
+    device: str | None,
+    weights_dir: str | Path | None,
+    allow_download: bool,
+    adapter_dir: str | Path | None,
+) -> tuple[Any, Any, str, str, Any]:
+    """Shared loader: ``(model, processor, source, device, dtype)`` from a digest-verified local
+    snapshot or, only when ``allow_download`` is set and no snapshot exists, from the Hub at the
+    pinned revision. There is no silent fallback: a missing or unverified snapshot raises unless
+    downloading was explicitly allowed (MOD8). ``trust_remote_code`` is always False."""
+    import torch
+    from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor
 
-    Weights are loaded in float16 on CUDA and float32 on CPU. With ``adapter_dir``, a PEFT
-    LoRA adapter saved by ``PeftModel.save_pretrained`` (for example by the fine-tuning
-    tutorial) is attached and merged into the weights, so the result is a plain Whisper
-    model; ``peft`` is only imported on that path, and only a safetensors bundle is accepted.
-    Remote model code is always refused.
-    """
     adapter_path = None if adapter_dir is None else Path(adapter_dir)
     if adapter_path is not None:
         for required in ("adapter_config.json", ADAPTER_WEIGHTS):
             if not (adapter_path / required).is_file():
                 raise FileNotFoundError(f"{required} not found in {adapter_path}")
-
-    import torch
-    from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor
-
     resolved_device = device or ("cuda:0" if torch.cuda.is_available() else "cpu")
     dtype = torch.float16 if resolved_device.startswith("cuda") else torch.float32
-    processor = AutoProcessor.from_pretrained(
-        MODEL_ID,
-        revision=MODEL_REVISION,
-        trust_remote_code=False,
-    )
+    root = Path(weights_dir or DEFAULT_WEIGHTS_DIR)
+    if (root / MANIFEST_NAME).is_file():
+        stage_missing_files(root, allow_download=allow_download)
+        verify_snapshot(root)
+        # A directory argument makes transformers read config/tokenizer/weights from it directly
+        # (no Hub resolution, no cache lookup).
+        location: dict[str, Any] = {"pretrained_model_name_or_path": str(root)}
+        source = "local-snapshot"
+    elif allow_download:
+        location = {"pretrained_model_name_or_path": MODEL_ID, "revision": MODEL_REVISION}
+        source = "hf-hub"
+    else:
+        raise FileNotFoundError(
+            f"no verified snapshot at {root} and allow_download=False; "
+            f"stage it with: hf download {MODEL_ID} --revision {MODEL_REVISION} --local-dir {root}"
+        )
+    processor = AutoProcessor.from_pretrained(**location, trust_remote_code=False)
     model = AutoModelForSpeechSeq2Seq.from_pretrained(
-        MODEL_ID,
-        revision=MODEL_REVISION,
+        **location,
         torch_dtype=dtype,
         low_cpu_mem_usage=True,
         trust_remote_code=False,
@@ -202,7 +213,198 @@ def load_model(device: str | None = None, adapter_dir: str | Path | None = None)
         model = model.merge_and_unload()
     if resolved_device.startswith("cuda"):
         model = model.to(resolved_device)
+    return model, processor, source, resolved_device, dtype
+
+
+def load_model(
+    device: str | None = None,
+    adapter_dir: str | Path | None = None,
+    *,
+    weights_dir: str | Path | None = None,
+    allow_download: bool = True,
+) -> tuple[Any, Any]:
+    """Return ``(model, processor)`` for the pinned upstream revision, on ``device``.
+
+    Weights are loaded in float16 on CUDA and float32 on CPU, from the digest-verified snapshot
+    under ``weights_dir`` when one exists (the fine-tuning tutorial passes the notebook's staged
+    directory) and otherwise from the Hub at the pinned revision. With ``adapter_dir``, a PEFT
+    LoRA adapter saved by ``PeftModel.save_pretrained`` is attached and merged into the weights,
+    so the result is a plain Whisper model; ``peft`` is only imported on that path, and only a
+    safetensors bundle is accepted. Remote model code is always refused.
+    """
+    model, processor, _source, _device, _dtype = _load_base(device, weights_dir, allow_download, adapter_dir)
     return model, processor
+
+
+def corpus_word_error_rate(references: Sequence[str], hypotheses: Sequence[str]) -> float:
+    """Corpus WER: total word edits over total reference words (``word_error_count`` summed)."""
+    if len(references) != len(hypotheses):
+        raise ValueError("references and hypotheses must have the same length")
+    counts = [
+        word_error_count(reference, hypothesis)
+        for reference, hypothesis in zip(references, hypotheses, strict=True)
+    ]
+    total_words = sum(length for _, length in counts)
+    if total_words == 0:
+        raise ValueError("corpus WER is undefined for empty references")
+    return sum(errors for errors, _ in counts) / total_words
+
+
+ADAPTER_BUNDLE_FORMAT = "peft_adapter"
+ADAPTER_BUNDLE_FORMAT_VERSION = 1
+ARTIFACT_MANIFEST_NAME = "artifact-manifest.json"
+
+
+def export_adapter_bundle(
+    model: Any, adapter_dir: str | Path, *, metrics: Mapping[str, Any], provenance: Mapping[str, Any]
+) -> list[dict[str, Any]]:
+    """Write the deployable adapter bundle and return its file manifest.
+
+    The bundle is what ``from_pretrained(adapter_dir=...)`` consumes: ``adapter_config.json`` and
+    ``adapter_model.safetensors`` from ``PeftModel.save_pretrained`` (safetensors only), plus
+    ``metrics.json``, ``provenance.json`` and ``artifact-manifest.json`` (every file with its size
+    and SHA-256). Saved LoRA ``B`` matrices that are all zero are refused: such an adapter is a
+    no-op and exporting it would hide a training run that never updated anything.
+    """
+    from safetensors.torch import load_file
+
+    root = Path(adapter_dir)
+    if root.exists():
+        for stale in sorted(root.rglob("*"), reverse=True):
+            stale.unlink() if stale.is_file() else stale.rmdir()
+    root.mkdir(parents=True)
+    model.save_pretrained(str(root), safe_serialization=True)
+    if not (root / ADAPTER_WEIGHTS).is_file():
+        raise RuntimeError(f"{ADAPTER_WEIGHTS} was not written; only safetensors adapters are accepted")
+    saved_b = [tensor for name, tensor in load_file(str(root / ADAPTER_WEIGHTS)).items() if "lora_B" in name]
+    if not saved_b or max(float(tensor.abs().max()) for tensor in saved_b) == 0:
+        raise RuntimeError("saved adapter weights are zero or missing")
+    (root / "metrics.json").write_text(json.dumps(dict(metrics), indent=2), encoding="utf-8")
+    (root / "provenance.json").write_text(json.dumps(dict(provenance), indent=2), encoding="utf-8")
+    manifest = [
+        {"path": path.relative_to(root).as_posix(), "bytes": path.stat().st_size, "sha256": _sha256(path)}
+        for path in sorted(root.rglob("*"))
+        if path.is_file()
+    ]
+    (root / ARTIFACT_MANIFEST_NAME).write_text(
+        json.dumps(
+            {
+                "format": ADAPTER_BUNDLE_FORMAT,
+                "formatVersion": ADAPTER_BUNDLE_FORMAT_VERSION,
+                "files": manifest,
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    return manifest
+
+
+def verify_adapter_merge(
+    adapter_dir: str | Path,
+    module_name: str,
+    base_weight: Any,
+    reloaded_weight: Any,
+    *,
+    rank: int,
+    alpha: int,
+    tolerance: float,
+) -> dict[str, Any]:
+    """Weight-level proof that a fresh load applied the saved adapter to the base weights.
+
+    For one probe module, ``W_reloaded`` must equal ``W_base + (alpha / rank) * B @ A`` read back
+    from the bundle, within ``tolerance``; an adapter whose delta is below the verification
+    resolution is rejected too, because the check would then pass on an unmodified base.
+    """
+    import torch
+    from safetensors.torch import load_file
+
+    saved = load_file(str(Path(adapter_dir) / ADAPTER_WEIGHTS))
+    lora_a = saved[f"base_model.model.{module_name}.lora_A.weight"].to(torch.float32)
+    lora_b = saved[f"base_model.model.{module_name}.lora_B.weight"].to(torch.float32)
+    base = base_weight.detach().to("cpu", torch.float32)
+    expected = base + (alpha / rank) * (lora_b @ lora_a)
+    reloaded = reloaded_weight.detach().to("cpu", torch.float32)
+    adapter_delta = float((expected - base).abs().max())
+    merge_error = float((reloaded - expected).abs().max())
+    if adapter_delta <= 4 * tolerance:
+        raise RuntimeError(
+            f"adapter delta {adapter_delta:.2e} on {module_name} is below the {tolerance:.0e} verification "
+            "resolution; train longer or with a higher learning rate"
+        )
+    if merge_error > tolerance:
+        raise RuntimeError(
+            f"reloaded weights differ from base + scaled B@A by {merge_error:.2e} "
+            f"(> {tolerance:.0e}) on {module_name}"
+        )
+    return {
+        "module": module_name,
+        "adapter_delta_max": adapter_delta,
+        "merge_error_max": merge_error,
+        "tolerance": tolerance,
+    }
+
+
+def adaptation_report(
+    *,
+    baseline_wer: float,
+    adapted_wer: float,
+    reloaded_wer: float | None,
+    n_eval: int,
+    history: Sequence[Mapping[str, Any]],
+    dataset: Mapping[str, Any],
+    sample_kind: str = "public-sample",
+) -> dict[str, Any]:
+    """Evaluation stage for the fine-tuning tutorial: corpus WER before/after adaptation.
+
+    The verdict is always ``sample-sanity``: one held-out split of one corpus says whether the
+    adapter helped *here*, not how it generalises, and ``history`` (teacher-forced losses) is
+    optimisation evidence only (FT7).
+    """
+    metrics = [
+        {
+            "id": "baseline_wer",
+            "value": baseline_wer,
+            "estimation": f"corpus WER over {n_eval} held-out utterances, zero-shot",
+        },
+        {
+            "id": "adapted_wer",
+            "value": adapted_wer,
+            "estimation": f"corpus WER over the same {n_eval} utterances, in-memory adapter",
+        },
+    ]
+    if reloaded_wer is not None:
+        metrics.append(
+            {
+                "id": "reloaded_wer",
+                "value": reloaded_wer,
+                "estimation": "same split, adapter reloaded from the bundle",
+            }
+        )
+    return {
+        "task": "automatic speech recognition (LoRA adaptation)",
+        "score_semantics": "generated transcript; the pipeline exposes no confidence score or threshold",
+        "sample_kind": sample_kind,
+        "n_utterances": n_eval,
+        "dataset": dict(dataset),
+        "baselines": [
+            {"id": "zero_shot_base_model", "word_error_rate": baseline_wer},
+        ],
+        "metrics": metrics,
+        "optimisation_history": [dict(row) for row in history],
+        "verdict": "sample-sanity",
+        "reason": (
+            "one seeded held-out split of one corpus; a few points of WER can change sign with another seed"
+        ),
+        "needs": (
+            "a referenced evaluation set from the deployment domain (speakers, microphones, noise) of "
+            "several "
+            "hundred utterances, and a check outside the adaptation distribution for forgetting, before any "
+            "generalisable claim"
+        ),
+        "model_id": MODEL_ID,
+        "model_revision": MODEL_REVISION,
+    }
 
 
 INPUT_SCHEMA: dict[str, Any] = {
@@ -351,48 +553,10 @@ class WhisperASRPipeline:
         ``allow_download`` is set, from the Hub at the pinned revision), optionally merging a
         PEFT LoRA adapter (safetensors only). There is no silent fallback: a missing or
         unverified snapshot raises unless downloading was explicitly allowed."""
-        import torch
-        from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor
-
-        adapter_path = None if adapter_dir is None else Path(adapter_dir)
-        if adapter_path is not None:
-            for required in ("adapter_config.json", ADAPTER_WEIGHTS):
-                if not (adapter_path / required).is_file():
-                    raise FileNotFoundError(f"{required} not found in {adapter_path}")
-        resolved_device = device or ("cuda:0" if torch.cuda.is_available() else "cpu")
-        dtype = torch.float16 if resolved_device.startswith("cuda") else torch.float32
-        root = Path(weights_dir or DEFAULT_WEIGHTS_DIR)
-        if (root / MANIFEST_NAME).is_file():
-            stage_missing_files(root, allow_download=allow_download)
-            verify_snapshot(root)
-            # A directory argument makes transformers read config/tokenizer/weights from it directly
-            # (no Hub resolution, no cache lookup).
-            location: dict[str, Any] = {"pretrained_model_name_or_path": str(root)}
-            source = "local-snapshot"
-        elif allow_download:
-            location = {"pretrained_model_name_or_path": MODEL_ID, "revision": MODEL_REVISION}
-            source = "hf-hub"
-        else:
-            raise FileNotFoundError(
-                f"no verified snapshot at {root} and allow_download=False; "
-                f"stage it with: hf download {MODEL_ID} --revision {MODEL_REVISION} --local-dir {root}"
-            )
-        processor = AutoProcessor.from_pretrained(**location, trust_remote_code=False)
-        model = AutoModelForSpeechSeq2Seq.from_pretrained(
-            **location,
-            torch_dtype=dtype,
-            low_cpu_mem_usage=True,
-            trust_remote_code=False,
+        model, processor, source, resolved_device, dtype = _load_base(
+            device, weights_dir, allow_download, adapter_dir
         )
-        if adapter_path is not None:
-            try:
-                from peft import PeftModel
-            except ImportError as exc:  # pragma: no cover - depends on the optional extra
-                raise ImportError("loading an adapter requires the 'finetune' extra (peft)") from exc
-            model = PeftModel.from_pretrained(model, str(adapter_path), is_trainable=False)
-            model = model.merge_and_unload()
-        if resolved_device.startswith("cuda"):
-            model = model.to(resolved_device)
+        adapter_path = None if adapter_dir is None else Path(adapter_dir)
         return cls.from_model(
             model,
             processor,

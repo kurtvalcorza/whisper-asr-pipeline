@@ -26,8 +26,10 @@ jobs:
         run: pytest
       - name: Validate tutorial and model-card source
         run: python tools/validate_release_assets.py
-      - name: Standalone notebook parity (NOTEBOOK_SPEC 1.1 PAR3)
-        run: python tools/build_notebook.py --check
+      - name: Standalone notebook parity (NOTEBOOK_SPEC 2.0 PAR3)
+        run: |
+          python tools/build_notebook.py --check
+          python tools/build_notebook.py --check --template tools/notebook_template_finetune.py
 
   release-evidence-boundary:
     runs-on: ubuntu-latest

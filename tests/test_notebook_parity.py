@@ -3,6 +3,7 @@
 The notebook carries `src/<package>/pipeline.py` verbatim; these tests fail whenever the carried
 cell, the inline manifest, or the inline pins diverge from the repository at HEAD.
 """
+# ruff: noqa: E501  -- assertion messages and paths are kept on one line; repos pin line-length 100 or 110
 
 from __future__ import annotations
 
@@ -68,22 +69,23 @@ REWRITES = TEMPLATE.get("rewrites", build.REWRITES)  # a template may declare it
 
 
 def test_par1_rewrite_rules_are_the_only_difference() -> None:
-    """Across all carried modules the documented rules apply exactly once each; every other differing line
-    is a removed package-relative import or a disabled __main__ guard, both marked by the generator."""
+    """Every line the generator changed in a carried module is a documented rewrite: the template's
+    `__file__` rules (each exactly once across modules), a removed package-relative import, or a
+    disabled `__main__` guard. Compared with difflib because a multi-line import collapses to one
+    marker line."""
+    import difflib
+
     ctx = build.load_context(ROOT, TEMPLATE)
-    rewritten = ctx["embedded"]
-    marked = 0
     rule_hits = 0
     for module, original in ctx["texts"].items():
-        for a, b in zip(original.splitlines(), rewritten[module].splitlines(), strict=True):
-            if a == b:
+        a, b = original.splitlines(), ctx["embedded"][module].splitlines()
+        for tag, i1, i2, j1, j2 in difflib.SequenceMatcher(a=a, b=b, autojunk=False).get_opcodes():
+            if tag == "equal":
                 continue
-            assert "standalone rewrite" in b, (module, a, b)
-            marked += 1
-            if "__file__" in a:
-                rule_hits += 1
+            replaced = b[j1:j2]
+            assert replaced and all("standalone rewrite" in line for line in replaced), (module, a[i1:i2], replaced)
+            rule_hits += sum("__file__" in line for line in a[i1:i2])
     assert rule_hits == len(REWRITES)
-    assert marked >= rule_hits
 
 
 def test_par2_inline_manifest_and_pins_match_repository(notebook: dict) -> None:
@@ -95,7 +97,7 @@ def test_par2_inline_manifest_and_pins_match_repository(notebook: dict) -> None:
     pins_block = re.search(r"^PINS = \[(.*?)^\]", code, re.M | re.S)
     assert pins_block, "install cell must carry PINS = [...]"
     inline_pins = re.findall(r"'([^']+)'", pins_block.group(1))
-    assert inline_pins == build._pins(ROOT)
+    assert inline_pins == build._pins(ROOT, TEMPLATE)
     meta = notebook["metadata"]["dimer"]
     assert meta["standalone"] is True
     assert meta["notebook_spec"] == build.NOTEBOOK_SPEC

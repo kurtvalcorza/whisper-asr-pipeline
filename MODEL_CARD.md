@@ -12,7 +12,7 @@ base_model: openai/whisper-large-v3-turbo
 
 ###### Description
 
-Whisper large-v3-turbo is the OpenAI Whisper speech-sequence-to-sequence model published as `openai/whisper-large-v3-turbo`, pinned here to revision `41f01f3fe87f28c78e2fbf8b568835947dd65ed9`. Upstream describes Turbo as a fine-tuned/pruned large-v3 variant with the decoder reduced from 32 layers to 4 for faster inference. This repository does not adapt weights; it adds immutable resolution, input checks, normalized ASR output, WER evaluation, provenance, and DIMER tutorial packaging.
+Whisper large-v3-turbo is the OpenAI Whisper speech-sequence-to-sequence model published as `openai/whisper-large-v3-turbo`, pinned here to revision `41f01f3fe87f28c78e2fbf8b568835947dd65ed9`. Upstream describes Turbo as a fine-tuned/pruned large-v3 variant with the decoder reduced from 32 layers to 4 for faster inference. This repository does not adapt weights; it adds immutable resolution, input checks, normalized ASR output, WER evaluation, provenance, and DIMER tutorial packaging. The `finetune` extra and the E2E tutorial let a user train a LoRA adapter on their own labelled speech and load it through the same public API (`adapter_dir=`); such adapters are user artifacts produced in the user's runtime, are not distributed by this repository, and inherit the license obligations of both these weights and the training data.
 
 #### Intended Use and Limitations
 

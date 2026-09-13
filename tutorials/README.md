@@ -1,5 +1,11 @@
 # Tutorials
 
+[![GitHub](https://img.shields.io/badge/GitHub-181717?style=flat&logo=github&logoColor=white)](https://github.com/kurtvalcorza/whisper-asr-pipeline)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/kurtvalcorza/whisper-asr-pipeline/blob/main/tutorials/whisper_asr_colab.ipynb)
+[![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-openai%2Fwhisper--large--v3--turbo-ffcc4d?style=flat)](https://huggingface.co/openai/whisper-large-v3-turbo)
+[![Upstream](https://img.shields.io/badge/Upstream-openai%2Fwhisper-181717?style=flat&logo=github&logoColor=white)](https://github.com/openai/whisper)
+[![arXiv](https://img.shields.io/badge/arXiv-2212.04356-b31b1b.svg)](https://arxiv.org/abs/2212.04356)
+
 Notebook specification: **DIMER Notebook Specification 1.0**
 
 | Notebook | Profile | Capability | Default runtime | BYOD | Release status |

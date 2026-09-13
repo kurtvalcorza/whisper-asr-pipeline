@@ -171,14 +171,17 @@ def _load_base(
     snapshot or, only when ``allow_download`` is set and no snapshot exists, from the Hub at the
     pinned revision. There is no silent fallback: a missing or unverified snapshot raises unless
     downloading was explicitly allowed (MOD8). ``trust_remote_code`` is always False."""
-    import torch
-    from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor
-
+    # The bundle-shape check runs before the heavyweight imports so a malformed adapter directory is
+    # refused (and testable) without torch installed.
     adapter_path = None if adapter_dir is None else Path(adapter_dir)
     if adapter_path is not None:
         for required in ("adapter_config.json", ADAPTER_WEIGHTS):
             if not (adapter_path / required).is_file():
                 raise FileNotFoundError(f"{required} not found in {adapter_path}")
+
+    import torch
+    from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor
+
     resolved_device = device or ("cuda:0" if torch.cuda.is_available() else "cpu")
     dtype = torch.float16 if resolved_device.startswith("cuda") else torch.float32
     root = Path(weights_dir or DEFAULT_WEIGHTS_DIR)

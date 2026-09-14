@@ -7,7 +7,7 @@ date_published: "2024-10-01"
 date_published_source: "Hugging Face Hub repository creation date of the exact hosted checkpoint (`createdAt`, https://huggingface.co/api/models/openai/whisper-large-v3-turbo)"
 ---
 
-# Whisper large-v3-turbo (DIMER package v0.1.0)
+# Whisper large-v3-turbo
 
 [![Hugging Face](https://img.shields.io/badge/Hugging%20Face-openai%2Fwhisper--large--v3--turbo-ffcc4d)](https://huggingface.co/openai/whisper-large-v3-turbo)
 [![Weight license](https://img.shields.io/badge/weights-mit-blue)](https://huggingface.co/openai/whisper-large-v3-turbo/blob/41f01f3fe87f28c78e2fbf8b568835947dd65ed9/LICENSE)

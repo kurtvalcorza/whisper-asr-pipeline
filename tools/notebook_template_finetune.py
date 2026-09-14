@@ -143,6 +143,7 @@ TEMPLATE = {
                 "    LANGUAGE = LOCALE.split('-')[0]\n"
                 "    DATASET = {{'name': SAMPLE_DATASET, 'config': LOCALE, 'revision': SAMPLE_DATASET_REVISION, 'license': 'CC-BY-4.0'}}\n"
                 "    sample_kind = 'public-sample'\n\n"
+                "clips = [c for c in clips if len(c['audio']) / TARGET_RATE <= MAX_CHUNK_LENGTH_S]\n"
                 "if TRAIN_CLIPS < 1 or EVAL_CLIPS < 1 or TRAIN_CLIPS + EVAL_CLIPS > len(clips):\n"
                 "    raise ValueError(f'TRAIN_CLIPS + EVAL_CLIPS must fit in the {{len(clips)}} available clips')\n"
                 "order = list(range(len(clips)))\n"

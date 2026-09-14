@@ -7,10 +7,34 @@ date_published: "2024-10-01"
 date_published_source: "Hugging Face Hub repository creation date of the exact hosted checkpoint (`createdAt`, https://huggingface.co/api/models/openai/whisper-large-v3-turbo)"
 ---
 
-# Whisper large-v3-turbo
+# Whisper large-v3-turbo — Speech Recognition Model (Inference & LoRA Fine-Tuning)
 
-[![Hugging Face](https://img.shields.io/badge/Hugging%20Face-openai%2Fwhisper--large--v3--turbo-ffcc4d)](https://huggingface.co/openai/whisper-large-v3-turbo)
-[![Weight license](https://img.shields.io/badge/weights-mit-blue)](https://huggingface.co/openai/whisper-large-v3-turbo/blob/41f01f3fe87f28c78e2fbf8b568835947dd65ed9/LICENSE)
+[![Hugging Face](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-openai%2Fwhisper--large--v3--turbo-ffcc4d?style=flat)](https://huggingface.co/openai/whisper-large-v3-turbo)
+[![Upstream GitHub](https://img.shields.io/badge/Upstream%20GitHub-openai%2Fwhisper-181717?style=flat&logo=github&logoColor=white)](https://github.com/openai/whisper)
+[![arXiv Paper](https://img.shields.io/badge/arXiv-2212.04356-b31b1b.svg)](https://arxiv.org/abs/2212.04356)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://huggingface.co/openai/whisper-large-v3-turbo/blob/41f01f3fe87f28c78e2fbf8b568835947dd65ed9/LICENSE)
+
+> [!WARNING]
+> ⚠️ **Provided for research, training, and evaluation purposes only.** Model weights are redistributed unmodified under their upstream license, which controls your use, including any commercial use or redistribution; the accompanying code and notebooks are released under this repository's license. All of it is supplied **"as is"**, without warranty of any kind, and has not been validated for production, clinical, or safety-critical use. Running the notebooks downloads third-party weights and datasets governed by their own licenses and consumes compute on your own Colab/Kaggle account. To the maximum extent permitted by law, the maintainers of this repository and the DIMER platform accept no liability for any damages arising from their use. Hosting implies no affiliation with or endorsement by the original authors.
+
+---
+
+## Interactive Colab Tutorials
+
+This repository ships standalone Google Colab tutorials that exercise its public pipeline API:
+
+- **Task Inference Tutorial**: \
+  [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/kurtvalcorza/whisper-asr-pipeline/blob/main/tutorials/whisper_asr_colab.ipynb) [`whisper_asr_colab.ipynb`](https://github.com/kurtvalcorza/whisper-asr-pipeline/blob/main/tutorials/whisper_asr_colab.ipynb) \
+  *Verify the pinned Whisper snapshot, validate and transcribe a public speech sample or an uploaded clip, compute word error rate when a reference transcript is available, and export the transcript, evaluation report and provenance.*
+
+- **LoRA Fine-Tuning Tutorial**: \
+  [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/kurtvalcorza/whisper-asr-pipeline/blob/main/tutorials/whisper_asr_finetune_colab.ipynb) [`whisper_asr_finetune_colab.ipynb`](https://github.com/kurtvalcorza/whisper-asr-pipeline/blob/main/tutorials/whisper_asr_finetune_colab.ipynb) \
+  *Validate a public labelled speech set or your own clips, record zero-shot word error rate, train LoRA adapters, evaluate the adapted model, and export and reload the adapter bundle against the verified base weights.*
+
+> [!NOTE]
+> The LoRA tutorial defaults require a 16 GiB-class CUDA GPU; CPU smoke runs require reducing `TRAIN_CLIPS`, `EVAL_CLIPS` and `EPOCHS`. These tutorials remain release candidates; see [release verification](docs/release-verification.md) for execution records and promotion requirements.
+
+---
 
 #### Description
 

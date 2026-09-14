@@ -2,6 +2,7 @@
 license: mit
 model_card_spec: "1.1"
 pipeline_tag: automatic-speech-recognition
+task: "Others - Automatic Speech Recognition"
 base_model: openai/whisper-large-v3-turbo
 date_published: "2024-10-01"
 date_published_source: "Hugging Face Hub repository creation date of the exact hosted checkpoint (`createdAt`, https://huggingface.co/api/models/openai/whisper-large-v3-turbo)"

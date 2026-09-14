@@ -4,7 +4,7 @@
 (`E2E`) are each a **release candidate** until the exact notebook revision has executed
 top-to-bottom in a clean supported runtime. Unit tests, JSON
 validation, code-cell compilation, and `tools/validate_release_assets.py` are necessary
-checks but are **not** runtime evidence under DIMER Notebook Specification 1.0. This file is
+checks but are **not** runtime evidence under DIMER Notebook Specification 2.0. This file is
 the durable release-gate record for both notebooks; each is promoted on its own evidence.
 
 ## Automatic coverage (static, every pull request)
@@ -16,9 +16,11 @@ CI runs `tools/validate_release_assets.py`, which checks:
   is preceded by an explanatory markdown cell;
 - every notebook in `tutorials/` is one of the two declared notebooks, each named in
   `tutorials/README.md` with its profile (`TASK-INFERENCE`, `E2E`) and the notebook-spec version;
-  `metadata.dimer` declares that profile and spec `1.0`;
-- the fresh-runtime bootstrap (clone by canonical URL, `DIMER_TUTORIAL_REF`, detached checkout of
-  the requested revision, restart-on-stale-import guard) and the recorded `REPO_SHA` in exports;
+  `metadata.dimer` declares that profile, spec `2.0` and a pedagogical mode;
+- the standalone carrier (NOTEBOOK_SPEC 2.0 §4): each notebook is byte-identical to its generator's output
+  (`tools/build_notebook.py --check`, PAR3), carries the package module verbatim (PAR1) and the committed
+  manifest and pins inline (PAR2), performs no clone or repository install, and records `NOTEBOOK_SOURCE`
+  (repository revision, module SHA-256) in exports; the restart-on-stale-import guard must raise;
 - `MODEL_ID`/`MODEL_REVISION` are imported from the package rather than hard-coded, the revision is
   a 40-hex immutable commit, and the same identity string appears in `README.md`,
   `MODEL_CARD.md`, and `docs/WEIGHTS.md` with no stray revisions;
@@ -70,7 +72,7 @@ For `whisper_asr_finetune_colab.ipynb` the same procedure applies with a 16 GiB-
 (Colab T4, or a Kaggle GPU kernel, which is assigned a P100 or T4), form parameters at their defaults (`en-US`, 400/100 clips, 2 epochs, rank 32), and the
 default-path stages are instead:
 
-- fresh bootstrap at the candidate revision with the `tutorial` and `finetune` extras;
+- pinned install from `tools/finetune-pins.txt` (runtime dependencies plus the `tutorial` and `finetune` extras), no repository checkout;
 - pinned base acquisition, `PolyAI/minds14` ingestion with 8→16 kHz resampling and the recorded
   `split_digest`;
 - zero-shot baseline corpus WER on the held-out clips through `WhisperASRPipeline`;
@@ -107,5 +109,7 @@ Pre-flight runtime: WSL2 Ubuntu 24.04 (kernel 6.18.33), Python 3.12.3, Intel Cor
 | 2026-09-11 | pre-fix working tree of `0b76b2a` | Local WSL harness, CPU | Default sample path | — | FAILED at cell 3 — the stale-import guard compared `torch.__version__` (`2.6.0+cu124`) with the distribution version (`2.6.0`) and raised the restart error whenever torch was already imported. Fixed: distribution metadata is compared with itself before/after installation |
 
 ## Current status
+
+**2026-09-14 — `whisper_asr_finetune_colab.ipynb` was regenerated as a standalone NOTEBOOK_SPEC 2.0 notebook.** The Kaggle P100 execution recorded below for `db4daf8` covers the previous clone-based revision; every code cell changed, so that row is audit trail only and the standalone revision is **unverified** until a clean GPU-runtime `Run all` of the exact new blob is recorded here (REL1/REL10).
 
 A clean supported-class execution of the notebook blob at this revision is recorded in the first row above (Kaggle container, fresh interpreter, clean cache, pinned wheels, all stages of the default path, verbatim blob measured in-run, every version recorded); it supersedes the earlier rows, which remain as the audit trail of the review round. Static CI is green on the same branch. The registry status remains **Candidate** until a reviewer confirms the recorded run against the notebook blob under review and an integrator promotes it; promotion is not performed by the builder. The commit that adds a recorded-execution row changes documentation only; the executed source is the commit named in the row.

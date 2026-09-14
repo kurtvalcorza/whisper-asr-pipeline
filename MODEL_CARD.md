@@ -1,8 +1,10 @@
 ---
 license: mit
-model_card_spec: "1.0"
+model_card_spec: "1.1"
 pipeline_tag: automatic-speech-recognition
 base_model: openai/whisper-large-v3-turbo
+date_published: "2024-10-01"
+date_published_source: "Hugging Face Hub repository creation date of the exact hosted checkpoint (`createdAt`, https://huggingface.co/api/models/openai/whisper-large-v3-turbo)"
 ---
 
 # Whisper large-v3-turbo (DIMER package v0.1.0)
@@ -10,7 +12,7 @@ base_model: openai/whisper-large-v3-turbo
 [![Hugging Face](https://img.shields.io/badge/Hugging%20Face-openai%2Fwhisper--large--v3--turbo-ffcc4d)](https://huggingface.co/openai/whisper-large-v3-turbo)
 [![Weight license](https://img.shields.io/badge/weights-mit-blue)](https://huggingface.co/openai/whisper-large-v3-turbo/blob/41f01f3fe87f28c78e2fbf8b568835947dd65ed9/LICENSE)
 
-###### Description
+#### Description
 
 Whisper large-v3-turbo is the OpenAI Whisper speech-sequence-to-sequence model published as `openai/whisper-large-v3-turbo`, pinned here to revision `41f01f3fe87f28c78e2fbf8b568835947dd65ed9`. Upstream describes Turbo as a fine-tuned/pruned large-v3 variant with the decoder reduced from 32 layers to 4 for faster inference. This repository does not adapt weights; it adds immutable resolution, input checks, normalized ASR output, WER evaluation, provenance, and DIMER tutorial packaging. The `finetune` extra and the E2E tutorial let a user train a LoRA adapter on their own labelled speech and load it through the same public API (`adapter_dir=`); such adapters are user artifacts produced in the user's runtime, are not distributed by this repository, and inherit the license obligations of both these weights and the training data.
 
@@ -48,7 +50,7 @@ The reference runtime is Python 3.12 with pinned PyTorch, torchvision, Transform
 
 ###### Performance Measures
 
-The repository reports `word_error_rate` when a reference transcript is supplied. WER measures token-level substitutions, insertions, and deletions relative to reference words after basic normalization (case-folding, curly-to-straight apostrophes and punctuation removal, with hyphenated compounds kept as one token; numbers, abbreviations and spelled-out forms are not normalized, so `Mr.` versus `Mister` counts as an error), making it interpretable for ASR but insensitive to some semantic differences. The tutorial labels its WER as sample/tutorial evidence from a single public example; the repository does not reproduce or claim upstream benchmark scores as measurements made by this pipeline.
+The repository reports `word_error_rate` when a reference transcript is supplied. The public `evaluation_report` stage writes it to a machine-readable report whose verdict is `sample-sanity` on the single referenced tutorial utterance and `not-measurable` when no reference exists. WER measures token-level substitutions, insertions, and deletions relative to reference words after basic normalization (case-folding, curly-to-straight apostrophes and punctuation removal, with hyphenated compounds kept as one token; numbers, abbreviations and spelled-out forms are not normalized, so `Mr.` versus `Mister` counts as an error), making it interpretable for ASR but insensitive to some semantic differences. The tutorial labels its WER as sample/tutorial evidence from a single public example; the repository does not reproduce or claim upstream benchmark scores as measurements made by this pipeline.
 
 ###### Decision thresholds
 
@@ -70,7 +72,7 @@ This pipeline is not intended or certified for autonomous decisions central to h
 
 ###### Mitigations
 
-Implemented mitigations include an immutable upstream model revision; standard Transformers loading with `trust_remote_code=False`; a SafeTensors upstream checkpoint; explicit task and chunk-length validation; missing-file rejection; normalized model/revision fields in every result; exact dependency pins for the model-facing runtime; a repository WER implementation for labeled checks; source-level notebook/model-card validation in CI; and a documented rule that static CI cannot be promoted as notebook runtime evidence.
+Implemented mitigations include an immutable upstream model revision; a committed `dimer-base-manifest.json` whose per-file SHA-256 digests `verify_snapshot` re-checks before every load; the public `validate_inputs` stage, which applies the same task, path and chunk-length checks as `transcribe` and writes an input manifest with any rejection recorded as a finding; standard Transformers loading with `trust_remote_code=False`; a SafeTensors upstream checkpoint; explicit task and chunk-length validation; missing-file rejection; normalized model/revision fields in every result; exact dependency pins for the model-facing runtime; a repository WER implementation for labeled checks; source-level notebook/model-card validation in CI; and a documented rule that static CI cannot be promoted as notebook runtime evidence.
 
 ###### Risks and harms
 
@@ -85,5 +87,6 @@ The pipeline must not be used for covert or unlawful surveillance, voice-biometr
 - Model: `openai/whisper-large-v3-turbo`
 - Revision: `41f01f3fe87f28c78e2fbf8b568835947dd65ed9`
 - Weight format: SafeTensors
+- Snapshot manifest: `weights/whisper-large-v3-turbo/dimer-base-manifest.json` — `model.safetensors` SHA-256 `542566a422ae4f3fd23f1ba11add198fca01bbf82e66e6a2857b3f608b1eb9d1` (1617824864 bytes)
 - Upstream reference: https://huggingface.co/openai/whisper-large-v3-turbo
 - Whisper paper: https://arxiv.org/abs/2212.04356

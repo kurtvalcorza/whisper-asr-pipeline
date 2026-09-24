@@ -94,7 +94,7 @@ def _first_marker_line(module) -> str:
 
 def test_committed_tree_passes() -> None:
     module = _load_validator(ROOT)
-    expected = ["model-card", "identity-consistency", "release-status", "notebooks+parity"]
+    expected = ["model-card", "identity-consistency", "weight-facts", "release-status", "notebooks+parity"]
     assert module.validate_all() == expected
 
 

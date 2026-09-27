@@ -94,7 +94,14 @@ def _first_marker_line(module) -> str:
 
 def test_committed_tree_passes() -> None:
     module = _load_validator(ROOT)
-    expected = ["model-card", "identity-consistency", "weight-facts", "release-status", "notebooks+parity"]
+    expected = [
+        "model-card",
+        "identity-consistency",
+        "weight-facts",
+        "release-status",
+        "notebooks+parity",
+        "workshop-notebooks",
+    ]
     assert module.validate_all() == expected
 
 
@@ -210,3 +217,72 @@ def test_control_placeholder_in_model_card_is_rejected(tree: Path) -> None:
     card.write_text(card.read_text(encoding="utf-8") + "\nTODO: fill in.\n", encoding="utf-8")
     with pytest.raises(module.ValidationError, match="placeholder"):
         module.validate_model_card()
+
+
+WORKSHOP = "DIMER_Whisper_Speech_Recognition_Workshop.ipynb"
+
+
+def _edit_workshop(module, mutate) -> None:
+    path = module.ROOT / "tutorials" / WORKSHOP
+    notebook = json.loads(path.read_text(encoding="utf-8"))
+    mutate(notebook)
+    path.write_text(json.dumps(notebook, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+
+
+def _carried_cell(notebook: dict) -> dict:
+    return next(c for c in notebook["cells"] if "".join(c["source"]).startswith("CARRIED_FILES = "))
+
+
+def test_workshop_carried_files_verify_and_match_the_package() -> None:
+    import ast
+    import hashlib
+
+    notebook = json.loads((ROOT / "tutorials" / WORKSHOP).read_text(encoding="utf-8"))
+    body = ast.parse("".join(_carried_cell(notebook)["source"])).body
+    files, hashes = (ast.literal_eval(node.value) for node in body[:2])
+    assert {name: hashlib.sha256(text.encode()).hexdigest() for name, text in files.items()} == hashes
+    pipeline = (ROOT / "src" / "whisper_asr_pipeline" / "pipeline.py").read_text(encoding="utf-8")
+    assert files["whisper_reference.py"] == pipeline
+    # The prepared 16 kHz waveform is reloaded as stored; re-validating it as learner audio rejected
+    # a resampled 8 kHz clip whose peak overshoots 1.01.
+    assert 'row["waveform"], rate = sf.read(row["audio_path"], dtype="float32")' in files["workshop.py"]
+
+
+def test_control_workshop_tampered_carried_file_is_rejected(tree: Path) -> None:
+    module = _load_validator(tree)
+
+    def mutate(notebook: dict) -> None:
+        cell = _carried_cell(notebook)
+        text = "".join(cell["source"])
+        cell["source"] = [text.replace("MIN_CHUNK_LENGTH_S = 1", "MIN_CHUNK_LENGTH_S = 2", 1)]
+
+    _edit_workshop(module, mutate)
+    with pytest.raises(module.ValidationError, match="CARRIED_HASHES digest"):
+        module.validate_workshop_notebooks()
+
+
+def test_control_workshop_pipeline_drift_is_rejected(tree: Path) -> None:
+    module = _load_validator(tree)
+    pipeline = tree / "src" / "whisper_asr_pipeline" / "pipeline.py"
+    pipeline.write_text(pipeline.read_text(encoding="utf-8") + "\n# drift\n", encoding="utf-8")
+    with pytest.raises(module.ValidationError, match="differs from src/whisper_asr_pipeline/pipeline.py"):
+        module.validate_workshop_notebooks()
+
+
+def test_control_workshop_persisted_output_is_rejected(tree: Path) -> None:
+    module = _load_validator(tree)
+
+    def mutate(notebook: dict) -> None:
+        _carried_cell(notebook)["execution_count"] = 1
+
+    _edit_workshop(module, mutate)
+    with pytest.raises(module.ValidationError, match="persists outputs"):
+        module.validate_workshop_notebooks()
+
+
+@pytest.mark.parametrize("key", ["notebook_profile", "notebook_mode"])
+def test_control_workshop_metadata_key_is_required(tree: Path, key: str) -> None:
+    module = _load_validator(tree)
+    _edit_workshop(module, lambda notebook: notebook["metadata"]["dimer"].pop(key))
+    with pytest.raises(module.ValidationError, match=key):
+        module.validate_workshop_notebooks()

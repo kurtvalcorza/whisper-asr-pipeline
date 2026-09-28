@@ -707,12 +707,43 @@ def _validate_notebook_content(
     _check(f"https://huggingface.co/{model_id}" in markdown, f"{path.name}: references must link {model_id}")
 
 
+def validate_audio_capstone(path: Path) -> None:
+    """Validate the distinct 2.2 isolated-environment carrier without legacy markers."""
+    import nbformat
+
+    builder = _load_tool("build_audio_capstone")
+    notebook = json.loads(_read(path))
+    nbformat.validate(nbformat.from_dict(notebook))
+    expected = (json.dumps(builder.build(), indent=1, ensure_ascii=False) + "\n").encode("utf-8")
+    _check(path.read_bytes() == expected, "audio capstone: source-generator parity failure")
+    meta = notebook["metadata"]["dimer"]
+    _check(meta["spec_version"] == "2.2" and meta["profile"] == "E2E", "audio capstone: profile")
+    for cell in notebook["cells"]:
+        if cell["cell_type"] == "code":
+            ast.parse("".join(cell["source"]))
+            _check(not cell["outputs"] and cell["execution_count"] is None, "audio capstone: stale output")
+    carried = builder.carried_files()
+    source = json.loads(carried["source.json"])
+    for name, checksum in source["files"].items():
+        _check(hashlib.sha256(carried[name].encode()).hexdigest() == checksum, f"audio source hash: {name}")
+        if name.endswith(".py"):
+            ast.parse(carried[name])
+    annotations = json.loads(carried["annotation_manifest.json"])
+    for name in ("queries.json", "qrels.json"):
+        _check(
+            annotations["files"][name]["sha256"] == source["files"][name],
+            f"audio annotation hash: {name}",
+        )
+
+
 def validate_notebooks() -> None:
     tutorials = ROOT / "tutorials"
     names = {n.name for n in sorted(tutorials.glob("*.ipynb"))}
-    unexpected = sorted(names - set(NOTEBOOKS) - set(WORKSHOP_NOTEBOOKS))
+    capstone = "DIMER_Filipino_Audio_Archive_Search_Capstone.ipynb"
+    declared = set(NOTEBOOKS) | set(WORKSHOP_NOTEBOOKS) | {capstone}
+    unexpected = sorted(names - declared)
     _check(not unexpected, f"undeclared tutorial notebooks (declare them in NOTEBOOKS): {unexpected}")
-    absent = sorted(set(NOTEBOOKS) - names)
+    absent = sorted(declared - names)
     _check(not absent, f"tutorial notebooks missing: {absent}")
     registry = _read(tutorials / "README.md")
     build = _load_tool("build_notebook")
@@ -732,6 +763,8 @@ def validate_notebooks() -> None:
         _validate_parity(path, notebook, code_cells, build, template)
         _check(f"`{name}`" in registry, f"{name} missing from tutorials/README.md")
         _check(f"`{spec['profile']}`" in registry, f"tutorials/README.md must record `{spec['profile']}`")
+    validate_audio_capstone(tutorials / capstone)
+    _check(f"`{capstone}`" in registry, "audio capstone missing from tutorials/README.md")
     _check(
         f"DIMER Notebook Specification {NOTEBOOK_SPEC}" in registry,
         "tutorials/README.md must name the notebook spec version",

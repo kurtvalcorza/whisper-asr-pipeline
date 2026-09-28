@@ -41,6 +41,17 @@ for inspection; and `word_error_count` returns the
 
 ## Tutorials
 
+The new [Filipino Audio Archive Search capstone](tutorials/DIMER_Filipino_Audio_Archive_Search_Capstone.ipynb)
+composes Whisper, Qwen3 embeddings and Qwen3 reranking. It compares keyword,
+dense and reranked search on reference versus automatic transcripts of 120
+Filipino FLEURS clips. This standalone `E2E` / `GUIDED` notebook targets a
+fresh Colab T4 and performs no weight training. It is an **engineering preview**:
+60 query drafts and all 7,200 relevance pairs still need human review, so the
+default retrieval scores describe nominated-anchor recovery, not benchmark
+relevance. Hosted execution is also pending. See the
+[build and validation guide](docs/audio-capstone.md) and
+[annotation review protocol](docs/audio-annotation-review.md).
+
 `tutorials/whisper_asr_colab.ipynb` is declared `TASK-INFERENCE`. Its default path uses a public LibriSpeech dummy sample, validates runtime/model provenance, transcribes through the public API, computes tutorial WER against the supplied reference (case-folded, punctuation removed, curly apostrophes folded; abbreviations are not normalized), and exports JSON. BYOD is optional and gated off by default.
 
 `tutorials/whisper_asr_finetune_colab.ipynb` is declared `E2E`. Its default path loads one locale of

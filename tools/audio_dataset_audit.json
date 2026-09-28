@@ -1,0 +1,3730 @@
+{
+  "format_version": 1,
+  "source_revision": "70bb2e84b976b7e960aa89f1c648e09c59f894dd",
+  "source_files": [
+    {
+      "split": "validation",
+      "bytes": 454686207,
+      "sha256": "693d176879c83b3ce9fa86d350f2351237e41e4f5e85bad1d8d7c0b7137d9f43",
+      "filename": "validation-00000-of-00001.parquet",
+      "path": "parquet-data/fil_ph/validation-00000-of-00001.parquet",
+      "url": "https://huggingface.co/datasets/google/fleurs/resolve/70bb2e84b976b7e960aa89f1c648e09c59f894dd/parquet-data/fil_ph/validation-00000-of-00001.parquet"
+    },
+    {
+      "split": "test",
+      "bytes": 1102327716,
+      "sha256": "cf89a30f324ca7c10dcc3d768d24c21966d7c9d66e1e9bc687237413e1cd88e8",
+      "filename": "test-00000-of-00001.parquet",
+      "path": "parquet-data/fil_ph/test-00000-of-00001.parquet",
+      "url": "https://huggingface.co/datasets/google/fleurs/resolve/70bb2e84b976b7e960aa89f1c648e09c59f894dd/parquet-data/fil_ph/test-00000-of-00001.parquet"
+    }
+  ],
+  "source_rows": {
+    "validation": 418,
+    "test": 964
+  },
+  "decoded_eligible_rows": 1199,
+  "cross_role_duplicate_rows_excluded": 0,
+  "eligible_unique_families": 464,
+  "selected_clips": 120,
+  "selected_roles": {
+    "test": 80,
+    "dev": 40
+  },
+  "duration_bands": {
+    "dev": {
+      "1": 17,
+      "0": 7,
+      "2": 16
+    },
+    "test": {
+      "0": 9,
+      "2": 35,
+      "1": 36
+    }
+  },
+  "total_audio_seconds": 1715.46,
+  "exclusions": [
+    {
+      "recording_key": "validation:000004:1617",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000005:1653",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000008:1583",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000014:1527",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000015:1539",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000022:1620",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000026:1512",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000032:1637",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000045:1539",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000049:1594",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000051:1546",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000056:1524",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000061:1637",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000064:1546",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000072:1538",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000096:1623",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000098:1635",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000111:1608",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000112:1574",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000119:1632",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000128:1539",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000129:1653",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000150:1520",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000162:1574",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000171:1527",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000187:1620",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000206:1524",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000215:1604",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000221:1608",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000245:1541",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000259:1635",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000260:1626",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000267:1568",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000269:1519",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000279:1527",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000286:1614",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000291:1522",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000325:1626",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000328:1618",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000341:1546",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000342:1608",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000364:1618",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000379:1525",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000389:1580",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000395:1522",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000396:1532",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000399:1525",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000402:1574",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000025:1859",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000026:1665",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000031:1753",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000034:1712",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000038:1940",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000048:1670",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000052:1989",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000072:1682",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000077:1852",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000089:1971",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000092:1780",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000094:1751",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000100:1667",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000115:1785",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000125:1785",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000126:1990",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000139:1685",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000150:1806",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000151:1869",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000158:1735",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000160:1795",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000161:1961",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000180:1831",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000188:1716",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000190:1877",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000192:1719",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000198:1984",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000200:1788",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000204:1883",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000209:1836",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000213:1878",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000227:1985",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000235:1690",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000259:1688",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000267:1722",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000290:1690",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000314:1733",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000317:1984",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000327:1715",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000330:1990",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000332:1864",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000336:1722",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000341:1864",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000348:1824",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000352:1812",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000353:1824",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000357:1983",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000361:1749",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000368:1937",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000372:1735",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000375:1810",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000379:1670",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000383:1682",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000384:1782",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000394:1667",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000403:1723",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000404:1686",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000408:1784",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000443:1671",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000454:1989",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000456:1804",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000459:1883",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000463:1937",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000465:1843",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000473:1688",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000476:1789",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000481:1683",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000491:1960",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000498:1725",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000529:1932",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000540:1681",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000554:1716",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000556:1712",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000557:1961",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000564:1968",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000576:1927",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000578:1729",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000584:1862",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000586:1785",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000587:1790",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000592:1668",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000596:1735",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000609:1932",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000613:1665",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000617:1685",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000623:1932",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000631:1790",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000632:1729",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000644:1878",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000647:1729",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000648:1836",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000655:1795",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000657:2008",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000668:1670",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000669:1996",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000695:1936",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000698:1714",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000707:1931",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000718:1688",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000723:1862",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000729:1961",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000744:1852",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000745:1983",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000746:1722",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000747:1995",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000751:1706",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000768:1683",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000774:1753",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000787:1896",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000794:1946",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000795:2001",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000800:1751",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000804:1681",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000806:1743",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000812:1671",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000815:1937",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000817:1836",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000829:1877",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000839:1784",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000840:2008",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000844:1852",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000852:1678",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000855:1946",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000857:1801",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000875:1855",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000877:1689",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000887:1681",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000890:1806",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000894:1689",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000905:1863",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000908:1759",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000931:1983",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000941:1809",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000943:1936",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "test:000952:1842",
+      "reason": "Duration outside 2–25 seconds"
+    },
+    {
+      "recording_key": "validation:000222:1648",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000090:1648",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000033:1599",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000401:1599",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000358:1656",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000412:1656",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000037:1511",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000243:1511",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000006:1594",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000046:1581",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000007:1581",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000108:1593",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000198:1572",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000010:1572",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000063:1623",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000176:1551",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000012:1551",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000223:1515",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000013:1515",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000169:1557",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000016:1557",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000017:1534",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000050:1534",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000031:1564",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000411:1564",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000307:1531",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000234:1531",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000057:1587",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000020:1587",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000021:1562",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000165:1562",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000085:1657",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000023:1657",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000416:1514",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000410:1514",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000025:1530",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000287:1530",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000393:1571",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000027:1571",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000028:1644",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000029:1545",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000079:1545",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000309:1655",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000250:1655",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000034:1555",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000035:1621",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000074:1621",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000182:1639",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000036:1639",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000159:1577",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000038:1577",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000327:1510",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000039:1510",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000155:1529",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000087:1529",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000041:1550",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000352:1550",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000193:1633",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000042:1633",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000043:1549",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000133:1533",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000060:1533",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000153:1517",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000047:1517",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000139:1553",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000048:1553",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000052:1536",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000204:1536",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000320:1526",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000053:1526",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000054:1603",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000247:1603",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000092:1612",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000114:1612",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000059:1615",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000386:1615",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000149:1592",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000065:1592",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000066:1576",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000166:1576",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000296:1585",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000067:1585",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000373:1659",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000293:1659",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000354:1561",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000337:1561",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000077:1540",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000070:1540",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000071:1649",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000091:1649",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000073:1560",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000131:1560",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000137:1543",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000075:1543",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000082:1589",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000361:1589",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000078:1569",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000237:1569",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000080:1582",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000174:1582",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000197:1542",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000084:1542",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000230:1606",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000088:1606",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000089:1584",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000141:1584",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000093:1627",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000252:1627",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000391:1575",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000094:1575",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000095:1518",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000110:1518",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000366:1597",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000099:1597",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000409:1625",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000308:1625",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000302:1580",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000345:1595",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000102:1595",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000103:1607",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000151:1607",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000104:1629",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000105:1628",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000125:1628",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000106:1596",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000181:1596",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000118:1605",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000268:1605",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000113:1559",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000192:1654",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000115:1654",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000117:1638",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000143:1638",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000120:1647",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000294:1647",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000158:1538",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000122:1566",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000368:1652",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000385:1652",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000124:1579",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000231:1579",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000126:1573",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000346:1573",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000310:1554",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000152:1554",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000377:1570",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000220:1570",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000239:1632",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000142:1590",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000177:1590",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000271:1630",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000167:1630",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000154:1513",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000347:1513",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000156:1651",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000280:1651",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000390:1578",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000160:1611",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000168:1548",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000384:1548",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000195:1591",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000200:1591",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000175:1521",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000331:1521",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000191:1642",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000235:1642",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000186:1567",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000179:1567",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000180:1588",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000306:1588",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000344:1658",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000183:1658",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000272:1622",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000188:1622",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000189:1650",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000194:1646",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000257:1646",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000199:1643",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000274:1565",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000202:1565",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000203:1631",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000218:1631",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000284:1558",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000375:1558",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000212:1636",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000330:1636",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000238:1563",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000213:1563",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000244:1598",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000405:1598",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000334:1616",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000382:1616",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000217:1641",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000374:1641",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000383:1600",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000224:1600",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000394:1610",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000365:1610",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000292:1552",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000318:1552",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000229:1535",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000233:1640",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000332:1640",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000236:1602",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000387:1602",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000351:1613",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000240:1613",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000415:1634",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000314:1634",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000363:1541",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000407:1547",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000253:1547",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000303:1624",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000256:1624",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000343:1619",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000289:1619",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000275:1516",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000264:1516",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000266:1583",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000276:1519",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000281:1614",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000285:1523",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000312:1537",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000300:1537",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000398:1528",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000301:1528",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000315:1617",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000388:1645",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "validation:000372:1645",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000752:1930",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000001:1930",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000002:1830",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000414:1875",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000003:1875",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000183:1814",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000103:1814",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000005:1897",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000260:1897",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000171:1856",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000208:1856",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000007:1951",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000090:1891",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000008:1891",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000009:1813",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000156:1813",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000501:1691",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000518:1691",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000373:1911",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000254:1911",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000321:1744",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000012:1744",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000369:1684",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000013:1684",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000836:1909",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000582:1909",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000015:1826",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000583:1826",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000222:1750",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000016:1750",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000067:1873",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000123:1873",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000863:1926",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000018:1926",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000865:1906",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000322:1906",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000020:1980",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000543:1980",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000021:1786",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000777:1786",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000023:1732",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000079:2000",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000226:2000",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000585:1707",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000816:1707",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000918:1763",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000683:1763",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000950:1740",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000611:1998",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000580:1998",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000283:1676",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000121:1676",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000225:1674",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000035:1674",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000737:1890",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000036:1890",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000037:1865",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000039:1992",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000872:1748",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000041:1922",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000042:1718",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000043:1837",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000559:1837",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000124:1700",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000292:1700",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000828:1807",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000046:1807",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000301:1887",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000878:1887",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000049:1860",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000640:1860",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000699:1853",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000423:1853",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000513:1943",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000594:1943",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000053:1845",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000098:1845",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000472:1666",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000935:1929",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000257:1929",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000395:1745",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000056:1745",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000748:1675",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000057:1675",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000903:1810",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000059:1979",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000541:1979",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000060:1715",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000061:1957",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000382:1957",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000838:1832",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000717:1832",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000063:1765",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000064:1884",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000634:1884",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000065:1701",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000528:1701",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000237:1846",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000066:1846",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000783:1703",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000069:1703",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000070:1764",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000535:1764",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000686:1697",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000344:1697",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000073:1847",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000223:1847",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000093:1858",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000719:1858",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000904:1808",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000076:1972",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000542:1972",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000885:1769",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000078:1769",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000080:1905",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000097:1668",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000168:1892",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000862:1892",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000651:1663",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000678:1663",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000084:1974",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000932:1974",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000389:1677",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000598:1677",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000917:1796",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000086:1796",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000087:1919",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000091:1966",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000187:1966",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000095:1939",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000232:1939",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000096:1982",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000261:1982",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000099:1900",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000271:1900",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000101:1821",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000915:1821",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000946:1781",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000464:1781",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000104:1794",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000105:1778",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000784:1778",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000106:1779",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000127:1779",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000466:2002",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000107:2002",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000273:1963",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000291:1963",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000603:1673",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000109:1673",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000506:1850",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000445:1850",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000286:1713",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000111:1713",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000113:1958",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000248:1958",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000663:1771",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000114:1771",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000550:1955",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000116:1955",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000169:1920",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000117:1920",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000118:1754",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000637:1754",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000119:1931",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000120:1938",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000677:1938",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000691:1996",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000130:1817",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000482:1817",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000131:1915",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000515:1661",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000366:1661",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000334:1734",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000133:1734",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000134:1839",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000953:1839",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000304:1727",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000135:1727",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000136:1770",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000544:1770",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000910:1679",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000214:1679",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000138:1669",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000253:1669",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000140:1956",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000685:1956",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000221:1730",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000197:1730",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000142:1802",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000279:1802",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000530:1964",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000143:1964",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000145:1843",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000371:1844",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000146:1844",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000262:1995",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000191:1746",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000560:1746",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000602:1766",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000149:1766",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000405:1695",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000166:1695",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000153:1793",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000492:1793",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000892:1672",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000155:1672",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000480:1977",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000157:1977",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000951:1757",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000162:1757",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000627:1719",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000458:1803",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000792:1803",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000359:1742",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000263:1742",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000207:1914",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000167:1914",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000636:1976",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000741:1976",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000172:1898",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000620:1660",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000173:1660",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000174:1935",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000274:1935",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000639:1686",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000380:1694",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000939:1694",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000185:1861",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000821:1861",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000926:1994",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000255:1994",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000186:1721",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000667:1721",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000810:1767",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000189:1767",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000906:1739",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000619:1739",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000278:1775",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000265:1775",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000834:1959",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000597:1959",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000337:1731",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000201:1731",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000202:1978",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000825:1978",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000203:1944",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000684:1944",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000239:1997",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000604:1818",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000527:1818",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000325:1965",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000726:1965",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000893:1952",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000216:1973",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000525:1973",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000217:1705",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000641:1702",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000643:1702",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000219:1886",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000242:1886",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000411:1947",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000220:1947",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000808:1762",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000228:1762",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000537:1849",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000229:1849",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000230:1910",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000955:1910",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000231:1819",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000275:1819",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000233:1967",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000664:1967",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000236:1680",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000947:1680",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000238:1940",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000240:1868",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000295:1868",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000241:2005",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000244:1828",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000328:1828",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000755:1768",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000625:1768",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000649:1816",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000246:1816",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000713:1975",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000835:1975",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000782:1942",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000251:1942",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000252:1907",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000406:1907",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000523:1820",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000256:1820",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000690:1950",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000258:1950",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000264:1876",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000670:1876",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000789:1855",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000268:1879",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000339:1879",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000269:1760",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000469:1760",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000270:1945",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000866:1945",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000409:1888",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000390:1888",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000276:1948",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000785:1948",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000451:1866",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000735:1866",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000280:1800",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000326:1800",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000281:1901",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000621:1854",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000846:1854",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000934:2001",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000710:1927",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000914:1737",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000288:1737",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000289:1933",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000412:1933",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000770:1720",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000920:1720",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000566:1792",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000294:1792",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000958:1801",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000299:1736",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000796:1736",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000396:1870",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000727:1969",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000711:1969",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000302:1774",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000438:1774",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000308:1696",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000493:1696",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000306:1908",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000945:1908",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000307:1805",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000703:1805",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000310:1918",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000709:1918",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000788:1809",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000312:1752",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000477:1752",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000313:1894",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000736:1894",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000315:1728",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000462:1728",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000860:1776",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000447:1747",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000318:1747",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000722:1999",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000693:1962",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000320:1962",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000720:1789",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000324:1758",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000545:1872",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000886:1872",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000333:1838",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000769:1788",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000851:1840",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000349:1840",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000662:1848",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000350:1848",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000612:1815",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000692:1815",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000355:1985",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000505:1833",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000356:1833",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000358:1798",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000531:1798",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000397:1912",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000391:1912",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000511:1783",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000362:1783",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000363:1708",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000381:2003",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000572:1902",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000365:1902",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000502:1916",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000705:1916",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000803:1859",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000377:1988",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000791:1988",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000378:1851",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000749:1851",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000823:1917",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000448:1917",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000883:1726",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000388:1829",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000624:1949",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000393:1949",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000732:1755",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000400:1755",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000731:1881",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000854:1881",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000949:2004",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000410:2004",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000413:1834",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000724:1834",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000415:1899",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000490:1899",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000765:1889",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000433:1889",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000891:1842",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000896:1693",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000605:1934",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000874:1934",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000422:1714",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000425:1953",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000936:1970",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000733:1970",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000841:1986",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000427:1986",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000428:1921",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000902:1921",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000871:1699",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000759:1699",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000916:1896",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000867:1925",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000434:1925",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000764:1711",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000913:1711",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000933:1687",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000514:1687",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000615:1678",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000440:1664",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000819:1664",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000441:1756",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000547:1756",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000798:1692",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000449:1692",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000776:1799",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000450:1799",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000532:1717",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000671:1717",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000558:1928",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000461:1787",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000588:1787",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000779:1895",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000467:1895",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000471:1791",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000706:1791",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000738:1987",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000793:1987",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000780:1797",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000485:1797",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000743:1761",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000486:1761",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000487:1880",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000569:1880",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000519:1662",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000495:1825",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000595:1825",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000899:1773",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000818:1773",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000567:1822",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000775:1822",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000507:1874",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000629:2007",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000508:2007",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000756:1698",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000805:1698",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000845:1738",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000599:1738",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000616:1867",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000539:1867",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000760:1960",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000944:1777",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000897:1777",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000790:1941",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000549:1941",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000927:1709",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000571:1709",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000763:1871",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000574:1871",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000575:1968",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000589:1904",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000827:1904",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000799:1954",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000590:1954",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000767:1903",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000771:1903",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000940:1835",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000608:1835",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000715:1991",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000622:1991",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000628:1841",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000676:1857",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000753:1812",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000650:2006",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000658:2006",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000661:1831",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000672:1993",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000689:1993",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000861:2009",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000702:2009",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000708:1704",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000740:1782",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000797:1981",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000957:1981",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000849:1725",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000901:1749",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000959:1772",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000929:1772",
+      "reason": "Repeated family; one deterministic representative"
+    },
+    {
+      "recording_key": "test:000942:1780",
+      "reason": "Repeated family; one deterministic representative"
+    }
+  ],
+  "manifest_sha256": "fff4e00572cc2dc74ff5813064ff95a5b82e139ec41ddc9db2d89c91026d6e16",
+  "audio_gate_passed": true,
+  "benchmark_qualified": false,
+  "limitations": [
+    "No verified speaker independence or capture location metadata.",
+    "Unknown pretraining overlap.",
+    "Read speech only.",
+    "Search relevance annotations require separate human review."
+  ]
+}

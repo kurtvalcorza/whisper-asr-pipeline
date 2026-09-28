@@ -1,2 +1,11 @@
 # Snapshot files are digest-verified byte-for-byte against dimer-base-manifest.json; never convert their line endings.
 weights/** -text
+
+# Capstone source and annotation hashes must survive Windows/Linux checkouts.
+tools/audio_*.py text eol=lf
+tools/audio_*.json text eol=lf
+tools/audio-requirements.* text eol=lf
+tools/build_audio_capstone.py text eol=lf
+tools/freeze_audio_data.py text eol=lf
+docs/audio-*.md text eol=lf
+tutorials/DIMER_Filipino_Audio_Archive_Search_Capstone.ipynb text eol=lf

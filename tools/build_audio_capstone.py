@@ -6,12 +6,18 @@ from __future__ import annotations
 
 import argparse
 import ast
+import base64
 import hashlib
 import json
+import zlib
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 NOTEBOOK = REPO / "tutorials/DIMER_Filipino_Audio_Archive_Search_Capstone.ipynb"
+# Colab opens GitHub notebooks through the contents API, which returns no content above 1 MB.
+GITHUB_CONTENTS_LIMIT = 1_000_000
+# Bulky data (7,200 unjudged relevance cells) is embedded compressed; all source stays plain text.
+PACKED = ("qrels.json",)
 
 
 def carried_files() -> dict[str, str]:
@@ -59,6 +65,9 @@ print('Engineering preview: human relevance review is pending. No benchmark-qual
 """
 
 INSTALL = r'''
+import base64, zlib
+for name, packed in PACKED_FILES.items():
+    FILES[name] = zlib.decompress(base64.b64decode(packed)).decode('utf-8')
 for name, content in FILES.items():
     destination = ROOT / name
     destination.write_bytes(content.encode('utf-8'))
@@ -189,12 +198,21 @@ The pinned models are [Whisper large-v3-turbo](https://huggingface.co/openai/whi
 Data: [Google FLEURS](https://huggingface.co/datasets/google/fleurs), `fil_ph`, CC BY 4.0; [Conneau et al. (2022)](https://arxiv.org/abs/2205.12446). Read speech does not establish performance on meetings, regional accents or noisy archives. Sentence families are not verified speaker identities; source/pretraining overlap is unknown.""")
     md("""### 2. Infrastructure — prepare an isolated environment
 
-The next cells verify the target runtime, materialize embedded source and hash-bound manifests, and install a locked Python environment. The second cell carries about 1.5 million characters of embedded source and data, so it starts collapsed: select **Show code** (Colab) or the collapsed-input bar (Jupyter) to inspect it. Models run in sequential subprocesses to release GPU memory. A failure is visible and stops execution; do not skip failed cells or accept incomplete output as a successful run.""")
+The next cells verify the target runtime, materialize embedded source and hash-bound manifests, and install a locked Python environment. The second cell carries several hundred thousand characters of embedded source and data, so it starts collapsed: select **Show code** (Colab) or the collapsed-input bar (Jupyter) to inspect it. Models run in sequential subprocesses to release GPU memory. A failure is visible and stops execution; do not skip failed cells or accept incomplete output as a successful run.""")
     code(PREFLIGHT)
+    files = carried_files()
+    packed = {
+        name: base64.b64encode(zlib.compress(files.pop(name).encode("utf-8"), 9)).decode("ascii")
+        for name in PACKED
+    }
     code(
         "# @title Infrastructure: embedded source, manifests and locked install (expand to inspect)\n"
         "# Embedded, inspectable source and manifests; no remote DIMER code import.\nFILES = "
-        + repr(carried_files())
+        + repr(files)
+        + "\n# Relevance matrix (7,200 unjudged cells), zlib+base64 to keep the notebook openable from\n"
+        "# GitHub in Colab; expanded below and verified against source.json like every other file.\n"
+        "PACKED_FILES = "
+        + repr(packed)
         + "\n"
         + INSTALL,
         # Collapsed in Colab (form view) and Jupyter; the source stays one click away.

@@ -1,6 +1,9 @@
 """Static learner-journey properties of the generated capstone notebook (no cells executed)."""
 
+import base64
+import json
 import sys
+import zlib
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
@@ -49,3 +52,21 @@ def test_failure_trace_shows_competing_evidence_for_both_categories():
 def test_activity_latency_table_is_same_query_paired():
     text = _code_cells()[_index("summary['paired_latency']")][1]
     assert "paired['query_ids']" in text and "query cohorts differ" in text
+
+
+def test_notebook_fits_github_contents_api_for_colab():
+    data = (json.dumps(builder.build(), indent=1, ensure_ascii=False) + "\n").encode("utf-8")
+    assert len(data) < builder.GITHUB_CONTENTS_LIMIT
+
+
+def test_packed_files_expand_to_exact_carried_bytes():
+    namespace = {}
+    _, text = _code_cells()[_index("PACKED_FILES = ")]
+    before_install = text.split("import base64, zlib")[0]
+    exec(before_install, namespace)
+    carried = builder.carried_files()
+    assert set(namespace["PACKED_FILES"]) == set(builder.PACKED)
+    assert not set(builder.PACKED) & set(namespace["FILES"])
+    for name, packed in namespace["PACKED_FILES"].items():
+        assert zlib.decompress(base64.b64decode(packed)).decode("utf-8") == carried[name]
+    assert all(namespace["FILES"][name] == carried[name] for name in namespace["FILES"])

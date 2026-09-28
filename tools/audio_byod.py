@@ -104,12 +104,14 @@ def verify(root: Path, source: Path, bundle: Path) -> None:
     if [(r["doc_id"], r["sha256"]) for r in records] != [(r["doc_id"], r["sha256"]) for r in expected_audio]:
         raise ValueError("Audio identity changed")
     count = min(3, len(docs))
+    # Re-embed exactly the build's first embedding batch: fp16 vectors depend on batch composition.
+    embedded = min(models.SETTINGS["embedding_batch_size"], len(docs))
     model = models.load_model("embedding", root)
     try:
-        rebuilt = models.embed(model, [r["text"] for r in docs[:count]])
+        rebuilt = models.embed(model, [r["text"] for r in docs[:embedded]])
     finally:
         models.unload(model)
-    np.testing.assert_allclose(rebuilt, vectors[:count], atol=1e-5, rtol=1e-4)
+    np.testing.assert_allclose(rebuilt, vectors[:embedded], atol=1e-5, rtol=1e-4)
     expected = read(bundle / "probe.json")
     actual = rankings(root, docs, vectors, expected["query"])
     for method, ranked in actual.items():
@@ -132,7 +134,7 @@ def verify(root: Path, source: Path, bundle: Path) -> None:
             "passed": True,
             "fresh_process": True,
             "retranscribed": count,
-            "reembedded": count,
+            "reembedded": embedded,
             "probe_query_replayed": True,
             "atol": 1e-5,
             "rtol": 1e-4,

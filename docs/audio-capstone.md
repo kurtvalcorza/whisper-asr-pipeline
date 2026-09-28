@@ -86,8 +86,11 @@ embeddings, model/settings identity, safe reconstruction code and audio
 reacquisition information. Reference text and qrels must not enter this search
 artifact. Both exclude model weights and source audio.
 
-Fresh-process verification replays three queries, re-embeds three documents and
-retranscribes three clips. Rankings must match exactly; numeric score/vector
+Fresh-process verification replays the first four queries, re-embeds the first
+four documents and retranscribes three clips. The four are exactly the first
+embedding batch of the original index and evaluation calls: fp16 embeddings
+depend on batch composition (left-padding length), so replaying a smaller batch
+would be a different computation, not a reconstruction. Rankings must match exactly; numeric score/vector
 tolerances are `atol=1e-5, rtol=1e-4`. No tolerance is widened automatically.
 
 Optional BYOD is disabled by default. Supply an authorized local JSON manifest
@@ -159,6 +162,12 @@ hash-checked playback of only BYOD recordings, clean-directory search by the
 exported consumer in a fresh process, and refusal of modified embeddings,
 identifiers and model settings were observed. None of this is hosted-runtime,
 pretrained-model or relevance evidence.
+
+## Hosted runs
+
+| Date (UTC) | Commit / notebook blob | Result |
+| --- | --- | --- |
+| 2026-09-28 | `d58ab28` / `284adf543e21` | **FAILED at reload.** Default Run all on a fresh Colab Tesla T4 passed `prepare`, `asr`, `index`, `evaluate` and `activity`; `reload` refused because 3 re-embedded documents missed `atol=1e-5` by up to 4.2e-4 against an index embedded in batches of 4. Fixed in the next commit by replaying the original first batch; tolerances unchanged. See [release verification](release-verification.md#filipino-audio-archive-search-capstone). |
 
 ## Release evidence still required
 

@@ -811,13 +811,17 @@ def reload(root):
     if read(out(root) / "receipt_index.json")["pid"] == os.getpid():
         raise ValueError("Index reload must cross a fresh process boundary")
     docs, vectors = verify_index(root)
-    queries = read(root / "queries.json")[:3]
+    # Replay exactly the first embedding batch of the original index and evaluation calls.
+    # fp16 embeddings depend on batch composition (left-padding length), so a smaller or
+    # differently composed batch is a different computation, not a reconstruction.
+    batch = models.SETTINGS["embedding_batch_size"]
+    queries = read(root / "queries.json")[:batch]
     baseline = read(out(root) / "ranked_runs.json")
     model = models.load_model("embedding", root)
     try:
         qvectors = models.embed(model, [q["text"] for q in queries], query=True)
-        rebuilt = models.embed(model, [d["text"] for d in docs[:3]])
-        np.testing.assert_allclose(rebuilt, vectors[:3], atol=1e-5, rtol=1e-4)
+        rebuilt = models.embed(model, [d["text"] for d in docs[:batch]])
+        np.testing.assert_allclose(rebuilt, vectors[:batch], atol=1e-5, rtol=1e-4)
     finally:
         models.unload(model)
     reranker = models.load_model("reranker", root)
@@ -850,9 +854,10 @@ def reload(root):
         out(root) / "verification.json",
         {
             "passed": True,
-            "queries_replayed": 3,
+            "queries_replayed": len(queries),
             "clips_retranscribed": 3,
-            "documents_reembedded": 3,
+            "documents_reembedded": min(batch, len(docs)),
+            "replay_batch": "first original embedding batch, identical composition",
             "fresh_process": True,
             "atol": 1e-5,
             "rtol": 1e-4,

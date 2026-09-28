@@ -252,3 +252,37 @@ def test_main_receipt_chain_rerun_ownership_and_tampering(experiment, monkeypatc
     rt.write(rt.out(root) / "verification.json", {"passed": True, "forged": "changed"})
     with pytest.raises(ValueError, match="Changed output: verification.json"):
         execute("report")
+
+
+def test_reload_replays_original_embedding_batch(experiment, monkeypatch):
+    """fp16 GPU embeddings depend on batch composition; reload must replay the same batch.
+
+    Regression for the 2026-09-28 hosted T4 run, where re-embedding 3 documents against an
+    index built in batches of 4 missed atol=1e-5 by up to 4.2e-4.
+    """
+    size = rt.models.SETTINGS["embedding_batch_size"]
+    plain = rt.models.embed
+
+    def batch_sensitive(handle, texts, query=False):
+        rows = []
+        for start in range(0, len(texts), size):
+            chunk = texts[start : start + size]
+            # Batch size and longest member stand in for the left-padding shape of a GPU batch.
+            shape = len(chunk) + max(map(len, chunk))
+            vectors = plain(handle, chunk, query) + 1e-3 * shape
+            rows.append(vectors / np.linalg.norm(vectors, axis=1, keepdims=True))
+        return np.concatenate(rows).astype("float32")
+
+    monkeypatch.setattr(rt.models, "embed", batch_sensitive)
+    root = experiment
+    rt.asr(root)
+    rt.index(root)
+    rt.evaluate(root)
+    docs, vectors = rt.verify_index(root)
+    # The stand-in really is batch-sensitive: a 3-document batch is a different computation.
+    assert not np.allclose(batch_sensitive(None, [d["text"] for d in docs[:3]]), vectors[:3], atol=1e-5)
+    rt.write(rt.out(root) / "receipt_index.json", {"pid": -1})
+    rt.reload(root)
+    verification = rt.read(rt.out(root) / "verification.json")
+    assert verification["passed"] is True
+    assert verification["documents_reembedded"] == verification["queries_replayed"] == size

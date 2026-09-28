@@ -33,7 +33,9 @@ No adaptation or fine-tuning occurs.
 
 **Engineering preview / Candidate.** Query drafts have not received human review;
 7,200 pairs are explicitly unjudged. Anchor recovery is not benchmark Recall or
-nDCG. A fresh hosted T4 default run and representative BYOD run remain required.
+nDCG. The first hosted T4 default run (2026-09-28, `d58ab28`) completed every stage
+through the activity and then failed fresh-process reload; the fix awaits a new hosted
+run. A passing hosted T4 default run and representative BYOD run remain required.
 The 60-minute / 12-GiB allocated GPU / 20-GiB free-disk figures are unverified
 engineering targets. See [capstone evidence](../docs/audio-capstone.md).
 

@@ -18,6 +18,29 @@ and regenerate (`python tools/build_notebook.py`; `--check` is enforced by the v
 | `whisper_asr_finetune_colab.ipynb` | `E2E` | `GUIDED` | standalone (generated from `tools/notebook_template_finetune.py`, pins from `tools/finetune-pins.txt`) | LoRA adaptation of the pinned `openai/whisper-large-v3-turbo` weights (q/v projections, rank 32) on one locale of `PolyAI/minds14` at a pinned dataset revision: every clip validated through `validate_inputs` into one input manifest (30 s ceiling enforced, never truncated), zero-shot baseline corpus WER through the carried pipeline, plain-PyTorch AdamW loop under mixed precision with the loss history as optimisation evidence only, adapted corpus WER through the same pipeline, `adaptation_report` → `sample-sanity`, `export_adapter_bundle` (safetensors adapter + metrics + provenance + manifest, zipped), fresh reload from the verified base snapshot with `verify_adapter_merge` (weight-level `W_base + (alpha/r)·B@A` check) and ≥95% transcript agreement | 16 GiB-class CUDA GPU (Colab T4 / Kaggle P100–T4); CPU only as a reduced smoke test | automatic (`PolyAI/minds14` `en-US`, seeded 400/100 split) | `transcripts.csv` + audio files, gated `USE_BYOD` upload (off by default) | verified — clean-room Kaggle GPU execution on Tesla T4 recorded in ../docs/release-verification.md (1002.0 s, all 10 code cells, snapshot staged from the Hub); REL1/REL8 satisfied | **Candidate** — static checks pass; clean-room Kaggle GPU execution recorded in ../docs/release-verification.md |
 | `DIMER_Whisper_Speech_Recognition_Workshop.ipynb` | `TASK-INFERENCE` | `WORKSHOP` | standalone (carried reference source, dependency lock and runner; isolated `uv` Python 3.12.12 environment; DIMER Notebook Specification 2.2) | Self-paced speech-recognition workshop, *When can we trust an automatically generated transcript?*: listen and validate a pinned MINDS-14 `en-US` sample (64 evaluation / 16 activity recordings), learn WER/CER with alignments, evaluate `openai/whisper-large-v3-turbo` English transcription against references and an empty baseline, run a paired seeded clean/noisy comparison, export a report ZIP (design: `../docs/speech-recognition-workshop-spec.md`) | Colab T4-class GPU (fails early without CUDA) | automatic (pinned MINDS-14 `en-US` parquet, frozen selection) | WAV/FLAC files with optional references, gated `RUN_BYOD` (off by default) | verified — fresh Colab T4 `Run all` without a restart recorded in `../docs/release-verification.md` (2026-09-27, 173 s) | **Candidate** — static checks pass; clean-runtime Colab execution recorded in `../docs/release-verification.md`, pending reviewer confirmation before promotion |
 
+## Filipino Audio Archive Search capstone (NOTEBOOK_SPEC 2.2)
+
+[`DIMER_Filipino_Audio_Archive_Search_Capstone.ipynb`](DIMER_Filipino_Audio_Archive_Search_Capstone.ipynb)
+is a standalone `E2E` / `GUIDED` composed-system tutorial. It carries its complete
+source, pinned data/model manifests and isolated Linux/Python dependency lock.
+Generate it with `python tools/build_audio_capstone.py`; use `--check` for parity.
+
+The default path uses 120 FLEURS Filipino clips, three pinned models, six search
+conditions, a development-only candidate-depth experiment, automatic-transcript
+search export and fresh-process replay. BYOD is disabled by default and accepts
+explicitly authorized local 16 kHz mono WAV/FLAC recordings of 2–25 seconds each.
+No adaptation or fine-tuning occurs.
+
+**Engineering preview / Candidate.** Query drafts have not received human review;
+7,200 pairs are explicitly unjudged. Anchor recovery is not benchmark Recall or
+nDCG. The first hosted T4 default run (2026-09-28, `d58ab28`) failed fresh-process
+reload. The fixed revision `5664f61` passed a hosted Kaggle T4 run on 2026-09-28 with every
+optional journey enabled: reload, export, search and BYOD. That BYOD run used public FLEURS
+recordings as stand-ins, so a BYOD run on the maintainer's own recordings and human relevance
+review remain open. That run took 733 s including installs and downloads, with a peak allocated
+GPU memory of 1.61 GiB; the 60-minute / 12-GiB / 20-GiB free-disk figures remain engineering
+targets. See [capstone evidence](../docs/audio-capstone.md).
+
 ## Conformance notes
 
 - **Speech-recognition workshop (`WORKSHOP`, NOTEBOOK_SPEC 2.2, added 2026-09-27):** the notebook is generated outside this repository (`generated_from` records the base revision and the SHA-256 of each carried file) and does not use `tools/build_notebook.py`. `tools/validate_release_assets.py` checks its metadata, that no outputs are persisted, that every code cell is plain Python, that each carried file matches its `CARRIED_HASHES` digest, that the carried `whisper_reference.py` and model manifest are byte-identical to `src/whisper_asr_pipeline/pipeline.py` and `weights/whisper-large-v3-turbo/dimer-base-manifest.json`, and that the carried `source.json` agrees with the metadata. Its design specification is `../docs/speech-recognition-workshop-spec.md`.

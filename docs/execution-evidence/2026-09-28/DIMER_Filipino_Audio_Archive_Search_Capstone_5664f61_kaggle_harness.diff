@@ -1,0 +1,23 @@
+--- a/5ac2d8bd4dc8
++++ b/5ac2d8bd4dc8
+@@ -2 +2 @@
+-PLAY_COMPETITORS = False  # set True to hear the top competing recordings
++PLAY_COMPETITORS = True  # set True to hear the top competing recordings
+--- a/9865afc44f59
++++ b/9865afc44f59
+@@ -18 +18 @@
+-RUN_SEARCH = False
++RUN_SEARCH = True
+--- a/2e3dfe137020
++++ b/2e3dfe137020
+@@ -1,2 +1,2 @@
+-RUN_BYOD = False
+-BYOD_MANIFEST = ROOT / 'my_audio/manifest.json'
++RUN_BYOD = True
++BYOD_MANIFEST = next(Path('/kaggle/input').rglob('manifest.json'))
+--- a/8dc2c8aeea5b
++++ b/8dc2c8aeea5b
+@@ -1 +1 @@
+-BYOD_QUERY = ''
++BYOD_QUERY = 'Anong mga dagat ang nakapalibot sa Turkey?'
++ appended harness cells: kaggleharness1, kaggleharness2, kaggleharness3

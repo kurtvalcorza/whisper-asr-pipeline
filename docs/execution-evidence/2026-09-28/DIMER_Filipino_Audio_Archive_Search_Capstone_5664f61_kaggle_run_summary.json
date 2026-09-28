@@ -1,0 +1,220 @@
+{
+ "identity": {
+  "repository": "whisper-asr-pipeline",
+  "candidate_sha": "5664f61a96f1933efdf85b4f475dadd02fb3a4a2",
+  "notebook": "tutorials/DIMER_Filipino_Audio_Archive_Search_Capstone.ipynb",
+  "committed_blob": "47da982901db10d69b6abe5b70897a7b62c5c22c",
+  "fetched_blob_verified": true,
+  "kaggle_docker_image": "gcr.io/kaggle-gpu-images/python@sha256:37c64f7dd9c54116ecd1bcc88817c5469b88387388fade02bfa8bf3fc647d461",
+  "kaggle_run_type": "Batch",
+  "os": "Linux-6.12.90+-x86_64-with-glibc2.35",
+  "python": "3.12.13",
+  "cpu_count": 4,
+  "image_versions_before_run": {
+   "torch": "2.10.0+cu128",
+   "numpy": "2.0.2",
+   "transformers": "5.0.0",
+   "tokenizers": "0.22.2",
+   "safetensors": "0.7.0",
+   "huggingface-hub": "1.11.0",
+   "pillow": "11.3.0",
+   "nbclient": "0.10.2",
+   "ipykernel": "6.17.1"
+  },
+  "started": "2026-09-28T15:52:35Z",
+  "nvidia_smi": "Tesla T4, 15360 MiB, 580.159.04\nTesla T4, 15360 MiB, 580.159.04",
+  "hf_cache_clean_at_start": true
+ },
+ "runner": {
+  "ok": true,
+  "started": "2026-09-28T15:52:37Z",
+  "passes": [
+   {
+    "attempt": 1,
+    "started": "2026-09-28T15:52:37Z",
+    "ok": true,
+    "wall_s": 732.9
+   }
+  ],
+  "wall_s": 733.2,
+  "finished": "2026-09-28T16:04:50Z"
+ },
+ "cells": [
+  {
+   "cell": 3,
+   "status": "ok",
+   "started": "2026-09-28T15:52:38.936023Z",
+   "ended": "2026-09-28T15:52:38.982359Z",
+   "stdout_tail": "GPU: Tesla T4\nTesla T4\nEngineering preview: human relevance review is pending. No benchmark-quality claim.\n",
+   "error": null
+  },
+  {
+   "cell": 4,
+   "status": "ok",
+   "started": "2026-09-28T15:52:39.006739Z",
+   "ended": "2026-09-28T15:53:21.211497Z",
+   "stdout_tail": "oaded nvidia-cufft\n Downloaded nvidia-cudnn-cu13\n Downloaded nvidia-cublas\n Downloaded torch\nPrepared 60 packages in 34.50s\nInstalled 60 packages in 3.27s\n + certifi==2026.7.22\n + cffi==2.1.1\n + charset-normalizer==3.5.1\n + contourpy==1.4.0\n + cuda-bindings==13.4.3\n + cuda-pathfinder==1.8.2\n + cuda-toolkit==13.0.2\n + cycler==0.12.1\n + filelock==4.0.4\n + fonttools==4.66.0\n + fsspec==2026.9.0\n + hf-xet==1.6.0\n + huggingface-hub==0.36.2\n + idna==3.20\n + jinja2==3.1.6\n + kiwisolver==1.5.1\n + markupsafe==3.0.3\n + matplotlib==3.10.8\n + mpmath==1.3.0\n + networkx==3.7\n + numpy==2.5.3\n + nvidia-cublas==13.1.0.3\n + nvidia-cuda-cupti==13.0.85\n + nvidia-cuda-nvrtc==13.0.88\n + nvidia-cuda-runtime==13.0.96\n + nvidia-cudnn-cu13==9.19.0.56\n + nvidia-cufft==12.0.0.61\n + nvidia-cufile==1.15.1.6\n + nvidia-curand==10.4.0.35\n + nvidia-cusolver==12.0.4.66\n + nvidia-cusparse==12.6.3.3\n + nvidia-cusparselt-cu13==0.8.0\n + nvidia-nccl-cu13==2.28.9\n + nvidia-nvjitlink==13.0.88\n + nvidia-nvshmem-cu13==3.4.5\n + nvidia-nvtx==13.0.85\n + packaging==26.3\n + pandas==3.0.1\n + pillow==12.3.0\n + pyarrow==23.0.1\n + pycparser==3.0\n + pyparsing==3.3.3\n + python-dateutil==2.9.0.post0\n + pyyaml==6.0.3\n + regex==2026.9.10\n + requests==2.34.2\n + safetensors==0.8.0\n + scipy==1.17.1\n + sentencepiece==0.2.1\n + setuptools==81.0.0\n + six==1.17.0\n + soundfile==0.13.1\n + sympy==1.14.0\n + tokenizers==0.22.2\n + torch==2.11.0\n + tqdm==4.70.1\n + transformers==4.57.6\n + triton==3.6.0\n + typing-extensions==4.16.0\n + urllib3==2.8.0\n",
+   "error": null
+  },
+  {
+   "cell": 6,
+   "status": "ok",
+   "started": "2026-09-28T15:53:21.216271Z",
+   "ended": "2026-09-28T15:55:23.605566Z",
+   "stdout_tail": "prepare: PASS\n<IPython.core.display.HTML object><IPython.core.display.Image object>",
+   "error": null
+  },
+  {
+   "cell": 7,
+   "status": "ok",
+   "started": "2026-09-28T15:55:23.609164Z",
+   "ended": "2026-09-28T15:55:23.679426Z",
+   "stdout_tail": "<IPython.core.display.Markdown object><IPython.lib.display.Audio object><IPython.core.display.Markdown object><IPython.lib.display.Audio object><IPython.core.display.Markdown object><IPython.lib.display.Audio object>",
+   "error": null
+  },
+  {
+   "cell": 10,
+   "status": "ok",
+   "started": "2026-09-28T15:55:23.712653Z",
+   "ended": "2026-09-28T15:56:46.859028Z",
+   "stdout_tail": "\nFetching 12 files:   0%|          | 0/12 [00:00<?, ?it/s]\nFetching 12 files:  17%|█▋        | 2/12 [00:00<00:00, 11.06it/s]\nFetching 12 files:  42%|████▏     | 5/12 [00:00<00:00, 16.70it/s]\nFetching 12 files:  67%|██████▋   | 8/12 [00:00<00:00, 15.35it/s]\nFetching 12 files:  92%|█████████▏| 11/12 [00:00<00:00, 14.27it/s]\nFetching 12 files: 100%|██████████| 12/12 [00:04<00:00,  2.85it/s]\n`torch_dtype` is deprecated! Use `dtype` instead!\nTranscribed 4/120\nTranscribed 8/120\nTranscribed 12/120\nTranscribed 16/120\nTranscribed 20/120\nTranscribed 24/120\nTranscribed 28/120\nTranscribed 32/120\nTranscribed 36/120\nTranscribed 40/120\nTranscribed 44/120\nTranscribed 48/120\nTranscribed 52/120\nTranscribed 56/120\nTranscribed 60/120\nTranscribed 64/120\nTranscribed 68/120\nTranscribed 72/120\nTranscribed 76/120\nTranscribed 80/120\nTranscribed 84/120\nTranscribed 88/120\nTranscribed 92/120\nTranscribed 96/120\nTranscribed 100/120\nTranscribed 104/120\nTranscribed 108/120\nTranscribed 112/120\nTranscribed 116/120\nTranscribed 120/120\nasr: PASS\n<IPython.core.display.HTML object>Showing 8/120 rows. Full table: /content/dimer_fil_audio_preview/results/transcriptions.csv\n<IPython.core.display.HTML object>",
+   "error": null
+  },
+  {
+   "cell": 11,
+   "status": "ok",
+   "started": "2026-09-28T15:56:46.862855Z",
+   "ended": "2026-09-28T15:56:47.118804Z",
+   "stdout_tail": "<IPython.core.display.Markdown object><IPython.core.display.Markdown object><Figure size 700x300 with 1 Axes>",
+   "error": null
+  },
+  {
+   "cell": 12,
+   "status": "ok",
+   "started": "2026-09-28T15:56:47.122550Z",
+   "ended": "2026-09-28T15:56:47.133595Z",
+   "stdout_tail": "<IPython.core.display.HTML object><IPython.core.display.HTML object><IPython.core.display.HTML object>Visual word diff only: strikethrough = removed/replaced reference; highlight = ASR addition/replacement.\nScientific WER/CER above use the documented normalized Levenshtein alignment, not this display diff.\n",
+   "error": null
+  },
+  {
+   "cell": 15,
+   "status": "ok",
+   "started": "2026-09-28T15:56:47.136905Z",
+   "ended": "2026-09-28T15:57:07.293890Z",
+   "stdout_tail": "\nFetching 11 files:   0%|          | 0/11 [00:00<?, ?it/s]\nFetching 11 files:  18%|█▊        | 2/11 [00:00<00:00,  9.48it/s]\nFetching 11 files:  45%|████▌     | 5/11 [00:00<00:00, 16.03it/s]\nFetching 11 files:  73%|███████▎  | 8/11 [00:02<00:00,  3.28it/s]\nFetching 11 files: 100%|██████████| 11/11 [00:03<00:00,  3.17it/s]\nFetching 11 files: 100%|██████████| 11/11 [00:03<00:00,  3.17it/s]\n`torch_dtype` is deprecated! Use `dtype` instead!\nYou're using a Qwen2TokenizerFast tokenizer. Please note that with a fast tokenizer, using the `__call__` method is faster than using a method to encode the text followed by a call to the `pad` method to get a padded encoding.\nindex: PASS\n<IPython.core.display.HTML object>",
+   "error": null
+  },
+  {
+   "cell": 17,
+   "status": "ok",
+   "started": "2026-09-28T15:57:07.298365Z",
+   "ended": "2026-09-28T15:58:37.671317Z",
+   "stdout_tail": "`torch_dtype` is deprecated! Use `dtype` instead!\nYou're using a Qwen2TokenizerFast tokenizer. Please note that with a fast tokenizer, using the `__call__` method is faster than using a method to encode the text followed by a call to the `pad` method to get a padded encoding.\n\nFetching 13 files:   0%|          | 0/13 [00:00<?, ?it/s]\nFetching 13 files:  15%|█▌        | 2/13 [00:00<00:01, 10.15it/s]\nFetching 13 files:  46%|████▌     | 6/13 [00:00<00:00, 17.56it/s]\nFetching 13 files:  77%|███████▋  | 10/13 [00:01<00:00,  7.43it/s]\nFetching 13 files: 100%|██████████| 13/13 [00:04<00:00,  2.94it/s]\nYou're using a Qwen2TokenizerFast tokenizer. Please note that with a fast tokenizer, using the `__call__` method is faster than using a method to encode the text followed by a call to the `pad` method to get a padded encoding.\nevaluate: PASS\n<IPython.core.display.HTML object><IPython.core.display.Image object><IPython.core.display.HTML object><IPython.core.display.HTML object>Showing 8/40 rows. Full table: /content/dimer_fil_audio_preview/results/error_trace.csv\n",
+   "error": null
+  },
+  {
+   "cell": 18,
+   "status": "ok",
+   "started": "2026-09-28T15:58:37.675269Z",
+   "ended": "2026-09-28T15:58:37.734324Z",
+   "stdout_tail": "<IPython.core.display.Markdown object><IPython.core.display.Markdown object><IPython.core.display.Markdown object><IPython.lib.display.Audio object>reference_rerank anchor rank: 1 top ten: ['fil-d852e40b0ba16d01', 'fil-baedb5085e878056', 'fil-cf85e87981b785bf', 'fil-d93f1de9ab243c25', 'fil-16f0138d81211918', 'fil-2d9eab69bd1f850c', 'fil-41b1db7990079a26', 'fil-12dc558141e0cbe9', 'fil-859035e1261a92c3', 'fil-29f34180216090a6']\nasr_dense anchor rank: 1 top ten: ['fil-d852e40b0ba16d01', 'fil-29f34180216090a6', 'fil-cf85e87981b785bf', 'fil-baedb5085e878056', 'fil-41b1db7990079a26', 'fil-999ec61bd83d7079', 'fil-d93f1de9ab243c25', 'fil-859035e1261a92c3', 'fil-2d9eab69bd1f850c', 'fil-a22e88f4f0791d64']\nasr_rerank anchor rank: 1 top ten: ['fil-d852e40b0ba16d01', 'fil-baedb5085e878056', 'fil-d93f1de9ab243c25', 'fil-999ec61bd83d7079', 'fil-859035e1261a92c3', 'fil-cf85e87981b785bf', 'fil-2d9eab69bd1f850c', 'fil-a22e88f4f0791d64', 'fil-41b1db7990079a26', 'fil-29f34180216090a6']\nAn anchor miss is not proof that every returned recording is irrelevant; all qrels remain unjudged.\n",
+   "error": null
+  },
+  {
+   "cell": 19,
+   "status": "ok",
+   "started": "2026-09-28T15:58:37.750127Z",
+   "ended": "2026-09-28T15:58:37.764953Z",
+   "stdout_tail": "<IPython.core.display.Markdown object>This category did not occur in this run.\n<IPython.core.display.Markdown object>This category did not occur in this run.\nCompeting recordings are unjudged, not negatives: a competitor may also be relevant.\n",
+   "error": null
+  },
+  {
+   "cell": 22,
+   "status": "ok",
+   "started": "2026-09-28T15:58:37.769021Z",
+   "ended": "2026-09-28T16:00:45.743396Z",
+   "stdout_tail": "`torch_dtype` is deprecated! Use `dtype` instead!\nYou're using a Qwen2TokenizerFast tokenizer. Please note that with a fast tokenizer, using the `__call__` method is faster than using a method to encode the text followed by a call to the `pad` method to get a padded encoding.\nYou're using a Qwen2TokenizerFast tokenizer. Please note that with a fast tokenizer, using the `__call__` method is faster than using a method to encode the text followed by a call to the `pad` method to get a padded encoding.\nYou're using a Qwen2TokenizerFast tokenizer. Please note that with a fast tokenizer, using the `__call__` method is faster than using a method to encode the text followed by a call to the `pad` method to get a padded encoding.\nactivity: PASS\n<IPython.core.display.HTML object><IPython.core.display.HTML object>Showing 8/120 rows. Full table: /content/dimer_fil_audio_preview/results/activity_results.csv\n<IPython.core.display.HTML object>Showing 8/80 rows. Full table: /content/dimer_fil_audio_preview/results/activity_candidates.csv\nCompare against development scores above; evaluation configuration remains depth 10.\n",
+   "error": null
+  },
+  {
+   "cell": 23,
+   "status": "ok",
+   "started": "2026-09-28T16:00:45.747714Z",
+   "ended": "2026-09-28T16:00:45.758257Z",
+   "stdout_tail": "<IPython.core.display.HTML object>Same development queries, same process and loaded reranker; one untimed warm-up call; depth order alternates per query; excludes model load, query embedding and dense search, which depth does not change. Wall-clock timing of one run, not a benchmark.\nPer-query timings: /content/dimer_fil_audio_preview/results/activity_latency.csv\n",
+   "error": null
+  },
+  {
+   "cell": 25,
+   "status": "ok",
+   "started": "2026-09-28T16:00:45.761938Z",
+   "ended": "2026-09-28T16:01:14.367937Z",
+   "stdout_tail": "`torch_dtype` is deprecated! Use `dtype` instead!\nYou're using a Qwen2TokenizerFast tokenizer. Please note that with a fast tokenizer, using the `__call__` method is faster than using a method to encode the text followed by a call to the `pad` method to get a padded encoding.\nYou're using a Qwen2TokenizerFast tokenizer. Please note that with a fast tokenizer, using the `__call__` method is faster than using a method to encode the text followed by a call to the `pad` method to get a padded encoding.\n`torch_dtype` is deprecated! Use `dtype` instead!\nreload: PASS\n<IPython.core.display.HTML object>",
+   "error": null
+  },
+  {
+   "cell": 27,
+   "status": "ok",
+   "started": "2026-09-28T16:01:14.372175Z",
+   "ended": "2026-09-28T16:01:15.723747Z",
+   "stdout_tail": "report: PASS\n<IPython.core.display.HTML object>Evidence bundle: /content/dimer_fil_audio_preview/results/results.zip\n",
+   "error": null
+  },
+  {
+   "cell": 29,
+   "status": "ok",
+   "started": "2026-09-28T16:01:15.727580Z",
+   "ended": "2026-09-28T16:01:34.335633Z",
+   "stdout_tail": "`torch_dtype` is deprecated! Use `dtype` instead!\nYou're using a Qwen2TokenizerFast tokenizer. Please note that with a fast tokenizer, using the `__call__` method is faster than using a method to encode the text followed by a call to the `pad` method to get a padded encoding.\nYou're using a Qwen2TokenizerFast tokenizer. Please note that with a fast tokenizer, using the `__call__` method is faster than using a method to encode the text followed by a call to the `pad` method to get a padded encoding.\n<IPython.core.display.Markdown object><IPython.core.display.Markdown object><IPython.lib.display.Audio object><IPython.core.display.Markdown object><IPython.lib.display.Audio object><IPython.core.display.Markdown object><IPython.lib.display.Audio object><IPython.core.display.Markdown object><IPython.lib.display.Audio object><IPython.core.display.Markdown object><IPython.lib.display.Audio object>",
+   "error": null
+  },
+  {
+   "cell": 31,
+   "status": "ok",
+   "started": "2026-09-28T16:01:34.363678Z",
+   "ended": "2026-09-28T16:02:37.004910Z",
+   "stdout_tail": "the `__call__` method is faster than using a method to encode the text followed by a call to the `pad` method to get a padded encoding.\n`torch_dtype` is deprecated! Use `dtype` instead!\nYou're using a Qwen2TokenizerFast tokenizer. Please note that with a fast tokenizer, using the `__call__` method is faster than using a method to encode the text followed by a call to the `pad` method to get a padded encoding.\nYou're using a Qwen2TokenizerFast tokenizer. Please note that with a fast tokenizer, using the `__call__` method is faster than using a method to encode the text followed by a call to the `pad` method to get a padded encoding.\nYou're using a Qwen2TokenizerFast tokenizer. Please note that with a fast tokenizer, using the `__call__` method is faster than using a method to encode the text followed by a call to the `pad` method to get a padded encoding.\n`torch_dtype` is deprecated! Use `dtype` instead!\n/content/dimer_fil_audio_preview/byod/fba4f3b47f304b59bac23a4dffa767ec\n<IPython.core.display.Markdown object>WER 0.138, CER 0.040 on the 2 referenced recordings only\nSearch package: /content/dimer_fil_audio_preview/byod/fba4f3b47f304b59bac23a4dffa767ec/search\nPortable ZIP: /content/dimer_fil_audio_preview/byod/fba4f3b47f304b59bac23a4dffa767ec/search_index.zip\nEvaluation (separate): /content/dimer_fil_audio_preview/byod/fba4f3b47f304b59bac23a4dffa767ec/evaluation.json\nReconstruction check: /content/dimer_fil_audio_preview/byod/fba4f3b47f304b59bac23a4dffa767ec/verification.json\n",
+   "error": null
+  },
+  {
+   "cell": 33,
+   "status": "ok",
+   "started": "2026-09-28T16:02:37.009357Z",
+   "ended": "2026-09-28T16:02:55.561640Z",
+   "stdout_tail": "`torch_dtype` is deprecated! Use `dtype` instead!\nYou're using a Qwen2TokenizerFast tokenizer. Please note that with a fast tokenizer, using the `__call__` method is faster than using a method to encode the text followed by a call to the `pad` method to get a padded encoding.\nYou're using a Qwen2TokenizerFast tokenizer. Please note that with a fast tokenizer, using the `__call__` method is faster than using a method to encode the text followed by a call to the `pad` method to get a padded encoding.\n<IPython.core.display.Markdown object><IPython.core.display.Markdown object><IPython.lib.display.Audio object><IPython.core.display.Markdown object><IPython.lib.display.Audio object><IPython.core.display.Markdown object><IPython.lib.display.Audio object>",
+   "error": null
+  },
+  {
+   "cell": 35,
+   "status": "ok",
+   "started": "2026-09-28T16:02:55.579185Z",
+   "ended": "2026-09-28T16:03:15.290720Z",
+   "stdout_tail": "ts.json', 'asr_settings.json', 'audio_acquisition.json', 'audio_core.py', 'audio_models.py', 'index_manifest.json', 'lexical_statistics.json', 'model_manifest.json', 'requirements.txt', 'search_archive.py']\nBYOD verification.json: {'passed': True, 'fresh_process': True, 'retranscribed': 3, 'reembedded': 3, 'probe_query_replayed': True, 'atol': 1e-05, 'rtol': 0.0001}\nEvidence copied: ['activity.log', 'activity_runs.json', 'activity_summary.json', 'annotation_manifest.json', 'asr.log', 'asr_documents.json', 'asr_index_documents.json', 'asr_metrics.json', 'asr_settings.json', 'asr_timing.json', 'audio_acquisition.json', 'audio_manifest.json', 'byod.log', 'byod_evaluation.json', 'byod_search_index.zip', 'byod_verification.json', 'checksums.json', 'corpus.json', 'dataset_audit.json', 'dependencies.log', 'environment.json', 'evaluate.log', 'experiment_lock.json', 'index.log', 'index_manifest.json', 'interactive-search.log', 'lexical_statistics.json', 'model_manifest.json', 'paired_comparisons.json', 'prepare.log', 'python-install.log', 'qrels.json', 'qualification.json', 'queries.json', 'ranked_runs.json', 'receipt_activity.json', 'receipt_asr.json', 'receipt_evaluate.json', 'receipt_index.json', 'receipt_prepare.json', 'receipt_reload.json', 'receipt_report.json', 'reference_index_documents.json', 'reload.log', 'report.log', 'results.zip', 'retrieval_results.json', 'retrieval_timing.json', 'run_summary.json', 'sample_manifest.json', 'source.json', 'venv.log', 'verification.json']\n",
+   "error": null
+  },
+  {
+   "cell": 36,
+   "status": "ok",
+   "started": "2026-09-28T16:03:15.294599Z",
+   "ended": "2026-09-28T16:04:47.307512Z",
+   "stdout_tail": "1238718182,\n    \"transcript\": \"Napapalibutan ng mga dagat ang perky sa tatlong panin. Ang dagat ng egan sa gawing kanduran, dagat na itim sa gawing hilaga, at ang dagat ng mediterranean sa gawing pinoy.\",\n    \"audio_path\": \"10004409263773767431.wav\",\n    \"audio_sha256\": \"1d530ceb3f6acbe4aca87dbe5177c3d6c8a60a3bf3b8b10afa6801ccc2083a41\"\n  }\n]\n\n\nFetching 11 files:   0%|          | 0/11 [00:00<?, ?it/s]\nFetching 11 files:  18%|█▊        | 2/11 [00:00<00:00,  9.01it/s]\nFetching 11 files:  55%|█████▍    | 6/11 [00:00<00:00, 14.31it/s]\nFetching 11 files:  91%|█████████ | 10/11 [00:02<00:00,  3.35it/s]\nFetching 11 files: 100%|██████████| 11/11 [00:04<00:00,  2.63it/s]\n`torch_dtype` is deprecated! Use `dtype` instead!\nYou're using a Qwen2TokenizerFast tokenizer. Please note that with a fast tokenizer, using the `__call__` method is faster than using a method to encode the text followed by a call to the `pad` method to get a padded encoding.\n\nFetching 13 files:   0%|          | 0/13 [00:00<?, ?it/s]\nFetching 13 files:  15%|█▌        | 2/13 [00:00<00:00, 12.09it/s]\nFetching 13 files:  46%|████▌     | 6/13 [00:00<00:00, 19.27it/s]\nFetching 13 files:  77%|███████▋  | 10/13 [00:02<00:00,  4.87it/s]\nFetching 13 files: 100%|██████████| 13/13 [00:05<00:00,  2.29it/s]\nYou're using a Qwen2TokenizerFast tokenizer. Please note that with a fast tokenizer, using the `__call__` method is faster than using a method to encode the text followed by a call to the `pad` method to get a padded encoding.\n\n",
+   "error": null
+  },
+  {
+   "cell": 37,
+   "status": "ok",
+   "started": "2026-09-28T16:04:47.311982Z",
+   "ended": "2026-09-28T16:04:49.828890Z",
+   "stdout_tail": "=========+========================+======================|\n|   0  Tesla T4                       Off |   00000000:00:04.0 Off |                    0 |\n| N/A   67C    P0             32W /   70W |       0MiB /  15360MiB |      0%      Default |\n|                                         |                        |                  N/A |\n+-----------------------------------------+------------------------+----------------------+\n|   1  Tesla T4                       Off |   00000000:00:05.0 Off |                    0 |\n| N/A   40C    P8             10W /   70W |       0MiB /  15360MiB |      0%      Default |\n|                                         |                        |                  N/A |\n+-----------------------------------------+------------------------+----------------------+\n\n+-----------------------------------------------------------------------------------------+\n| Processes:                                                                              |\n|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |\n|        ID   ID                                                               Usage      |\n|=========================================================================================|\n|  No running processes found                                                             |\n+-----------------------------------------------------------------------------------------+\n\nvenv torch/cuda: 2.11.0+cu130 13.0\ndisk / free GiB: 1108.7\n",
+   "error": null
+  }
+ ],
+ "preserved_outputs": {},
+ "staged_weights": [],
+ "executor_torch_after_run": {
+  "torch": "2.10.0+cu128",
+  "cuda": "12.8",
+  "device": "Tesla T4"
+ },
+ "finished": "2026-09-28T16:04:57Z"
+}

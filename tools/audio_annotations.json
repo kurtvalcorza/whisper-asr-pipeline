@@ -1,0 +1,46 @@
+{
+  "format_version": 1,
+  "annotation_version": "ai-draft-v1",
+  "status": "engineering_preview",
+  "human_review_complete": false,
+  "benchmark_qualified": false,
+  "reviewer_ids": [],
+  "independent_review": false,
+  "reconciliation": null,
+  "review_evidence": [],
+  "query_count": 60,
+  "corpus_count": 120,
+  "matrix_entries": 7200,
+  "judged_pairs": 0,
+  "unjudged_pairs": 7200,
+  "role_counts": {
+    "dev": 20,
+    "test": 40
+  },
+  "query_type_counts": {
+    "relationship_action": 20,
+    "paraphrased_fact": 17,
+    "distinctive_term": 23
+  },
+  "provenance": "60 individually AI-authored Filipino query drafts based only on pinned source references. No ASR predictions or rankings consulted. Nominated anchor IDs are engineering targets, not relevance judgements; every qrel remains null, including anchors.",
+  "selection": "Python random.Random(42), dev then test; sample 20/40 without replacement from document-ID-sorted role lists.",
+  "review_required": "Competent Filipino-language human review of naturalness, answerability and audio/reference correspondence; full 7200 pair relevance judgments; independent review of nonzero and ambiguous labels and deterministic 20% zero sample; reconcile and freeze before model comparison.",
+  "annotation_rights": "AI-assisted maintainer-authored drafts derived from CC-BY-4.0 FLEURS reference material; preserve source attribution and transformation notice.",
+  "files": {
+    "queries.json": {
+      "source_file": "audio_queries.json",
+      "sha256": "ec69e92f94be30c7741e037bf78c54930ffa709bd82881e15accee9b9eb90f23",
+      "bytes": 32200
+    },
+    "qrels.json": {
+      "source_file": "audio_qrels.json",
+      "sha256": "0fe203bf35a08de6112a7001a9cc1be51556224b87fbbd83a7ab2c956d7ad865",
+      "bytes": 998403
+    },
+    "audio_manifest.json": {
+      "source_file": "audio_sample.json",
+      "sha256": "fff4e00572cc2dc74ff5813064ff95a5b82e139ec41ddc9db2d89c91026d6e16",
+      "bytes": 102097
+    }
+  }
+}

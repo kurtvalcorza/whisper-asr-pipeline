@@ -139,12 +139,12 @@ def build() -> dict:
     """Return a deterministic notebook with plain Python code cells."""
     cells = []
 
-    def add(kind: str, text: str) -> None:
+    def add(kind: str, text: str, metadata: dict | None = None) -> None:
         text = text.strip() + "\n"
         cell = {
             "cell_type": kind,
             "id": hashlib.sha256(f"{len(cells)}:{text}".encode()).hexdigest()[:12],
-            "metadata": {},
+            "metadata": metadata or {},
             "source": text.splitlines(keepends=True),
         }
         if kind == "code":
@@ -155,8 +155,8 @@ def build() -> dict:
     def md(text: str) -> None:
         add("markdown", text)
 
-    def code(text: str) -> None:
-        add("code", text)
+    def code(text: str, metadata: dict | None = None) -> None:
+        add("code", text, metadata)
 
     md("""# Filipino Audio Archive Search
 ## How do transcription errors affect what we find?
@@ -189,13 +189,16 @@ The pinned models are [Whisper large-v3-turbo](https://huggingface.co/openai/whi
 Data: [Google FLEURS](https://huggingface.co/datasets/google/fleurs), `fil_ph`, CC BY 4.0; [Conneau et al. (2022)](https://arxiv.org/abs/2205.12446). Read speech does not establish performance on meetings, regional accents or noisy archives. Sentence families are not verified speaker identities; source/pretraining overlap is unknown.""")
     md("""### 2. Infrastructure — prepare an isolated environment
 
-The next cells verify the target runtime, materialize embedded source and hash-bound manifests, and install a locked Python environment. Models run in sequential subprocesses to release GPU memory. A failure is visible and stops execution; do not skip failed cells or accept incomplete output as a successful run.""")
+The next cells verify the target runtime, materialize embedded source and hash-bound manifests, and install a locked Python environment. The second cell carries about 1.5 million characters of embedded source and data, so it starts collapsed: select **Show code** (Colab) or the collapsed-input bar (Jupyter) to inspect it. Models run in sequential subprocesses to release GPU memory. A failure is visible and stops execution; do not skip failed cells or accept incomplete output as a successful run.""")
     code(PREFLIGHT)
     code(
+        "# @title Infrastructure: embedded source, manifests and locked install (expand to inspect)\n"
         "# Embedded, inspectable source and manifests; no remote DIMER code import.\nFILES = "
         + repr(carried_files())
         + "\n"
-        + INSTALL
+        + INSTALL,
+        # Collapsed in Colab (form view) and Jupyter; the source stays one click away.
+        {"cellView": "form", "jupyter": {"source_hidden": True}},
     )
     md("""### 3. Inspect the recordings before modelling
 
@@ -273,6 +276,54 @@ for name in ('reference_rerank', 'asr_dense', 'asr_rerank'):
     print(name, 'anchor rank:', ids.index(anchor['doc_id']) + 1 if anchor['doc_id'] in ids else 'absent',
           'top ten:', ids[:10])
 print('An anchor miss is not proof that every returned recording is irrelevant; all qrels remain unjudged.')""")
+    code("""# Competing evidence: what outranked the anchor? Automatic transcripts are what search saw.
+PLAY_COMPETITORS = False  # set True to hear the top competing recordings
+locations = {r['doc_id']: r for r in corpus_rows}
+
+def rank_of(run, doc_id):
+    ids = [r['doc_id'] for r in run]
+    return ids.index(doc_id) + 1 if doc_id in ids else None
+
+def candidate_table(query):
+    runs, anchor_id = ranked_runs[query['query_id']], query['anchor_doc_id']
+    dense = runs['asr_dense'][:10]
+    rerank = {r['doc_id']: (i + 1, r['score']) for i, r in enumerate(runs['asr_rerank'])}
+    rows = []
+    for position, row in enumerate(dense, 1):
+        rerank_rank, rerank_score = rerank.get(row['doc_id'], (None, None))
+        rows.append([position, row['doc_id'] + (' ← anchor' if row['doc_id'] == anchor_id else ''),
+                     f"{row['score']:.4f}", rerank_rank, '' if rerank_score is None else f'{rerank_score:.4f}',
+                     automatic[row['doc_id']][:110]])
+    if rank_of(dense, anchor_id) is None:
+        full = rank_of(runs['asr_dense'], anchor_id)
+        rows.append([full, anchor_id + ' ← anchor (outside candidates)', '', None, '', automatic[anchor_id][:110]])
+    head = ['dense rank', 'doc_id', 'cosine', 'rerank rank', 'reranker score', 'Whisper transcript (excerpt)']
+    cell = lambda v: '<td>' + html.escape('' if v is None else str(v)) + '</td>'
+    display(HTML('<table><tr>' + ''.join('<th>' + h + '</th>' for h in head) + '</tr>'
+                 + ''.join('<tr>' + ''.join(cell(v) for v in r) + '</tr>' for r in rows) + '</table>'))
+    print('Scores are raw ranking values of different kinds (cosine vs reranker), not probabilities.')
+    if PLAY_COMPETITORS:
+        for row in runs['asr_rerank'][:2]:
+            if row['doc_id'] != anchor_id:
+                display(Markdown('Competitor **' + row['doc_id'] + '**'))
+                display(Audio(filename=str(ROOT / locations[row['doc_id']]['path'])))
+
+categories = {
+    'Candidate miss (anchor not among the 10 dense candidates; reranking cannot recover it)':
+        [q for q in test_queries if rank_of(ranked_runs[q['query_id']]['asr_dense'][:10], q['anchor_doc_id']) is None],
+    'Reranker demotion (anchor among the candidates but ranked lower after reranking)':
+        [q for q in test_queries
+         if (d := rank_of(ranked_runs[q['query_id']]['asr_dense'][:10], q['anchor_doc_id'])) is not None
+         and rank_of(ranked_runs[q['query_id']]['asr_rerank'], q['anchor_doc_id']) > d],
+}
+for label, cases in categories.items():
+    display(Markdown(f'#### {label}: {len(cases)} of {len(test_queries)} evaluation queries'))
+    if not cases:
+        print('This category did not occur in this run.')
+        continue
+    display(Markdown('**Query:** ' + cases[0]['text'] + ' · **draft anchor:** ' + cases[0]['anchor_doc_id']))
+    candidate_table(cases[0])
+print('Competing recordings are unjudged, not negatives: a competitor may also be relevant.')""")
     md("""**What to notice:** primary paired differences compare automatic versus reference transcripts under the same method. Rerank-minus-dense isolates the reranking stage; dense-minus-BM25 compares semantic and lexical search. Uncertainty resamples entire target-family query groups, 2,000 times with seed 42. Small curated drafts do not represent real user traffic.
 
 Trace a missed target through its source audio → reference → Whisper transcript → dense candidates → reranked list. A missing candidate cannot be rescued by reranking. A present candidate can be demoted. Good transcription does not guarantee search success. Log potential annotation issues for a new version and complete rerun; do not edit labels after seeing results.
@@ -280,10 +331,35 @@ Trace a missed target through its source audio → reference → Whisper transcr
 <details><summary>Worked answer</summary>A reranker only reorders the candidates supplied to it. If the target is absent, improving its pairwise scoring cannot recover that target. Increasing candidate depth changes that constraint, but may increase latency.</details>""")
     md("""### 7. Change one thing — development candidate depth
 
-**Predict → run → observe → explain:** increase candidate depth from **10 to 20** on development queries only. Keep models, corpus, prompts and labels fixed. Canonical evaluation files remain unchanged. Compare anchor recovery and measured latency; after label qualification, compare graded relevance too. More candidates do not guarantee improvement.""")
+**Predict → run → observe → explain:** increase candidate depth from **10 to 20** on development queries only. Keep models, corpus, prompts and labels fixed. Canonical evaluation files remain unchanged. Compare anchor recovery and measured latency; after label qualification, compare graded relevance too. More candidates do not guarantee improvement.
+
+**Fair cost comparison:** the canonical run reranked 60 queries and this activity reranks 20, so their raw durations measure different workloads. The activity therefore times depth 10 and depth 20 on the **same 20 development queries**, in the same process with the reranker already loaded, alternating which depth runs first. Depth changes only reranking, so query embedding and dense search are excluded from both columns.""")
     code(
         "stage('activity')\nshow_json('activity_summary.json')\nshow_csv('activity_results.csv')\nshow_csv('activity_candidates.csv')\nprint('Compare against development scores above; evaluation configuration remains depth 10.')"
     )
+    code("""import csv
+summary = record('activity_summary.json')
+with (RESULTS / 'activity_candidates.csv').open(encoding='utf-8', newline='') as handle:
+    candidate_rows = list(csv.DictReader(handle))
+rows = []
+for condition in ('reference', 'asr'):
+    paired = summary['paired_latency'][condition]
+    quality = {}
+    for depth in (10, 20):
+        values = [float(r['value']) for r in candidate_rows
+                  if r['condition'] == condition and int(r['candidate_depth']) == depth]
+        assert [r['query_id'] for r in candidate_rows if r['condition'] == condition
+                and int(r['candidate_depth']) == depth] == paired['query_ids'], 'query cohorts differ'
+        quality[depth] = sum(values) / len(values)
+    rows.append([condition, paired['queries'], f"{quality[10]:.3f}", f"{quality[20]:.3f}",
+                 paired['depth10_pairs'], paired['depth20_pairs'],
+                 f"{paired['depth10_mean_seconds_per_query']:.4f}", f"{paired['depth20_mean_seconds_per_query']:.4f}"])
+head = ['transcripts', 'same dev queries', 'anchor in candidates @10', 'anchor in candidates @20',
+        'reranked pairs @10', 'reranked pairs @20', 'rerank s/query @10', 'rerank s/query @20']
+display(HTML('<table><tr>' + ''.join('<th>' + h + '</th>' for h in head) + '</tr>' + ''.join(
+    '<tr>' + ''.join('<td>' + html.escape(str(v)) + '</td>' for v in r) + '</tr>' for r in rows) + '</table>'))
+print(summary['paired_latency']['conditions'])
+print('Per-query timings:', RESULTS / 'activity_latency.csv')""")
     md("""### 8. Reconstruct in a fresh process
 
 Reload the automatic-transcript artifact, verify hashes and dimensions, replay fixed queries, re-embed a document subset and retranscribe three frozen clips. Ranked IDs must match, with declared score tolerance `atol=1e-5, rtol=1e-4`. A mismatch stops the run; tolerances are not silently loosened. This verifies reconstruction beyond reading cached results.""")
@@ -298,24 +374,72 @@ The automatic-transcript search artifact is separate from evaluation references 
     )
     md("""### 10. Optional free-form search
 
-Set `RUN_SEARCH=True` and enter a Filipino query. This uses automatic transcripts only. Results have no benchmark score because your new query has no reviewed relevance labels. Listen to the returned recordings and judge the evidence yourself.""")
-    code("""RUN_SEARCH = False
+Set `RUN_SEARCH=True` and enter a Filipino query. This uses automatic transcripts only. Results have no benchmark score because your new query has no reviewed relevance labels. Listen to the returned recordings and judge the evidence yourself.
+
+The same search view serves the default archive and a BYOD archive (§11): each search package is verified (hashes, model identity and settings) before it is queried, and a recording plays only when its local file matches the SHA256 recorded in the package.""")
+    code("""def show_search(query, index_dir=None, audio_base=ROOT):
+    \"\"\"Search a verified package and show top-five transcript evidence with hash-checked playback.\"\"\"
+    args = [PY, ROOT / 'audio_runtime.py', '--root', ROOT, '--query', query]
+    if index_dir is not None:
+        args += ['--index', index_dir]
+    command(args, 'interactive-search.log')
+    response = json.loads((ROOT / 'interactive_search.json').read_text(encoding='utf-8'))
+    display(Markdown(f"**Query:** {response['query']} · **archive:** `{response['source']}` · "
+                     'unscored: no reviewed relevance labels exist for a new query'))
+    for rank, row in enumerate(response['results'], 1):
+        display(Markdown(f"**{rank}. {row['doc_id']}** (reranker score {row['score']:.4f}) — {row['transcript']}"))
+        audio_path = (Path(audio_base) / row['audio_path']).resolve()
+        if audio_path.is_file() and hashlib.sha256(audio_path.read_bytes()).hexdigest() == row['audio_sha256']:
+            display(Audio(filename=str(audio_path)))
+        else:
+            print('   audio unavailable or changed; supply/reacquire it via audio_acquisition.json')
+
+RUN_SEARCH = False
 SEARCH_QUERY = 'Ano ang epekto ng matinding panahon?'
 if RUN_SEARCH:
-    command([PY, ROOT / 'audio_runtime.py', '--root', ROOT, '--query', SEARCH_QUERY], 'interactive-search.log')
-    response = json.loads((ROOT / 'interactive_search.json').read_text(encoding='utf-8'))
-    locations = {r['doc_id']: r for r in corpus_rows}
-    for row in response['results']:
-        display(Markdown('**' + row['doc_id'] + '** — ' + row['transcript']))
-        display(Audio(filename=str(ROOT / locations[row['doc_id']]['path'])))""")
+    show_search(SEARCH_QUERY)""")
     md("""### 11. Optional bring-your-own recordings
 
 Disabled by default; no microphone or upload dialog opens during Run all. Use recordings you have rights and consent to process. Prepare a local JSON manifest with `rights_confirmed: true`, nonempty `source_notes`, optional `probe_query`, and `records` containing stable `doc_id`, safe relative `path`, and optional nonempty `reference`. Example: `{"rights_confirmed": true, "source_notes": "My consented recording", "records": [{"doc_id": "clip_01", "path": "clip_01.wav"}]}`.
 
-WAV/FLAC inputs are bounded to 1–120 clips, 4 MB each and the same audio eligibility checks. The real BYOD path builds and reloads an independent artifact. WER/CER require references; retrieval metrics require reviewed labels. Missing evidence is reported as **not measurable**, never zero error. BYOD needs separate hosted verification.""")
-    code(
-        "RUN_BYOD = False\nBYOD_MANIFEST = ROOT / 'my_audio/manifest.json'\nif RUN_BYOD:\n    command([PY, ROOT / 'audio_byod.py', '--root', ROOT, '--manifest', BYOD_MANIFEST], 'byod.log')"
-    )
+WAV/FLAC inputs are bounded to 1–120 clips, 4 MB each and the same audio eligibility checks. The BYOD build transcribes and embeds your recordings once, then exports a search package in **the same format as the default archive**, with the same `search_archive.py` consumer. A fresh process then re-embeds, replays a probe query and retranscribes up to three clips against your original audio.
+
+Each build gets its own folder under `byod/`; the default index is never touched:
+- `search/` and `search_index.zip`: the portable automatic-transcript package (transcripts, embeddings, audio identities, consumer, lock, `RECONSTRUCT.md`). It contains no references or evaluation records.
+- `evaluation.json`: kept separate. WER/CER require references; retrieval metrics require reviewed labels. Missing evidence is reported as **not measurable**, never zero error.
+- `verification.json`: the fresh-process reconstruction check.
+
+BYOD needs separate hosted verification.""")
+    code("""RUN_BYOD = False
+BYOD_MANIFEST = ROOT / 'my_audio/manifest.json'
+DOWNLOAD_BYOD = False
+if RUN_BYOD:
+    command([PY, ROOT / 'audio_byod.py', '--root', ROOT, '--manifest', BYOD_MANIFEST], 'byod.log')
+    BYOD = json.loads((ROOT / 'byod/latest.json').read_text(encoding='utf-8'))
+    evaluation = json.loads(Path(BYOD['evaluation']).read_text(encoding='utf-8'))
+    display(Markdown(
+        f"**BYOD archive built:** {evaluation['recordings']} recordings; references supplied for "
+        f"{evaluation['reference_count']} of {evaluation['recordings']}. ASR: `{evaluation['asr_status']}`; "
+        f"retrieval: `{evaluation['retrieval_status']}`."))
+    if evaluation['asr']:
+        print(f"WER {evaluation['asr']['wer']:.3f}, CER {evaluation['asr']['cer']:.3f} "
+              f"on the {evaluation['reference_count']} referenced recordings only")
+    for label, key in (('Search package', 'search_dir'), ('Portable ZIP', 'search_index_zip'),
+                       ('Evaluation (separate)', 'evaluation'), ('Reconstruction check', 'verification')):
+        print(f'{label}: {BYOD[key]}')
+    if DOWNLOAD_BYOD:
+        from google.colab import files
+        files.download(BYOD['search_index_zip'])
+else:
+    print('BYOD disabled (RUN_BYOD = False).')""")
+    md("""**Query your archive.** Change `BYOD_QUERY` and re-run only the next cell as often as you like: it searches the saved BYOD package without re-transcribing, and plays only your own recordings. To reuse the archive in a later session, keep `search_index.zip` and follow its `RECONSTRUCT.md`, or upload it with your audio and point `show_search` at the extracted folder.""")
+    code("""BYOD_QUERY = ''
+if 'BYOD' in globals() and BYOD_QUERY.strip():
+    show_search(BYOD_QUERY, BYOD['search_dir'], Path(BYOD['audio_base']))
+elif 'BYOD' in globals():
+    print('Enter a BYOD_QUERY and re-run this cell to search your archive.')
+else:
+    print('No BYOD archive in this session; enable RUN_BYOD above first.')""")
     md("""### AI Assistance Disclosure
 
 Code, instructional text and initial query drafts were developed with generative AI assistance under maintainer direction. Draft annotations are explicitly distinguished from completed human review. The maintainer remains responsible for reviewing implementation, validating results and release decisions. AI assistance is not independent verification, provider endorsement or release approval.

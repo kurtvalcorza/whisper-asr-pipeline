@@ -9,6 +9,7 @@ import re
 import subprocess
 import sys
 import uuid
+import zipfile
 from pathlib import Path
 
 import numpy as np
@@ -16,6 +17,7 @@ import soundfile as sf
 
 import audio_core as core
 import audio_models as models
+import audio_runtime as runtime
 from audio_data import inspect_audio, safe_path, sha256
 
 
@@ -88,33 +90,17 @@ def rankings(root: Path, docs: list[dict], vectors: np.ndarray, query: str) -> d
     }
 
 
-def check_bundle(bundle: Path) -> tuple[dict, list[dict], np.ndarray]:
-    manifest = read(bundle / "index_manifest.json")
-    if manifest.get("format") != "dimer_byod_audio_search_v1":
-        raise ValueError("Unsupported BYOD index format")
-    for filename, checksum in manifest["files"].items():
-        if Path(filename).name != filename or sha256(bundle / filename) != checksum:
-            raise ValueError("BYOD artifact integrity failure")
-    docs = read(bundle / "documents.json")
-    vectors = np.load(bundle / "embeddings.npy", allow_pickle=False)
-    if [r["doc_id"] for r in docs] != manifest["doc_ids"] or vectors.shape != (
-        len(docs),
-        manifest["dimension"],
-    ):
-        raise ValueError("BYOD shape/order failure")
-    if not np.isfinite(vectors).all() or not np.allclose(np.linalg.norm(vectors, axis=1), 1, atol=1e-5):
-        raise ValueError("BYOD vector normalization failure")
-    return manifest, docs, vectors
-
-
 def verify(root: Path, source: Path, bundle: Path) -> None:
-    manifest, docs, vectors = check_bundle(bundle)
-    if manifest["pid"] == os.getpid() or sha256(source) != manifest["input_manifest_sha256"]:
+    """Fresh-process reconstruction check; needs the original manifest and audio, unlike search."""
+    receipt = read(bundle / "build_receipt.json")
+    if receipt["pid"] == os.getpid() or sha256(source) != receipt["input_manifest_sha256"]:
         raise ValueError("Fresh process and unchanged input manifest required")
-    if sha256(root / "model_manifest.json") != manifest["model_manifest_sha256"]:
-        raise ValueError("Model identity changed")
+    package = bundle / "search"
+    if sha256(package / "index_manifest.json") != receipt["search_manifest_sha256"]:
+        raise ValueError("BYOD search package changed after build")
+    docs, vectors = runtime.verify_package(package, root / "model_manifest.json")
     _, records = validate_input(source)
-    expected_audio = read(bundle / "audio_reacquisition.json")["records"]
+    expected_audio = read(package / "audio_acquisition.json")["records"]
     if [(r["doc_id"], r["sha256"]) for r in records] != [(r["doc_id"], r["sha256"]) for r in expected_audio]:
         raise ValueError("Audio identity changed")
     count = min(3, len(docs))
@@ -147,13 +133,32 @@ def verify(root: Path, source: Path, bundle: Path) -> None:
             "fresh_process": True,
             "retranscribed": count,
             "reembedded": count,
+            "probe_query_replayed": True,
             "atol": 1e-5,
             "rtol": 1e-4,
         },
     )
 
 
-def build(root: Path, source: Path) -> Path:
+LICENSE = """# User-supplied recordings
+
+These recordings were supplied by the person who ran this BYOD build, who confirmed they have
+the rights and consent to process them. Source notes supplied with the build:
+
+{notes}
+
+Automatic transcripts in this package are model output. Do not redistribute this package beyond
+the permissions that apply to the original recordings.
+"""
+
+
+def build(root: Path, source: Path, verify_in_subprocess: bool = True) -> Path:
+    """Transcribe, index and export BYOD recordings in the same format as the default archive.
+
+    Layout: ``search/`` is the portable automatic-transcript package (searchable by
+    ``audio_runtime.py --index`` or its own ``search_archive.py``); ``evaluation.json`` holds any
+    supplied references and stays outside it. ``search_index.zip`` is ``search/`` zipped.
+    """
     provided, records = validate_input(source)
     if not (root / "model_manifest.json").is_file():
         raise ValueError("Run root must contain the pinned model_manifest.json")
@@ -161,100 +166,113 @@ def build(root: Path, source: Path) -> Path:
     bundle.mkdir(parents=True)
     model = models.load_model("whisper", root)
     try:
+        asr_settings = {
+            key: model[key]
+            for key in ("generation_config", "generation_overrides", "language_token_id", "prefix_length")
+        }
         texts = models.transcribe(model, waves(records))
     finally:
         models.unload(model)
+    if len(texts) != len(records):
+        raise ValueError("ASR output count mismatch")
     docs = [{"doc_id": r["doc_id"], "text": text} for r, text in zip(records, texts, strict=True)]
     model = models.load_model("embedding", root)
     try:
         vectors = models.embed(model, texts)
     finally:
         models.unload(model)
+    if vectors.shape[0] != len(docs) or not np.isfinite(vectors).all():
+        raise ValueError("Bad document embeddings")
+    acquisition = {
+        "instructions": "Supply the original local audio at these relative paths; audio is not bundled.",
+        "records": [
+            {k: r[k] for k in ("doc_id", "path", "sha256", "sample_rate", "channels", "frames", "duration")}
+            for r in records
+        ],
+    }
+    package = runtime.write_search_package(
+        bundle / "search",
+        root,
+        docs,
+        vectors,
+        acquisition,
+        LICENSE.format(notes=str(provided["source_notes"]).strip()),
+        asr_settings,
+        "byod",
+    )
+    runtime.verify_package(package, root / "model_manifest.json")
+    with zipfile.ZipFile(bundle / "search_index.zip", "w", zipfile.ZIP_DEFLATED) as archive:
+        for path in sorted(package.iterdir()):
+            archive.write(path, path.name)
     query = provided.get("probe_query") or next(
         (t for t in texts if t.strip()), "Ano ang nilalaman ng audio?"
-    )
-    predicted = rankings(root, docs, vectors, query)
-    references = [
-        (r["reference"], text) for r, text in zip(records, texts, strict=True) if r.get("reference")
-    ]
-    metrics = core.asr_metrics([r for r, _ in references], [t for _, t in references]) if references else None
-    write(bundle / "documents.json", docs)
-    np.save(bundle / "embeddings.npy", vectors, allow_pickle=False)
-    lexical = core.BM25([r["doc_id"] for r in docs], texts)
-    write(
-        bundle / "lexical_statistics.json",
-        {
-            "normalization": "NFC, lowercase, punctuation-to-space, whitespace collapse; no stopword removal",
-            "token_counts": [dict(counts) for counts in lexical.tokens],
-            "document_frequency": dict(lexical.df),
-            "document_lengths": lexical.lengths.tolist(),
-            "average_length": lexical.average_length,
-            "k1": lexical.k1,
-            "b": lexical.b,
-        },
     )
     write(
         bundle / "probe.json",
         {
             "query": query,
             "purpose": "Mechanical reconstruction probe; no accuracy claim",
-            "rankings": predicted,
+            "rankings": rankings(root, docs, vectors, query),
         },
     )
+    references = [
+        (r["doc_id"], r["reference"], text)
+        for r, text in zip(records, texts, strict=True)
+        if r.get("reference")
+    ]
+    metrics = (
+        core.asr_metrics([ref for _, ref, _ in references], [hyp for _, _, hyp in references])
+        if references
+        else None
+    )
+    # Evaluation evidence (including supplied references) lives beside, never inside, search/.
     write(
         bundle / "evaluation.json",
         {
             "asr_status": "measured_on_supplied_references" if references else "not_measurable",
+            "recordings": len(records),
             "reference_count": len(references),
+            "reference_doc_ids": [doc_id for doc_id, _, _ in references],
             "asr": metrics,
             "retrieval_status": "not_measurable",
             "reason": "No reviewed query/relevance labels supplied; BYOD v1 does not import qrels.",
         },
     )
     write(
-        bundle / "audio_reacquisition.json",
+        bundle / "build_receipt.json",
         {
-            "instructions": "Supply original local audio matching these SHA256 values; audio is not bundled.",
-            "source_notes": provided["source_notes"],
-            "records": [
-                {k: r[k] for k in ("doc_id", "path", "sha256", "duration", "sample_rate")} for r in records
-            ],
-        },
-    )
-    (bundle / "model_manifest.json").write_bytes((root / "model_manifest.json").read_bytes())
-    write(
-        bundle / "settings.json",
-        {
-            "models": models.SETTINGS,
-            "bm25": {"k1": 1.2, "b": 0.75},
-            "candidate_depth": 10,
-            "tie_rule": "stable document ID",
-        },
-    )
-    write(
-        bundle / "index_manifest.json",
-        {
-            "format": "dimer_byod_audio_search_v1",
             "pid": os.getpid(),
             "input_manifest_sha256": sha256(source),
             "model_manifest_sha256": sha256(root / "model_manifest.json"),
-            "doc_ids": [r["doc_id"] for r in docs],
-            "dimension": vectors.shape[1],
-            "files": {p.name: sha256(p) for p in sorted(bundle.iterdir()) if p.is_file()},
+            "search_manifest_sha256": sha256(package / "index_manifest.json"),
+            "search_index_zip_sha256": sha256(bundle / "search_index.zip"),
         },
     )
-    subprocess.run(
-        [
-            sys.executable,
-            str(Path(__file__).resolve()),
-            "--root",
-            str(root),
-            "--manifest",
-            str(source),
-            "--verify",
-            str(bundle),
-        ],
-        check=True,
+    if verify_in_subprocess:
+        subprocess.run(
+            [
+                sys.executable,
+                str(Path(__file__).resolve()),
+                "--root",
+                str(root),
+                "--manifest",
+                str(source),
+                "--verify",
+                str(bundle),
+            ],
+            check=True,
+        )
+    write(
+        root / "byod" / "latest.json",
+        {
+            "bundle": str(bundle),
+            "search_dir": str(package),
+            "search_index_zip": str(bundle / "search_index.zip"),
+            "evaluation": str(bundle / "evaluation.json"),
+            "verification": str(bundle / "verification.json"),
+            "audio_base": str(source.parent),
+            "input_manifest": str(source),
+        },
     )
     return bundle
 

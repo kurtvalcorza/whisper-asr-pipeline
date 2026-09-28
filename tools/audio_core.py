@@ -232,6 +232,9 @@ def validate_annotations(
             or len(set(reviewers)) != len(reviewers)
         ):
             raise ValueError("Reviewer IDs must be distinct nonempty strings")
+        if manifest.get("independent_review") is True and len(reviewers) < 2:
+            # Counting IDs cannot prove independence, but one reviewer cannot be independent review.
+            raise ValueError("Independent review requires at least two distinct reviewers")
         if manifest.get("independent_review") is not True:
             limitation = manifest.get("single_reviewer_limitation")
             if (

@@ -132,6 +132,18 @@ def test_full_fake_stages_and_portable_export(experiment, monkeypatch):
     candidates = list(rt.csv.DictReader((rt.out(root) / "activity_candidates.csv").open()))
     assert len(candidates) == 80 and {r["candidate_depth"] for r in candidates} == {"10", "20"}
     assert all(r["query_id"].startswith("dev-") for r in candidates)
+    latency = list(rt.csv.DictReader((rt.out(root) / "activity_latency.csv").open()))
+    dev_ids = [q["query_id"] for q in rt.read(root / "queries.json") if q["role"] == "dev"]
+    for condition in ("reference", "asr"):
+        rows = [r for r in latency if r["condition"] == condition]
+        assert [r["query_id"] for r in rows] == dev_ids
+        assert {(r["depth10_pairs"], r["depth20_pairs"]) for r in rows} == {("10", "20")}
+        assert all(r["depth10_matches_canonical"] == "True" for r in rows)
+        paired = rt.read(rt.out(root) / "activity_summary.json")["paired_latency"][condition]
+        assert paired["query_ids"] == dev_ids and paired["depth10_pairs"] == 200
+        assert paired["depth20_pairs"] == 400
+    canonical_timing = {t["stage"]: t for t in rt.read(rt.out(root) / "retrieval_timing.json")}
+    assert len(canonical_timing["asr_rerank"]["per_query"]) == 60
     for stage in rt.STAGES[:-1]:
         rt.write(rt.out(root) / f"receipt_{stage}.json", {"pid": -1})
     import importlib.metadata

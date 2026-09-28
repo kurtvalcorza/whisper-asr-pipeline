@@ -164,12 +164,42 @@ def test_reviewed_claim_requires_complete_labels_and_provenance():
         label["status"] = "reviewed"
     manifest.update(
         human_review_complete=True,
-        reviewer_ids=["fixture-reviewer"],
+        reviewer_ids=["fixture-reviewer-a", "fixture-reviewer-b"],
         review_evidence="fixture review record",
         independent_review=True,
         reconciliation="fixture disposition",
     )
     assert core.validate_annotations(docs, queries, labels, manifest)["benchmark_qualified"] is True
+
+
+def _reviewed(reviewers, independent, **extra):
+    docs, queries, labels, manifest = annotations()
+    labels[1]["grade"] = 0
+    for label in labels:
+        label["status"] = "reviewed"
+    manifest.update(
+        status="human_reviewed",
+        human_review_complete=True,
+        reviewer_ids=reviewers,
+        independent_review=independent,
+        **extra,
+    )
+    return docs, queries, labels, manifest
+
+
+def test_independent_review_claim_needs_two_reviewers():
+    evidence = dict(review_evidence="Completed review record", reconciliation="Adjudicated disagreements")
+    with pytest.raises(ValueError, match="at least two"):
+        core.validate_annotations(*_reviewed(["reviewer-a"], True, **evidence))
+    single = _reviewed(
+        ["reviewer-a"], False, single_reviewer_limitation="One reviewer; no independent check.", **evidence
+    )
+    assert core.validate_annotations(*single)["benchmark_qualified"] is True
+    assert core.validate_annotations(*_reviewed(["reviewer-a", "reviewer-b"], True, **evidence))[
+        "benchmark_qualified"
+    ]
+    with pytest.raises(ValueError, match="evidence"):
+        core.validate_annotations(*_reviewed(["reviewer-a", "reviewer-b"], True))
 
 
 def test_anchor_diagnostic_is_not_relevance_metric():

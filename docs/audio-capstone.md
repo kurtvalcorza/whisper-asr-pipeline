@@ -69,7 +69,13 @@ make curated queries representative of user behaviour.
 
 The controlled activity changes only candidate depth from 10 to 20 on the
 20 development queries. Canonical evaluation results remain separate. A
-candidate absent from the shortlist cannot be recovered by reranking.
+candidate absent from the shortlist cannot be recovered by reranking. Its cost
+comparison times depth 10 and depth 20 on the same 20 development queries, in one
+process with the reranker loaded, after one untimed warm-up call and with the
+depth order alternating per query (`activity_latency.csv`,
+`activity_summary.json → paired_latency`). The canonical run's 60-query timings
+are a different workload and are not compared with it. The canonical run also
+records per-query reranking time.
 
 ## Artifacts and BYOD
 
@@ -100,10 +106,59 @@ and 1–120 mono 16 kHz WAV/FLAC recordings, each 2–25 seconds and at most 4 M
 
 Paths are relative to the manifest directory and cannot escape it. Omit
 `reference` if unavailable. This path performs the same ASR, indexing, search,
-export and fresh-process reconstruction in a separate output directory. It
-reports ASR metrics only for supplied references. BYOD v1 does not import
+export and fresh-process reconstruction in a separate output directory,
+`byod/<run id>/`:
+
+- `search/` and `search_index.zip`: a search package in the **same
+  `dimer_audio_archive` v1 format** as the default index, verified by the same
+  `verify_package` code and searched by the same `search_archive.py` consumer.
+  It holds automatic transcripts, embeddings, audio identities (relative path and
+  SHA-256), model identity, the lock and `RECONSTRUCT.md`; no references,
+  queries, qrels or evaluation records.
+- `evaluation.json`: kept outside the search package; holds supplied references
+  and ASR metrics.
+- `probe.json`, `build_receipt.json`, `verification.json`: the fresh-process
+  reconstruction check, which needs the original manifest and audio.
+
+In the notebook, a separate query cell searches the saved BYOD package with
+`audio_runtime.py --query ... --index <package>` without re-running ASR, shows
+top-five transcript evidence and plays only local files whose SHA-256 matches the
+package. The package can be moved to a clean directory and searched with its own
+`search_archive.py`. It reports ASR metrics only for supplied references. BYOD v1 does not import
 reviewed relevance labels; retrieval evaluation is explicitly `not_measurable`.
 The replay probe is a mechanical check, never an accuracy score.
+
+## Review fixes (2026-09-28)
+
+The Notebook Review Framework v1 review of PR #10 at `5b9f2ab` found one major
+and four minor issues. Fixes, all made in the generator or carried modules:
+
+| Finding | Change |
+| --- | --- |
+| F1 BYOD search/reuse | Shared `write_search_package` / `verify_package` / `search_archive.py` for default and BYOD packages; `--index` selects a package; BYOD query cell with transcript evidence and hash-checked playback; `evaluation.json` moved out of the search package; BYOD `search_index.zip`. |
+| F2 latency cohort | Paired depth-10/20 timing on the same development queries (see Experiment). |
+| F3 competing evidence | Failure tracing shows dense candidates with transcript excerpts, cosine and reranker scores and ranks for one candidate miss and one reranker demotion, or states that a category did not occur; optional competitor playback. |
+| F4 reviewer declaration | `independent_review: true` now requires at least two distinct reviewer IDs; the one-reviewer route still needs its disclosed limitation. |
+| F5 collapse | The embedded-source carrier cell starts collapsed in Colab (form view) and Jupyter. |
+
+User-visible contract changes: the default search package manifest gains a
+`source` field; search results (runtime and exported consumer) gain
+`audio_path` and `audio_sha256`; `interactive_search.json` records the searched
+package; the BYOD `dimer_byod_audio_search_v1` bundle format is replaced by the
+`byod/<run id>/` layout above; `independent_review: true` with one reviewer is
+refused.
+
+Offline verification: the regenerated notebook's own code cells were executed
+in order with synthetic constant-valued audio (not speech) and deterministic
+stand-in models (not pretrained inference); the T4 preflight and locked install
+were skipped. Default outputs (rankings, scores, per-query CSV, paired
+comparisons, transcripts, embeddings) were byte-identical to the reviewed
+notebook under the same stand-ins, and unchanged when every optional toggle was
+enabled. BYOD with and without references, a repeat query without rebuilding,
+hash-checked playback of only BYOD recordings, clean-directory search by the
+exported consumer in a fresh process, and refusal of modified embeddings,
+identifiers and model settings were observed. None of this is hosted-runtime,
+pretrained-model or relevance evidence.
 
 ## Release evidence still required
 
@@ -125,7 +180,8 @@ fixtures and are not stored as notebook outputs or scientific results.
    or disclosed single-reviewer limitation, and a frozen review record.
 2. Fresh Colab T4 default Run all against the exact notebook bytes, retaining the
    executed notebook, all six real-model outputs and complete evidence ZIP.
-3. Real-model BYOD execution, artifact replay and resource measurements.
+3. Real-model BYOD execution (with and without references, a repeat query and
+   clean-directory reuse), artifact replay and resource measurements.
 
 Model superiority is not required. Do not claim production readiness, verified
 speaker independence, real meeting performance, or a causal relationship between

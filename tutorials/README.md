@@ -34,10 +34,11 @@ No adaptation or fine-tuning occurs.
 **Engineering preview / Candidate.** Query drafts have not received human review;
 7,200 pairs are explicitly unjudged. Anchor recovery is not benchmark Recall or
 nDCG. The first hosted T4 default run (2026-09-28, `d58ab28`) failed fresh-process
-reload. The fixed revision `5664f61` passed a hosted Kaggle T4 run on 2026-09-28 with every
-optional journey enabled: reload, export, search and BYOD. That BYOD run used public FLEURS
-recordings as stand-ins, so a BYOD run on the maintainer's own recordings and human relevance
-review remain open. That run took 733 s including installs and downloads, with a peak allocated
+reload. The fixed notebook (blob `47da9829`, on `main` since `ad42d18`) passed a hosted Kaggle
+T4 run on 2026-09-28 with every optional journey enabled (reload, export, search and BYOD) and a
+default Colab T4 `Run all` the same day; both hosts produced byte-identical model outputs. The
+Kaggle BYOD run used public FLEURS recordings as stand-ins, so a BYOD run on the maintainer's own
+recordings and human relevance review remain open. That run took 733 s including installs and downloads, with a peak allocated
 GPU memory of 1.61 GiB; the 60-minute / 12-GiB / 20-GiB free-disk figures remain engineering
 targets. See [capstone evidence](../docs/audio-capstone.md).
 

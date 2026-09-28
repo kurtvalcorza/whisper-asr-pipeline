@@ -141,8 +141,44 @@ not benchmark Recall, MRR or nDCG.
 
 | Date (UTC) | Commit / notebook blob | Executor | Path exercised | Wall | Outcome |
 |---|---|---|---|---|---|
+| 2026-09-28 | `ad42d18` (`main`) / blob `47da982901db` (executed file's 35 cell sources and IDs equal this blob; no toggle changed) | Google Colab, fresh **Tesla T4**, maintainer-supplied; isolated `uv` Python 3.12.12 environment from the carried lock | Default `Run all`, every optional toggle off | Stage total 483.8 s (Colab saved no per-cell timings) | **PASS**: 18/18 code cells, execution counts 1–18, no errors; see below |
 | 2026-09-28 | `5664f61` / blob `47da982901db` (fetched from GitHub at the commit and blob-verified in-run; four toggle lines edited and three harness cells appended, listed below) | Kaggle kernel `kurtvalcorza/dimer-nb2-filipino-audio-archive-search-capstone` v1, serial test-suite executor: fresh `nbclient` interpreter, **Tesla T4** ×2 (driver 580.159.04; the runtime uses `cuda:0`), clean HF cache; isolated `uv` CPython 3.12.12 venv with torch 2.11.0+cu130 from the carried lock | `Run all` with search, competitor playback and BYOD on; harness cells re-queried BYOD, re-ran the export, built a no-reference BYOD package and reused it from a clean directory | 733.2 s runner wall (installs, 1.56 GB data and model downloads included); stage total 462.5 s | **PASS**: 21/21 code cells, execution counts 1–21, no errors; see below |
 | 2026-09-28 | `d58ab28` / blob `284adf543e21` (executed file's 35 cell sources and IDs equal this blob; no `# @param` value changed) | Google Colab, fresh **Tesla T4** (reported by the preflight cell); isolated `uv` Python 3.12.12 environment from the carried hash-pinned lock | Default `Run all`; every optional toggle left at its default (off). Code cells executed in order 1–14; `reload` raised; export and the optional search/BYOD cells did not run | Not recorded (Colab saved no per-cell timings); ASR 52.8 s for 1,715.46 s of audio | **FAILED at `reload`** — see below |
+
+### Maintainer-supplied Colab execution of `ad42d18` — 2026-09-28
+
+- **File:** [`execution-evidence/2026-09-28/DIMER_Filipino_Audio_Archive_Search_Capstone_ad42d18_colab.ipynb`](execution-evidence/2026-09-28/DIMER_Filipino_Audio_Archive_Search_Capstone_ad42d18_colab.ipynb),
+  SHA-256 `eef0cf97c3f0ec54235011ad24aafc9a0f89fa317bec3991d9bcc8a64e7881d4` (5,052,980 bytes),
+  stored byte for byte.
+- **Source match:** all 35 cells have the IDs, order and source of blob `47da9829…`, the
+  notebook on `main` at the merge commit `ad42d18` and at `5664f61`. No toggle was changed.
+- **Runtime:** fresh Colab Tesla T4; the stages ran in the notebook's `uv` CPython 3.12.12
+  venv from the carried lock.
+- **Per-stage seconds / peak allocated GPU memory:** prepare 103.3 / none; asr 92.2 / 1.61 GiB;
+  index 26.7 / 1.17 GiB; evaluate 98.1 / 1.16 GiB; activity 134.5 / 1.16 GiB; reload 28.8 /
+  1.61 GiB.
+- **Results (engineering preview):** ASR dev WER 0.140 / CER 0.036, test WER 0.136 / CER 0.042,
+  real-time factor 0.032. Test anchor hit@5: BM25 0.975, dense and rerank 1.000 (reference and
+  ASR). Paired latency: mean rerank time per query 0.571 → 1.038 s (reference) and 0.551 →
+  1.102 s (ASR) from depth 10 to 20. Failure tracing: 0 candidate misses, 0 reranker demotions.
+- **Reload:** `passed: true`, 4 queries replayed, 4 documents re-embedded, 3 clips
+  retranscribed, tolerances unchanged. This is the step that failed on Colab at `d58ab28`.
+- **Cross-host check:** every stage-output digest in this run's `run_summary.json` equals the
+  Kaggle run of `5664f61` below (transcripts, embeddings, rankings, evaluation, reload
+  verification); only the timing files differ. The Colab and Kaggle T4 hosts produced
+  byte-identical model outputs.
+- **Evidence boundary:** Saved outputs were inspected; execution was not independently
+  repeated.
+
+| Journey | Verdict |
+|---|---|
+| Setup, preflight, locked install (Colab T4) | Pass |
+| Prepare, ASR, index, evaluate (six systems) | Pass; outputs byte-identical to the Kaggle run |
+| Failure tracing (F3) | Ran; neither category occurred |
+| Development depth activity with paired latency (F2) | Pass |
+| Fresh-process reload | **Pass** on Colab |
+| Export (`report`) | Pass |
+| Free-form search, BYOD | Not assessed in this run (toggles off by default); covered by the Kaggle run below |
 
 ### Kaggle execution of `5664f61` — 2026-09-28
 

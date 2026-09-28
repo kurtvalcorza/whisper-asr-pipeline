@@ -141,7 +141,88 @@ not benchmark Recall, MRR or nDCG.
 
 | Date (UTC) | Commit / notebook blob | Executor | Path exercised | Wall | Outcome |
 |---|---|---|---|---|---|
+| 2026-09-28 | `5664f61` / blob `47da982901db` (fetched from GitHub at the commit and blob-verified in-run; four toggle lines edited and three harness cells appended, listed below) | Kaggle kernel `kurtvalcorza/dimer-nb2-filipino-audio-archive-search-capstone` v1, serial test-suite executor: fresh `nbclient` interpreter, **Tesla T4** ×2 (driver 580.159.04; the runtime uses `cuda:0`), clean HF cache; isolated `uv` CPython 3.12.12 venv with torch 2.11.0+cu130 from the carried lock | `Run all` with search, competitor playback and BYOD on; harness cells re-queried BYOD, re-ran the export, built a no-reference BYOD package and reused it from a clean directory | 733.2 s runner wall (installs, 1.56 GB data and model downloads included); stage total 462.5 s | **PASS**: 21/21 code cells, execution counts 1–21, no errors; see below |
 | 2026-09-28 | `d58ab28` / blob `284adf543e21` (executed file's 35 cell sources and IDs equal this blob; no `# @param` value changed) | Google Colab, fresh **Tesla T4** (reported by the preflight cell); isolated `uv` Python 3.12.12 environment from the carried hash-pinned lock | Default `Run all`; every optional toggle left at its default (off). Code cells executed in order 1–14; `reload` raised; export and the optional search/BYOD cells did not run | Not recorded (Colab saved no per-cell timings); ASR 52.8 s for 1,715.46 s of audio | **FAILED at `reload`** — see below |
+
+### Kaggle execution of `5664f61` — 2026-09-28
+
+Run by the agent on the maintainer's Kaggle account with the workspace serial
+test-suite executor, not supplied by the maintainer.
+
+- **File:** [`execution-evidence/2026-09-28/DIMER_Filipino_Audio_Archive_Search_Capstone_5664f61_kaggle.ipynb`](execution-evidence/2026-09-28/DIMER_Filipino_Audio_Archive_Search_Capstone_5664f61_kaggle.ipynb),
+  SHA-256 `b6fdbc398c4bd1c83cf35fdde2e2c2509c5335a499f8f9b3211aed4e69713aa2` (18,570,318 bytes;
+  larger than the `d58ab28` record because the search and BYOD cells embed 11 more audio
+  players), stored byte for byte. Executor summary:
+  [`execution-evidence/2026-09-28/DIMER_Filipino_Audio_Archive_Search_Capstone_5664f61_kaggle_run_summary.json`](execution-evidence/2026-09-28/DIMER_Filipino_Audio_Archive_Search_Capstone_5664f61_kaggle_run_summary.json); applied source diff:
+  [`execution-evidence/2026-09-28/DIMER_Filipino_Audio_Archive_Search_Capstone_5664f61_kaggle_harness.diff`](execution-evidence/2026-09-28/DIMER_Filipino_Audio_Archive_Search_Capstone_5664f61_kaggle_harness.diff).
+- **Source match:** the executor fetched the notebook from GitHub at `5664f61` and asserted
+  blob `47da9829…` before running. Cells 1–35 keep the IDs, order and source of that blob,
+  except four toggle cells, each edited only after its committed source matched a recorded
+  SHA-256:
+  `PLAY_COMPETITORS = True`; `RUN_SEARCH = True`; `RUN_BYOD = True` with
+  `BYOD_MANIFEST = next(Path('/kaggle/input').rglob('manifest.json'))`; and
+  `BYOD_QUERY = 'Anong mga dagat ang nakapalibot sa Turkey?'`. Three harness cells
+  (`kaggleharness1`–`3`, tagged `kaggle-harness`) were appended; they are executed evidence,
+  not notebook source. `DOWNLOAD_RESULTS` / `DOWNLOAD_BYOD` stayed `False`.
+- **BYOD input:** three unmodified FLEURS `fil_ph` **train**-split WAVs at the pinned revision
+  `70bb2e84` (CC-BY-4.0), attached as a private Kaggle dataset. The default archive indexes only
+  validation and test clips, so the BYOD archive shares no recording with it. Two records carried
+  their FLEURS transcript as `reference`; a second manifest carried none. These are public
+  licensed stand-ins; no maintainer-owned or field recording has been tested.
+- **Runtime:** Kaggle GPU image `sha256:37c64f7d…`, Linux 6.12.90, kernel Python 3.12.13; the
+  preflight saw `Tesla T4` twice and 1,108.7 GiB free on `/`; `/content` was creatable. The stages
+  ran in the notebook's own `uv` venv: torch 2.11.0 (CUDA 13.0), transformers 4.57.6, numpy 2.5.3,
+  pyarrow 23.0.1, soundfile 0.13.1 (`environment.json`).
+- **Per-stage seconds / peak allocated GPU memory:** prepare 119.6 / none; asr 81.6 / 1.61 GiB;
+  index 18.7 / 1.17 GiB; evaluate 88.9 / 1.16 GiB; activity 126.5 / 1.16 GiB; reload 27.1 /
+  1.61 GiB. Well inside the unverified 60-minute / 12-GiB targets.
+- **Results (engineering preview):** identical to the `d58ab28` Colab run where comparable. ASR
+  dev WER 0.140 / CER 0.036, test WER 0.136 / CER 0.042, real-time factor 0.031. Test anchor
+  hit@5: reference and ASR BM25 0.975; dense and rerank 1.000. Paired latency (20 dev queries,
+  same process): mean rerank time per query 0.519 → 1.032 s (reference) and 0.518 → 1.031 s (ASR)
+  from depth 10 to 20. Failure tracing: 0 candidate misses and 0 reranker demotions in 40
+  evaluation queries, so `PLAY_COMPETITORS` had no competitor to play.
+- **Reload:** `verification.json` shows `passed: true`, `queries_replayed: 4`,
+  `documents_reembedded: 4`, `clips_retranscribed: 3`, `replay_batch: "first original embedding
+  batch, identical composition"`, `atol` 1e-5, `rtol` 1e-4 (unchanged). The `d58ab28` failure is
+  fixed on hosted hardware.
+- **BYOD:** 3 recordings, references for 2; ASR `measured_on_supplied_references`, WER 0.138 /
+  CER 0.040 on those 2 (Whisper heard "Turkey" as "perky" and "Aegean" as "egan"); retrieval
+  `not_measurable`; bundle `verification.json` passed (3 re-embedded, 3 retranscribed, probe
+  replayed). Both BYOD queries returned only the three BYOD `doc_id`s with hash-matched audio.
+  The second query created no new `byod/<uuid>` folder. The no-reference build reported
+  `asr_status` and `retrieval_status` `not_measurable` and verified. Its `search_index.zip`,
+  extracted to an empty directory, ran `search_archive.py` with the venv Python (exit 0) and
+  ranked `fleurs_train_fish` first (score 0.9998) for "Bakit namamatay ang mga isda?".
+- **Export:** `report` passed in the notebook's export cell and again in the harness re-run;
+  `results.zip` lists 56 members. Free-form search showed five transcripts, each with playback
+  after its SHA-256 matched.
+- **Figures:** `prepare.png`, the per-recording WER histogram and `evaluate.png` rendered and
+  were inspected.
+- **Repeat:** an earlier direct Kaggle kernel of the same edited source
+  (`dimer-fil-audio-capstone-5664f61-verify` v1, same day) passed every stage. Kaggle kept none of
+  its executed outputs, so it is not recorded here, but its stage-output digests equal this run's
+  for every model output (transcripts, embeddings, rankings, reload verification). Only timing files
+  differ.
+- **Evidence boundary:** Saved outputs were inspected. The recorded run was not independently
+  repeated by a human; the repeat above was agent-run, and its executed notebook was not retained.
+
+| Journey | Verdict |
+|---|---|
+| Setup, preflight, locked install (Kaggle T4) | Pass |
+| Prepare, ASR, index, evaluate (six systems) | Pass; metrics equal the `d58ab28` run |
+| Failure tracing with competing evidence (F3) | Ran; neither category occurred, so there was no competitor audio to play |
+| Development depth activity with paired latency (F2) | Pass |
+| Fresh-process reload | **Pass** (fix confirmed) |
+| Export and export re-run | Pass |
+| Free-form search with hash-checked playback | Pass |
+| BYOD build with references, query, re-query without rebuild | Pass (FLEURS stand-in audio) |
+| BYOD build without references (`not_measurable`) | Pass (harness) |
+| Search package reuse from a clean directory | Pass (harness) |
+| Colab-only download buttons; opening from GitHub in Colab | Not assessed in this run |
+
+Open: human relevance review (0 of 7,200 judged); a BYOD run on the maintainer's own or field
+recordings; a Colab run of this head if Colab-specific behaviour must be qualified.
 
 ### Maintainer-supplied Colab execution of `d58ab28` — 2026-09-28
 

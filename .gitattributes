@@ -9,3 +9,6 @@ tools/build_audio_capstone.py text eol=lf
 tools/freeze_audio_data.py text eol=lf
 docs/audio-*.md text eol=lf
 tutorials/DIMER_Filipino_Audio_Archive_Search_Capstone.ipynb text eol=lf
+
+# Executed notebooks are recorded byte-for-byte as maintainer-supplied evidence.
+docs/execution-evidence/** -text

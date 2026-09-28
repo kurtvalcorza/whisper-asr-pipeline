@@ -132,3 +132,55 @@ A clean supported-class execution of the notebook blob at this revision is recor
 | 2026-09-27 | This branch (carried `workshop.py` sha256 `6763e433336c…`) | Same pre-flight environment | `prepare` (64 evaluation / 16 activity recordings, 597 s of audio), `model` (1.6 GB snapshot staged at the pinned revision and verified), `evaluate`, `activity`; then the notebook's display, metric-demo and export cells run against those outputs; exploration and BYOD left at their defaults (off) | prepare 6 s, model 14 s, evaluate 414 s, activity 171 s (CPU float32) | **PASS**. Evaluate: WER 0.1981, CER 0.1646 (S 56, D 5, I 122, N 924), exact-match 0.453, 0 truncated, against 1.0 for the empty-transcript baseline. Activity at 10 dB SNR: clean WER 0.1850, noisy 0.2081; paired 0 improved / 12 unchanged / 4 worsened. Both report ZIPs exported and reload-verified. **Not a supported runtime and not promotion evidence**: CPU float32 differs from the notebook's T4 float16 path, so Colab figures may differ |
 
 A fresh Colab T4 `Run all` of the committed blob is recorded in the first row above. The notebook stays **Candidate** until a reviewer confirms that run against the blob under review and an integrator promotes it; the optional branches remain unexercised.
+
+## Filipino Audio Archive Search capstone
+
+Status: **Engineering Preview / Candidate.** Human relevance review is pending
+(0 of 7,200 cells judged); scores below are nominated-anchor recovery diagnostics,
+not benchmark Recall, MRR or nDCG.
+
+| Date (UTC) | Commit / notebook blob | Executor | Path exercised | Wall | Outcome |
+|---|---|---|---|---|---|
+| 2026-09-28 | `d58ab28` / blob `284adf543e21` (executed file's 35 cell sources and IDs equal this blob; no `# @param` value changed) | Google Colab, fresh **Tesla T4** (reported by the preflight cell); isolated `uv` Python 3.12.12 environment from the carried hash-pinned lock | Default `Run all`; every optional toggle left at its default (off). Code cells executed in order 1–14; `reload` raised; export and the optional search/BYOD cells did not run | Not recorded (Colab saved no per-cell timings); ASR 52.8 s for 1,715.46 s of audio | **FAILED at `reload`** — see below |
+
+### Maintainer-supplied Colab execution of `d58ab28` — 2026-09-28
+
+- **File:** [`execution-evidence/2026-09-28/DIMER_Filipino_Audio_Archive_Search_Capstone_d58ab28.ipynb`](execution-evidence/2026-09-28/DIMER_Filipino_Audio_Archive_Search_Capstone_d58ab28.ipynb),
+  SHA-256 `7bf7717f0e310a6601f02a8f9021c18165bf3aabf2baa1ba4a3d007ea0594834`, stored byte for byte.
+- **Source match:** all 35 cells have the IDs, order and source of blob `284adf543e21`;
+  the carrier cell kept its collapsed (`cellView: form`) metadata.
+- **Runtime:** Tesla T4; `uv` CPython 3.12.12 virtual environment. Peak GPU memory and
+  disk use are in the stage receipts, which were not exported because the run stopped
+  before `report`.
+- **Results (engineering preview):** 120 recordings (40 dev / 80 test); 60 queries;
+  7,200 unjudged cells. ASR: dev WER 0.140 / CER 0.036, test WER 0.136 / CER 0.042;
+  real-time factor 0.031 (model load excluded). Test anchor hit@5: reference BM25 0.975,
+  dense 1.000, rerank 1.000; ASR BM25 0.975, dense 1.000, rerank 1.000. Paired
+  ASR-rerank minus reference-rerank difference 0.0 (95% interval 0.0–0.0, 40 families).
+  Activity (20 dev queries, same process): anchor-in-candidates 1.000 → 1.000
+  (reference) and 0.950 → 0.950 (ASR) from depth 10 to 20; mean rerank time per query
+  0.548 → 0.988 s (reference) and 0.538 → 1.058 s (ASR). Failure tracing: 0 candidate
+  misses and 0 reranker demotions among 40 evaluation queries.
+- **Failure:** `reload` re-embedded 3 documents and compared them with the index at
+  `atol=1e-5, rtol=1e-4`; 2,737 of 3,072 elements differed, by up to 4.2e-4.
+  **Cause:** Qwen3 embeddings run in float16 in batches of 4 with left padding, so a
+  vector depends on its batch's composition; the index embedded documents 0–3 together
+  and reload embedded 0–2. The evaluation queries had the same mismatch (batches of 4,
+  replayed as 3). **Fixed in** the commit that follows this record: reload (and BYOD
+  verification) replay exactly the first original embedding batch; tolerances are
+  unchanged. A regression test with a batch-sensitive stand-in reproduces the failure
+  on the old code and passes on the fix.
+- **Evidence boundary:** Saved outputs were inspected; execution was not independently
+  repeated. This run does not qualify the fix, the export, the free-form search or BYOD.
+
+| Journey | Verdict |
+|---|---|
+| Setup, preflight, locked install | Pass |
+| Prepare, ASR, index, evaluate (six systems) | Pass |
+| Failure tracing with competing evidence (F3) | Ran; neither category occurred |
+| Development depth activity with paired latency (F2) | Pass |
+| Fresh-process reload | **Fail** (fixed; needs a new hosted run) |
+| Export, free-form search, BYOD build and re-query | Not assessed in this run (not reached; toggles off) |
+
+Open: a hosted T4 run of the fixed head with the optional journeys enabled; human
+relevance review.

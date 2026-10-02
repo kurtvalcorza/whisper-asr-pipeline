@@ -171,6 +171,20 @@ pretrained-model or relevance evidence.
 | 2026-09-28 | `5664f61` / `47da982901db` | **PASSED on Kaggle Tesla T4.** Blob-verified serial test-suite execution, 21/21 cells, with search, competitor playback and BYOD on plus harness cells for BYOD re-query, export re-run, a no-reference build and clean-directory reuse. Reload passed (4 queries, 4 documents, 3 clips replayed; tolerances unchanged); metrics equal the `d58ab28` run; peak allocated GPU 1.61 GiB. BYOD used FLEURS train clips as stand-ins. See [release verification](release-verification.md#kaggle-execution-of-5664f61--2026-09-28). |
 | 2026-09-28 | `d58ab28` / `284adf543e21` | **FAILED at reload.** Default Run all on a fresh Colab Tesla T4 passed `prepare`, `asr`, `index`, `evaluate` and `activity`; `reload` refused because 3 re-embedded documents missed `atol=1e-5` by up to 4.2e-4 against an index embedded in batches of 4. Fixed in the next commit by replaying the original first batch; tolerances unchanged. See [release verification](release-verification.md#filipino-audio-archive-search-capstone). |
 
+### Notebook source layout change (2026-10-02)
+
+The infrastructure cell's `FILES` and `PACKED_FILES` literals were written as one
+line of about 500,000 characters, which can make the Colab editor unresponsive.
+The generator now writes each carried string as short implicitly concatenated
+pieces (at most 1,000 characters each; longest notebook line 1,011 characters).
+The carried text is unchanged: every carried file and the packed `qrels.json`
+are byte-identical, except `source.json`, whose `builder_sha256` records the
+changed generator (its per-file hashes are unchanged). That cell's ID changes from
+`9277aaf09d79` to `d15fecc044a2` because IDs hash the cell text. The notebook blob
+changes from `47da982901db` to `f890d97d43fd` (602,389 to 817,776 bytes, still
+under the 1 MB GitHub contents limit). The hosted runs above were of blob
+`47da982901db`; a hosted re-run of blob `f890d97d43fd` is pending.
+
 ## Release evidence still required
 
 Local validation on 2026-09-27: the pre-change suite had **53 passed, 1 skipped**.

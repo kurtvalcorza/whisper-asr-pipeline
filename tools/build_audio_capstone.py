@@ -18,6 +18,26 @@ NOTEBOOK = REPO / "tutorials/DIMER_Filipino_Audio_Archive_Search_Capstone.ipynb"
 GITHUB_CONTENTS_LIMIT = 1_000_000
 # Bulky data (7,200 unjudged relevance cells) is embedded compressed; all source stays plain text.
 PACKED = ("qrels.json",)
+# Carried strings are written as short implicitly concatenated pieces: one very long notebook
+# line makes the Colab editor unresponsive. Python joins the pieces back into identical text.
+CARRIER_PIECE = 1000
+
+
+def carried_literal(value: str | dict[str, str], indent: str = "") -> str:
+    """Return a Python literal equal to ``value`` with no line much longer than CARRIER_PIECE."""
+    if isinstance(value, dict):
+        inner = indent + "    "
+        items = [f"{inner}{key!r}: {carried_literal(text, inner)},\n" for key, text in value.items()]
+        return "{\n" + "".join(items) + indent + "}"
+    pieces = [
+        line[start : start + CARRIER_PIECE]
+        for line in value.splitlines(keepends=True)
+        for start in range(0, len(line), CARRIER_PIECE)
+    ]
+    if not pieces:
+        return repr(value)
+    inner = indent + "    "
+    return "(\n" + "".join(f"{inner}{piece!r}\n" for piece in pieces) + indent + ")"
 
 
 def carried_files() -> dict[str, str]:
@@ -208,11 +228,11 @@ The next cells verify the target runtime, materialize embedded source and hash-b
     code(
         "# @title Infrastructure: embedded source, manifests and locked install (expand to inspect)\n"
         "# Embedded, inspectable source and manifests; no remote DIMER code import.\nFILES = "
-        + repr(files)
+        + carried_literal(files)
         + "\n# Relevance matrix (7,200 unjudged cells), zlib+base64 to keep the notebook openable from\n"
         "# GitHub in Colab; expanded below and verified against source.json like every other file.\n"
         "PACKED_FILES = "
-        + repr(packed)
+        + carried_literal(packed)
         + "\n"
         + INSTALL,
         # Collapsed in Colab (form view) and Jupyter; the source stays one click away.

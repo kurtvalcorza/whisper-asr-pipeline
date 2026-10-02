@@ -133,6 +133,8 @@ A clean supported-class execution of the notebook blob at this revision is recor
 
 A fresh Colab T4 `Run all` of the committed blob is recorded in the first row above. The notebook stays **Candidate** until a reviewer confirms that run against the blob under review and an integrator promotes it; the optional branches remain unexercised.
 
+**2026-10-02 notebook review fixes (ASR-M1..M3, ASR-m1..m5).** The review in `reviews/2026-10-02-notebook-review/` changed the notebook (prose, the `show_results` helper, and the carried `workshop.py`: BYOD file identity and named refusals, reference provenance in `summary.md`). The 2026-09-27 run above covers blob `56749100397d` only and is **not** evidence for the revised blob. Before promotion, a fresh Colab T4 run of the revised blob must cover the default path, the 5 or 20 dB exploration, and BYOD with labelled, unlabelled and one rejected input (REL12). Local checks for the fix were CPU-only with a stand-in transcriber and are not clean-runtime evidence.
+
 ## Filipino Audio Archive Search capstone
 
 Status: **Engineering Preview / Candidate.** Human relevance review is pending

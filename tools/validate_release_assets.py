@@ -832,6 +832,12 @@ def validate_workshop_notebooks() -> None:
         _check(recorded.get("sources") == generated.get("sources"), f"{name}: carried source.json and metadata generated_from disagree")
         for carried, digest in recorded["sources"].items():
             _check(hashes.get(carried) == digest, f"{name}: source.json digest for {carried} is stale")
+        carrier = next(c for c in notebook["cells"] if _cell_source(c).startswith("CARRIED_FILES = "))
+        cell_sources = carrier.get("metadata", {}).get("dimer", {}).get("sources")
+        _check(
+            cell_sources is None or cell_sources == generated.get("sources"),
+            f"{name}: carrier cell metadata.dimer.sources disagrees with metadata generated_from",
+        )
         row = next((line for line in registry.splitlines() if f"`{name}`" in line), None)
         _check(row is not None, f"{name} missing from tutorials/README.md")
         for needle in (f"`{spec['profile']}`", "`WORKSHOP`", "Candidate"):

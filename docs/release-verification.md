@@ -135,6 +135,8 @@ A fresh Colab T4 `Run all` of the committed blob is recorded in the first row ab
 
 **2026-10-02 notebook review fixes (ASR-M1..M3, ASR-m1..m5).** The review in `reviews/2026-10-02-notebook-review/` changed the notebook (prose, the `show_results` helper, and the carried `workshop.py`: BYOD file identity and named refusals, reference provenance in `summary.md`). The 2026-09-27 run above covers blob `56749100397d` only and is **not** evidence for the revised blob. Before promotion, a fresh Colab T4 run of the revised blob must cover the default path, the 5 or 20 dB exploration, and BYOD with labelled, unlabelled and one rejected input (REL12). Local checks for the fix were CPU-only with a stand-in transcriber and are not clean-runtime evidence.
 
+**2026-10-03 source layout change.** The workshop's `CARRIED_FILES` literal in cell 3 was one 203,177-character line. `tools/split_workshop_carrier.py` rewrote it as parenthesised runs of short string pieces (at most 1,000 characters each), and the change is logged in `metadata.dimer.revisions`. Python joins the pieces back into the same text: the carried files, `CARRIED_HASHES`, the carried `source.json` and `generated_from` are unchanged, and no cell line is now longer than 2,000 characters (`python tools/split_workshop_carrier.py --check`). The notebook blob changes from `baa5be541c92` (the 2026-10-02 review-fix revision, which has no hosted run) to `fc8acbb6a3df`. A hosted re-run of the new blob is pending. Status stays **Candidate**.
+
 ## Filipino Audio Archive Search capstone
 
 Status: **Engineering Preview / Candidate.** Human relevance review is pending

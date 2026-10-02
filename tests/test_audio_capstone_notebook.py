@@ -1,5 +1,6 @@
 """Static learner-journey properties of the generated capstone notebook (no cells executed)."""
 
+import ast
 import base64
 import json
 import sys
@@ -70,3 +71,16 @@ def test_packed_files_expand_to_exact_carried_bytes():
     for name, packed in namespace["PACKED_FILES"].items():
         assert zlib.decompress(base64.b64decode(packed)).decode("utf-8") == carried[name]
     assert all(namespace["FILES"][name] == carried[name] for name in namespace["FILES"])
+
+
+def test_carrier_lines_stay_short_and_round_trip():
+    # One ~500,000-character carrier line can make the Colab editor unresponsive.
+    notebook = json.loads(builder.NOTEBOOK.read_text(encoding="utf-8"))
+    assert max(len(line) for cell in notebook["cells"] for line in cell["source"]) <= 2000
+    long_line = "x" * 2500 + "\n"
+    value = {"empty": "", "long": long_line, "multi": "a\nb\r\n'c'\n\n" + long_line + "tail"}
+    for literal in (builder.carried_literal(value), builder.carried_literal(long_line + "end")):
+        assert max(len(line) for line in literal.splitlines()) <= 2000
+    assert ast.literal_eval(builder.carried_literal(value)) == value
+    assert ast.literal_eval(builder.carried_literal(long_line + "end")) == long_line + "end"
+    assert ast.literal_eval(builder.carried_literal("")) == ""

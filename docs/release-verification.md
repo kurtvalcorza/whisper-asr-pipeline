@@ -4,7 +4,7 @@
 (`E2E`) are each a **release candidate** until the exact notebook revision has executed
 top-to-bottom in a clean supported runtime. Unit tests, JSON
 validation, code-cell compilation, and `tools/validate_release_assets.py` are necessary
-checks but are **not** runtime evidence under DIMER Notebook Specification 2.0. This file is
+checks but are **not** runtime evidence under DIMER Notebook Specification 2.2. This file is
 the durable release-gate record for both notebooks; each is promoted on its own evidence.
 
 ## Automatic coverage (static, every pull request)
@@ -111,9 +111,11 @@ Pre-flight runtime: WSL2 Ubuntu 24.04 (kernel 6.18.33), Python 3.12.3, Intel Cor
 
 ## Current status
 
-**2026-09-14 — `whisper_asr_finetune_colab.ipynb` was regenerated as a standalone NOTEBOOK_SPEC 2.0 notebook and verified on Kaggle.** Clean-room GPU execution on Tesla T4 (1002.0 s, 10/10 ok, kernel `dimer-nb2-whisper-asr-finetune v2`) is recorded in the table above. Both the task-inference and fine-tuning standalone notebooks have now completed clean-room execution on Kaggle.
+**2026-10-05 — review fixes; no run of the current blobs is recorded.** The 2026-10-05 reviews (`docs/reviews/2026-10-05-notebook-review/`) found that the recorded rows do not cover the standalone notebooks as they stand: every `whisper_asr_colab.ipynb` row executed the earlier, repository-installing notebook (blobs `a5b13f9b`, `c308c7b1`, 5 code cells) in a fresh-interpreter harness, and the one `whisper_asr_finetune_colab.ipynb` standalone row (2026-09-14, blob `818d2e55`, Kaggle T4, 1002.0 s) needed one manual restart after the install cell, which is not REL2 evidence, and recorded no metrics or versions. Both notebooks were then regenerated: an isolated, hash-locked `uv` environment replaces the in-kernel install and its restart guard (spec 2.2), the inference pins now include `datasets==4.4.0`, and the guided layer and the BYOD and evaluation fixes were added (details in the two `*_Fixes.md` files). **A one-pass hosted Run all of each regenerated blob, recorded with `restarted: false`, is the open gate.**
 
-A clean supported-class execution of the notebook blob at this revision is recorded in the first row above (Kaggle container, fresh interpreter, clean cache, pinned wheels, all stages of the default path, verbatim blob measured in-run, every version recorded); it supersedes the earlier rows, which remain as the audit trail of the review round. Static CI is green on the same branch. The registry status remains **Candidate** until a reviewer confirms the recorded run against the notebook blob under review and an integrator promotes it; promotion is not performed by the builder. The commit that adds a recorded-execution row changes documentation only; the executed source is the commit named in the row.
+**2026-09-14 — `whisper_asr_finetune_colab.ipynb` was regenerated as a standalone NOTEBOOK_SPEC 2.0 notebook and run on Kaggle** (Tesla T4, 1002.0 s, 10/10 code cells after one restart, kernel `dimer-nb2-whisper-asr-finetune v2`). The task-inference standalone notebook was not run.
+
+Before the standalone migration: a clean supported-class execution of the notebook blob at that revision is recorded in the rows above (Kaggle container, fresh interpreter, clean cache, pinned wheels, all stages of the default path, verbatim blob measured in-run, every version recorded); it supersedes the earlier rows, which remain as the audit trail of the review round. Static CI is green on the same branch. The registry status remains **Candidate** until a reviewer confirms the recorded run against the notebook blob under review and an integrator promotes it; promotion is not performed by the builder. The commit that adds a recorded-execution row changes documentation only; the executed source is the commit named in the row.
 ## Speech-recognition workshop notebook
 
 `tutorials/DIMER_Whisper_Speech_Recognition_Workshop.ipynb` (`TASK-INFERENCE` / `WORKSHOP`, DIMER Notebook Specification 2.2) is a **Candidate**. It carries its reference module, runner, frozen sample manifest, model manifest and hash-pinned dependency lock, and installs them into an isolated `uv` Python 3.12.12 environment. Its design is `docs/speech-recognition-workshop-spec.md`.

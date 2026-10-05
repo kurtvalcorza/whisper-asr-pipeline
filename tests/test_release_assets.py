@@ -5,7 +5,8 @@ so each negative control below re-runs the validator against a copy carrying one
 that has actually shipped in, or been found to evade the checks of, DIMER tutorials:
 editable self-install in either spelling, hard-coded or rebound revision, persisted
 outputs, drifting identity, conflicting release status, an enabled or non-form BYOD gate,
-a required call surviving only in a comment, and a stale-import guard that no longer raises.
+a required call surviving only in a comment, an isolated install without its hash check, and a restart
+instruction.
 """
 
 from __future__ import annotations
@@ -108,12 +109,12 @@ def test_committed_tree_passes() -> None:
 @pytest.mark.parametrize("flag", ["'-e', ", "'--editable', "])
 def test_control_editable_self_install_is_rejected(tree: Path, flag: str) -> None:
     module = _load_validator(tree)
-    # A second pip call that installs the tree editably; the pinned-install marker line stays intact.
+    # A pip call that installs the tree editably, added to the isolated install cell; its markers stay intact.
     _replace_in_code(
         module,
-        "    importlib.invalidate_caches()\n",
-        f"    subprocess.run([sys.executable, '-m', 'pip', 'install', '-q', {flag}'.'], check=True)\n"
-        "    importlib.invalidate_caches()\n",
+        'SKIP_INSTALL = os.environ.get("DIMER_NOTEBOOK_CI_PREINSTALLED") == "1"\n',
+        'SKIP_INSTALL = os.environ.get("DIMER_NOTEBOOK_CI_PREINSTALLED") == "1"\n'
+        f"subprocess.run([sys.executable, '-m', 'pip', 'install', '-q', {flag}'.'], check=True)\n",
     )
     with pytest.raises(module.ValidationError, match="editable self-install"):
         module.validate_notebooks()
@@ -182,14 +183,19 @@ def test_control_required_call_only_in_comment_is_rejected(tree: Path) -> None:
         module.validate_notebooks()
 
 
-def test_control_guard_that_no_longer_raises_is_rejected(tree: Path) -> None:
+def test_control_isolated_install_without_hash_check_is_rejected(tree: Path) -> None:
+    # WSP-M1: the stale-import restart guard is gone; the isolated install must keep --require-hashes.
     module = _load_validator(tree)
-    _replace_in_code(
-        module,
-        "    if stale:\n        raise RuntimeError(",
-        "    if stale:\n        print(  # Restart the runtime, then rerun from the top.\n            ",
-    )
-    with pytest.raises(module.ValidationError, match="must raise RuntimeError"):
+    _replace_in_code(module, '"--require-hashes", ', "")
+    with pytest.raises(module.ValidationError, match="--require-hashes"):
+        module.validate_notebooks()
+
+
+def test_control_restart_instruction_is_rejected(tree: Path) -> None:
+    module = _load_validator(tree)
+    anchor = "os.makedirs('outputs', exist_ok=True)\n"
+    _replace_in_code(module, anchor, anchor + "print('Restart the runtime, then rerun from the top.')\n")
+    with pytest.raises(module.ValidationError, match="restart"):
         module.validate_notebooks()
 
 

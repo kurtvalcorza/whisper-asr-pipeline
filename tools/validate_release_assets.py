@@ -1,6 +1,6 @@
 """Static release-asset validation for the Whisper large-v3-turbo ASR DIMER pipeline.
 
-Checks the STANDALONE tutorial notebook (DIMER Notebook Specification 2.0 §4), the tutorial
+Checks the STANDALONE tutorial notebook (DIMER Notebook Specification 2.2 §4), the tutorial
 registry, model card, README, STATUS.md and weight documentation for source conformance and
 cross-document identity consistency, and runs the generator parity checks (PAR1–PAR3).
 
@@ -47,10 +47,17 @@ EXPECTED_OUTPUTS = (
 )
 # Profile-specific code the notebook must exercise through the carried module's public API.
 CODE_MARKERS = (
-    "input_manifest = validate_inputs(audio_input, language='en', task='transcribe', names=[sample_name])",
+    "input_manifest = validate_inputs(audio_input, language=language, task=TASK, names=[sample_name])",
     "validate_inputs(audio_input, chunk_length_s=MAX_CHUNK_LENGTH_S + 1)",
-    "result = pipe.transcribe(audio_input, language='en', task='transcribe')",
-    "report = evaluation_report(result, reference, sample_kind=sample_kind)",
+    "result = pipe.transcribe(audio_input, language=language, task=TASK, return_timestamps=RETURN_TIMESTAMPS)",
+    "TASK = 'transcribe'",
+    "RETURN_TIMESTAMPS = False",
+    "BYOD_PATH = ''",
+    "waveform, sampling_rate = decode_audio(sample_name, audio_bytes)",
+    "audio_input = {'array': waveform, 'sampling_rate': sampling_rate}",
+    "if len(uploaded) != 1:",
+    "activity = pipe.transcribe({'array': activity_waveform, 'sampling_rate': 16_000}, language=language, task=TASK)",
+    "report = with_empty_transcript_baseline(evaluation_report(result, reference, sample_kind=sample_kind), reference)",
     "print({'ceilings': {'TASKS': list(TASKS), 'MIN_CHUNK_LENGTH_S': MIN_CHUNK_LENGTH_S, 'MAX_CHUNK_LENGTH_S': MAX_CHUNK_LENGTH_S}})",
     "REFERENCE_TEXT = ''",
     "SAMPLE_DATASET_REVISION = '5be91486e11a2d616f4ec5db8d3fd248585ac07a'",
@@ -77,6 +84,14 @@ MARKDOWN_MARKERS = (
     "abbreviations and numbers are **not** normalised",
     "the verdict is `not-measurable`",
     "`sample-sanity`",
+    "**empty-transcript baseline**",
+    "## 9. Activity: what does Whisper write for silence?",
+    "## How to use this notebook",
+    "<strong>Glossary</strong>",
+    "**Predict before running:**",
+    "<summary>Check your reasoning</summary>",
+    "## Troubleshooting",
+    "## Conclusion (your notes)",
     "speaker diarization, speaker identification or any biometric inference",
     "pinned dataset revision `5be91486e11a2d616f4ec5db8d3fd248585ac07a`",
 )
@@ -97,6 +112,14 @@ FINETUNE_CODE_MARKERS = (
     "SPLIT_DIGEST = hashlib.sha256(",
     "entry = validate_inputs(audio_input, language=LANGUAGE, task='transcribe', names=[clip['id']])['inputs'][0]",
     "if entry['seconds'] > MAX_CHUNK_LENGTH_S:",
+    "DROPPED_OVER_30S = [c['id'] for c in clips if len(c['audio']) / TARGET_RATE > MAX_CHUNK_LENGTH_S]",
+    "input_manifest['findings'].append({'input': 'clips-over-30s', 'verdict': 'dropped before the split', 'count': len(DROPPED_OVER_30S), 'ids': DROPPED_OVER_30S})",
+    "if 'pipe' not in globals():",
+    "    pipe = WhisperASRPipeline.from_pretrained(weights_dir=WEIGHTS_DIR, allow_download=False)",
+    "uploaded = read_byod_files(BYOD_PATH)",
+    "TRAIN_CLIPS = min(len(clips) - 1, max(1, round(BYOD_TRAIN_FRACTION * len(clips))))",
+    "EVAL_TRANSCRIPTS_IN_TRAIN = sum(normalise_transcript(c['text']) in train_texts for c in eval_clips)",
+    "adapted_edits = word_error_breakdown(eval_references, adapted_transcripts)",
     "validate_inputs({'array': eval_clips[0]['audio'], 'sampling_rate': TARGET_RATE}, chunk_length_s=MAX_CHUNK_LENGTH_S + 1)",
     "baseline_transcripts = transcribe_all(pipe, eval_clips)",
     "baseline_wer = corpus_word_error_rate(eval_references, baseline_transcripts)",
@@ -130,6 +153,14 @@ FINETUNE_MARKDOWN_MARKERS = (
     "`sample-sanity`",
     "catastrophic forgetting",
     "CC-BY-4.0",
+    "## 11. Activity: change one thing — the number of epochs",
+    "## How to use this notebook",
+    "<strong>Glossary</strong>",
+    "**Predict before running:**",
+    "<summary>Check your reasoning</summary>",
+    "**Read the gain carefully.**",
+    "## Troubleshooting",
+    "## Conclusion (your notes)",
 )
 # WORKSHOP-mode notebooks (DIMER Notebook Specification 2.2). They carry their own reference source,
 # dependency lock and runner and execute in an isolated environment, so they are checked for
@@ -189,10 +220,10 @@ FORBIDDEN_OUTSIDE_MODULE = (
 # ---------------------------------------------------------------------------
 # Shared checks. Everything below is source/structure validation only. Passing
 # these checks is NOT clean-runtime execution evidence under DIMER Notebook
-# Specification 2.0; see docs/release-verification.md for the release gate.
+# Specification 2.2; see docs/release-verification.md for the release gate.
 # ---------------------------------------------------------------------------
 
-NOTEBOOK_SPEC = "2.0"
+NOTEBOOK_SPEC = "2.2"
 ALLOWED_PROFILES = {"E2E", "ARTIFACT-INFERENCE", "TASK-INFERENCE", "MULTI-CAPABILITY", "SMOKE"}
 STATUS_TOKENS = ("Candidate", "Release-grade")
 PLACEHOLDER = re.compile(r"\b(TODO|TBD|FIXME)\b|Insert text here|Tooltip:", re.I)
@@ -229,10 +260,8 @@ REQUIRED_CARD_HEADINGS = [
 COMMON_CODE_MARKERS = (
     "PINS = [",
     "NOTEBOOK_SOURCE = {",
-    "SKIP_INSTALL = os.environ.get('DIMER_NOTEBOOK_CI_PREINSTALLED') == '1'",
-    "subprocess.run([sys.executable, '-m', 'pip', 'install', '-q', *PINS], check=True)",
-    "importlib.metadata.packages_distributions()",
-    "importlib.invalidate_caches()",
+    "LOCK_TEXT = r'" + "''",
+    "_ip.input_transformers_cleanup.append(_route_to_isolated_runtime)",
     "platform.python_version()",
     "torch.__version__",
     "MANIFEST = {",
@@ -652,17 +681,17 @@ def _validate_parity(
 
 
 def _validate_bootstrap_guard(path: Path, code_cells: list[tuple[int, str, ast.Module]]) -> None:
-    """The stale-import guard must actually raise: `if stale:` whose body raises RuntimeError."""
-    raises = False
-    for _, _, tree in code_cells:
-        for node in ast.walk(tree):
-            if isinstance(node, ast.If) and isinstance(node.test, ast.Name) and node.test.id == "stale":
-                for sub in ast.walk(node):
-                    if isinstance(sub, ast.Raise) and isinstance(sub.exc, ast.Call):
-                        func = sub.exc.func
-                        if isinstance(func, ast.Name) and func.id == "RuntimeError":
-                            raises = True
-    _check(raises, f"{path.name}: install cell must raise RuntimeError when already-imported packages change")
+    """WSP-M1 / WSF-M1 (RUN1, RUN10, ENV6): nothing is pip-installed into the kernel and no cell asks for a restart.
+    Exactly two kernel cells exist: the isolated install (pinned uv by digest, managed CPython, hash lock with
+    --require-hashes --only-binary :all:) and the router that sends every later cell to the isolated worker."""
+    kernel_raw = [source for _index, source, _tree in code_cells if "# dimer: kernel cell" in source]
+    _check(len(kernel_raw) == 2, f"{path.name}: exactly two kernel cells (isolated install and router) are expected")
+    install = next((k for k in kernel_raw if "LOCK_TEXT = r" in k), "")
+    for needed in ('"--managed-python"', '"--require-hashes"', '"--only-binary"', '":all:"', "UV_SHA256", "LOCK_SHA256", 'platform.machine() != "x86_64"'):
+        _check(needed in install, f"{path.name}: the isolated install cell must use {needed}")
+    every = "\n".join(source for _index, source, _tree in code_cells)
+    _check("Restart the runtime" not in every, f"{path.name}: no cell may ask for a runtime restart")
+    _check("[sys.executable, '-m', 'pip'" not in every, f"{path.name}: nothing may be pip-installed into the kernel")
 
 
 def _validate_notebook_content(
@@ -687,10 +716,9 @@ def _validate_notebook_content(
     _check(not present, f"{path.name}: forbidden/insecure source: {present}")
     leaked = [marker for marker in FORBIDDEN_OUTSIDE_MODULE if marker in outside]
     _check(not leaked, f"{path.name}: direct library use outside the carried module cell (G2): {leaked}")
-    install_index = code_cells[0][0]  # the generator-owned install cell is the only place a subprocess may run
-    after_install = "\n".join(
-        text for index, text in stripped.items() if index not in embedded and index != install_index
-    )
+    # The two generator-owned kernel cells (isolated install and router) are the only places a subprocess may run.
+    kernel = {index for index, source, _tree in code_cells if "# dimer: kernel cell" in source}
+    after_install = "\n".join(text for index, text in stripped.items() if index not in embedded and index not in kernel)
     workers = [marker for marker in FORBIDDEN_WORKER_CALLS if marker in after_install]
     _check(not workers, f"{path.name}: worker process or subprocess on the primary path (ST1): {workers}")
     _check(

@@ -1,0 +1,55 @@
+[colab] Parsing notebook '/home/kurt/colab-runs/whisper-asr-pipeline-9a9c39f-2f94d6/whisper_asr_finetune_colab_9a9c39f_colab-cli-t4.ipynb'...
+[colab] Executing cell 1/13 - Infrastructure: install the locked runtime into an isolated environment...
+{'isolated_environment': '/content/dimer_isolated_env', 'isolated_python': '3.12.12', 'kernel_python': '3.13.15', 'locked_packages': 70, 'setup_seconds': 62}
+[colab] Executing cell 2/13 - Route the remaining cells to the isolated environment...
+Every later code cell now runs in /content/dimer_isolated_env/bin/python (pid 3769).
+[colab] Executing cell 3/13 - Infrastructure: record the pinned runtime and the notebook source...
+{'notebook_source': {'repository': 'whisper-asr-pipeline', 'repository_revision': '382758b7254b11ed773e783ef85cbac487265de8', 'embedded_module': 'src/whisper_asr_pipeline/pipeline.py', 'embedded_modules': ['src/whisper_asr_pipeline/pipeline.py', 'src/whisper_asr_pipeline/tutorial_support.py'], 'module_sha256': 'bfa2693c8f58408d8d7d5a4d0213ccb228e799384e4cf86aa46addccc8a3db91', 'generator': 'build_notebook.py/2.1-swc', 'notebook_spec': '2.2'}, 'python': '3.12.12', 'torch': '2.6.0+cu124', 'transformers': '4.52.1', 'peft': '0.17.1', 'cuda': True}
+[colab] Executing cell 4/13 - whisper_asr_finetune-12...
+[colab] Executing cell 5/13 - whisper_asr_finetune-14...
+[colab] Executing cell 6/13 - Infrastructure: pin, stage and verify the model...
+{'model_id': 'openai/whisper-large-v3-turbo', 'revision': '41f01f3fe87f28c78e2fbf8b568835947dd65ed9', 'license': 'MIT', 'files': 12, 'total_bytes': 1622464535}
+{'weights_dir': '/content/weights/whisper-large-v3-turbo', 'fetched': ['README.md', 'added_tokens.json', 'config.json', 'generation_config.json', 'merges.txt', 'model.safetensors', 'normalizer.json', 'preprocessor_config.json', 'special_tokens_map.json', 'tokenizer.json', 'tokenizer_config.json', 'vocab.json']}
+{'verified_files': 12, 'revision': '41f01f3fe87f28c78e2fbf8b568835947dd65ed9'}
+{'device': 'cuda:0', 'source': 'local-snapshot'}
+Device set to use cuda:0
+[colab] Executing cell 7/13 - whisper_asr_finetune-18...
+
+Generating train split:   0%|          | 0/563 [00:00<?, ? examples/s]
+Generating train split:  18%|█▊        | 100/563 [00:00<00:00, 969.49 examples/s]
+Generating train split: 100%|██████████| 563/563 [00:00<00:00, 3579.26 examples/s]
+{'dataset': {'name': 'PolyAI/minds14', 'config': 'en-US', 'revision': '40ce77cb32a384e4d50a568e1ec39ac804019d33', 'license': 'CC-BY-4.0'}, 'language': 'en', 'train_clips': 400, 'eval_clips': 100, 'dropped_over_30s': 5, 'split_digest': '1d7ec0f47f34c578', 'seconds_mean': 8.29, 'seconds_max': 28.07, 'eval_transcripts_also_in_train': 3}
+{'example_text': "hi I'm going to be traveling abroad in Japan and I just wondered if I'm going to be able to use my bank card when I'm there if you could let me know that would be great thank you"}
+[colab] Executing cell 8/13 - whisper_asr_finetune-20...
+{'ceilings': {'TASKS': ['transcribe', 'translate'], 'MIN_CHUNK_LENGTH_S': 1, 'MAX_CHUNK_LENGTH_S': 30, 'TARGET_RATE': 16000}}
+{'validated_clips': 500, 'verdict': 'accepted', 'findings': [{'input': 'clips-over-30s', 'verdict': 'dropped before the split', 'count': 5, 'ids': ['en-US~PAY_BILL/602baedc5f67b421554f64c5.wav', 'en-US~APP_ERROR/602ba6b9963e11ccd901ccdb.wav', 'en-US~ATM_LIMIT/602ba7815f67b421554f6430.wav', 'en-US~ATM_LIMIT/602ba71405f96973d6794465.wav', 'en-US~ABROAD/602ba5e2963e11ccd901ccbf.wav']}, {'input': 'oversized-chunk-probe', 'verdict': 'rejected', 'message': 'chunk_length_s must be between 1 and 30 seconds'}]}
+[colab] Executing cell 9/13 - whisper_asr_finetune-22...
+/content/dimer_isolated_env/lib/python3.12/site-packages/transformers/models/whisper/generation_whisper.py:573: FutureWarning: The input name `inputs` is deprecated. Please make sure to use `input_features` instead.
+  warnings.warn(
+You have passed task=transcribe, but also have set `forced_decoder_ids` to [[1, None], [2, 50360]] which creates a conflict. `forced_decoder_ids` will be ignored in favor of task=transcribe.
+The attention mask is not set and cannot be inferred from input because pad token is same as eos token. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+You seem to be using the pipelines sequentially on GPU. In order to maximize efficiency please use a dataset
+{'device': 'cuda:0', 'source': 'local-snapshot', 'baseline_wer': 0.4211, 'edits': {'substitutions': 82, 'insertions': 424, 'deletions': 12, 'reference_words': 1230}, 'seconds': 40.1}
+{'reference': 'why was my card declined', 'baseline': 'Why was my card declined?', 'wer': 0.0}
+{'reference': 'how much cash can I pull out at your ATM', 'baseline': 'How much cash can I pull out at your ATM?', 'wer': 0.0}
+{'reference': 'return to direct deposit', 'baseline': 'Return to direct deposit.', 'wer': 0.0}
+[colab] Executing cell 10/13 - whisper_asr_finetune-24...
+{'lora_targets': ['q_proj', 'v_proj'], 'trainable_parameters': 6553600, 'all_parameters': 815431680, 'trainable_percent': 0.804, 'dtype': 'torch.float32'}
+[colab] Executing cell 11/13 - whisper_asr_finetune-26...
+{'epoch': 1, 'train_loss': 0.511, 'validation_loss': 0.4814, 'optimizer_steps': 50}
+{'epoch': 2, 'train_loss': 0.2832, 'validation_loss': 0.5016, 'optimizer_steps': 50}
+{'training_seconds': 595.1, 'peak_gpu_gib': 4.48, 'optimizer_steps_total': 100}
+[colab] Executing cell 12/13 - whisper_asr_finetune-28...
+Device set to use cuda:0
+{'baseline_wer': 0.4211, 'adapted_wer': 0.37073170731707317, 'wer_delta': -0.0504, 'verdict': 'sample-sanity'}
+{'edits_baseline': {'substitutions': 82, 'insertions': 424, 'deletions': 12, 'reference_words': 1230}, 'edits_adapted': {'substitutions': 81, 'insertions': 346, 'deletions': 29, 'reference_words': 1230}, 'eval_transcripts_also_in_train': 3}
+{'clips_with_changed_transcript': 100}
+{'reference': 'why was my card declined', 'baseline': 'Why was my card declined?', 'adapted': 'why was my card declined'}
+{'reference': 'how much cash can I pull out at your ATM', 'baseline': 'How much cash can I pull out at your ATM?', 'adapted': 'how much cash can I pull out at your ATM'}
+{'reference': 'return to direct deposit', 'baseline': 'Return to direct deposit.', 'adapted': 'return to direct deposit'}
+[colab] Executing cell 13/13 - whisper_asr_finetune-30...
+{'adapter_dir': 'outputs/whisper-asr-lora-adapter', 'files': 5, 'zip_mib': 12.5, 'zip_sha256': '2904999fb211c744047b16388313a612b3be9dc13904873b60faaea143135db4'}
+Device set to use cuda:0
+{'reloaded_wer': 0.3707, 'reload_agreement': '99/100', 'clips_changed_vs_baseline': 100, 'adapter': 'outputs/whisper-asr-lora-adapter', 'adapter_sha256': '061ee9739300b37fea24cf95f58de09f6be6bf9966e51a09a9c90857a5b0de1d', 'source': 'local-snapshot', 'reload_weight_check': {'module': 'model.decoder.layers.0.self_attn.q_proj', 'adapter_delta_max': 0.01835814118385315, 'merge_error_max': 0.00012183189392089844, 'tolerance': 0.001}}
+['whisper-asr-lora-adapter', 'whisper-asr-lora-adapter.zip', 'whisper_asr_finetune_evaluation_report.json', 'whisper_asr_finetune_input_manifest.json', 'whisper_asr_finetune_metrics.json', 'whisper_asr_finetune_result.json']
+[colab] Saving notebook with outputs to '/home/kurt/colab-runs/whisper-asr-pipeline-9a9c39f-2f94d6/whisper_asr_finetune_colab_9a9c39f_colab-cli-t4_output.ipynb'...

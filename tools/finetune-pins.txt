@@ -1,4 +1,4 @@
-# Runtime pins for the standalone fine-tuning notebook (tools/notebook_template_finetune.py, NOTEBOOK_SPEC 2.0 ENV2).
+# Runtime pins for the standalone fine-tuning notebook (tools/notebook_template_finetune.py, NOTEBOOK_SPEC 2.2 ENV2).
 # = pyproject [project].dependencies + the `tutorial` and `finetune` extras, verbatim; tests/test_finetune_parity.py
 # fails when this file and pyproject.toml drift.
 torch==2.6.0

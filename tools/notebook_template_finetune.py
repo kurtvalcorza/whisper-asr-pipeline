@@ -1,4 +1,4 @@
-"""E2E template for tools/build_notebook.py (NOTEBOOK_SPEC 2.0 §4 standalone carrier): LoRA fine-tuning.
+"""E2E template for tools/build_notebook.py (NOTEBOOK_SPEC 2.2 §4 standalone carrier): LoRA fine-tuning.
 
 Only the task-specific prose and stage cells live here. Runtime install (pins from
 tools/finetune-pins.txt), the embedded pipeline module, and the model pin/stage/verify cells are
@@ -15,7 +15,23 @@ TEMPLATE = {
     "mode": "GUIDED",
     "pipeline_class": "WhisperASRPipeline",
     "weights_key": "whisper-large-v3-turbo",
+    # pipeline.py is shared byte for byte with the workshop notebook; the review-fix helpers live in their own module.
+    "modules": ["pipeline.py", "tutorial_support.py"],
     "pins_file": "tools/finetune-pins.txt",
+    # NOTEBOOK_SPEC 2.2 §5 (WSF-M1): the pins are installed into an isolated uv environment and every later cell runs in
+    # a persistent worker there, so a hosted runtime's preloaded packages never force a restart. The lock is compiled with
+    # `uv pip compile tools/finetune-pins.txt --python-version 3.12 --python-platform x86_64-manylinux_2_28
+    # --generate-hashes --only-binary :all: -o tutorials/requirements-finetune.lock.txt`.
+    "isolated_runtime": True,
+    "infrastructure_labels": True,
+    "managed_python": "3.12.12",
+    "uv": {
+        "version": "0.12.15",
+        "url": "https://files.pythonhosted.org/packages/1e/fd/432451d732917c49152a291de3ef171aa6b0f1a22d39780fb2c1f085ca4c/uv-0.12.15-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
+        "bytes": 20081404,
+        "sha256": "aee9802f46bae436bd91751bb33ddeb379ef1596b5c19df193219d545d244b60",
+    },
+    "lock": "tutorials/requirements-finetune.lock.txt",
     "runtime_imports": ["torch", "transformers", "peft"],
     "title": "Whisper large-v3-turbo — DIMER LoRA fine-tuning tutorial (standalone)",
     "badges": [
@@ -43,10 +59,10 @@ TEMPLATE = {
     ],
     "capability": "parameter-efficient (LoRA) domain adaptation of the pinned `openai/whisper-large-v3-turbo` weights for automatic speech recognition, evaluated by corpus word error rate before and after adaptation and after a fresh reload of the exported adapter bundle",
     "run_all": (
-        "This notebook needs a 16 GiB-class CUDA GPU (Colab: Runtime > Change runtime type > T4 GPU; Kaggle P100/T4 also works) — the default configuration was measured at 4.5 GiB peak GPU memory and about 27 minutes on a Kaggle P100 (RUN11/RUN12; on CPU it runs but takes hours, so reduce `TRAIN_CLIPS`, `EVAL_CLIPS` and `EPOCHS` first). Once that runtime is selected, **Run all** installs the pinned dependencies, stages and digest-verifies the pinned snapshot, downloads one locale of the public `PolyAI/minds14` corpus at a pinned dataset revision and decodes/resamples it with the pinned `soundfile`/`torchaudio`, draws a seeded train/held-out split and validates every clip into an input manifest, records the zero-shot **baseline** corpus WER through the carried pipeline, attaches LoRA adapters to the verified base weights and trains them for two bounded epochs with AdamW under mixed precision, evaluates the adapted model on the held-out split through the same pipeline and writes the evaluation report, exports the manifested adapter bundle, and reloads it against the verified base snapshot with a weight-level merge check and a transcript agreement check. No repository clone, DIMER worker or service, credential, upload dialog or configuration edit is required (NOTEBOOK_SPEC 2.0 §5)."
+        "This notebook needs a 16 GiB-class CUDA GPU (Colab: Runtime > Change runtime type > T4 GPU; Kaggle P100/T4 also works) — the earlier version of this notebook took 1002 s end to end on a Kaggle **T4** (14 September 2026, after one manual restart, which this version no longer needs) and 1617.7 s with 4.48 GiB peak GPU memory on a Kaggle P100 (11 September 2026); this version has not been timed yet (RUN11/RUN12; on CPU it runs but takes hours, so reduce `TRAIN_CLIPS`, `EVAL_CLIPS` and `EPOCHS` first). Once that runtime is selected, **Run all** builds an isolated Python environment from the hash-locked pins (the kernel's own packages are left alone, so no restart is needed; a second Run all reuses it), stages and digest-verifies the pinned snapshot, downloads one locale of the public `PolyAI/minds14` corpus at a pinned dataset revision and decodes/resamples it with the pinned `soundfile`/`torchaudio`, draws a seeded train/held-out split and validates every clip into an input manifest, records the zero-shot **baseline** corpus WER through the carried pipeline, attaches LoRA adapters to the verified base weights and trains them for two bounded epochs with AdamW under mixed precision, evaluates the adapted model on the held-out split through the same pipeline and writes the evaluation report, exports the manifested adapter bundle, and reloads it against the verified base snapshot with a weight-level merge check and a transcript agreement check. No repository clone, DIMER worker or service, credential, upload dialog, configuration edit or runtime restart is required (NOTEBOOK_SPEC 2.2 §5)."
     ),
     "byod": (
-        "After the sample workflow completes, set `USE_BYOD = True` in Section 4 and re-run from that cell to upload a `transcripts.csv` (`file,text` columns) plus the referenced audio files; they enter the same decoding, validation, seeded split, baseline, LoRA training, evaluation, export and fresh-reload cells as the public sample (DAT14). Expected format, the 30-second clip ceiling and the privacy guidance are stated in the Prerequisites and in Section 4; uploads stay inside this runtime. BYOD is optional and never part of the default path."
+        "After the sample workflow completes, set `USE_BYOD = True` in Section 4 and choose *Runtime → Run after* from that cell. Supply a `.csv` with `file,text` columns plus the audio files it names, either as a folder or `.zip` in `BYOD_PATH` or through the upload dialog; they enter the same decoding, validation, seeded split, baseline, LoRA training, evaluation, export and fresh-reload cells as the public sample (DAT14). For BYOD the split is derived from what you supply (`BYOD_TRAIN_FRACTION`, 80 / 20 by default) and at least `BYOD_MIN_CLIPS` (10) usable clips are needed; `TRAIN_CLIPS` and `EVAL_CLIPS` apply to the public sample only. Clips longer than 30 seconds are dropped before the split and listed as a finding. Uploads stay inside this runtime. BYOD is optional and never part of the default path."
     ),
     "intro": (
         "**What is trained and what is not.** LoRA keeps every original weight matrix $W_0$ frozen and learns a "
@@ -77,15 +93,92 @@ TEMPLATE = {
         "transcript-confidence threshold. Whisper can hallucinate fluent text on silence or music, and the pipeline "
         "does not detect it."
     ),
+    "guided_opening": [
+        (
+            "## How to use this notebook\n\n"
+            "**Who this notebook is for.** Learners who can open a hosted notebook (Google Colab or Kaggle), run cells in order and read short "
+            "Python and PyTorch, and who want to see how a large pretrained speech model is adapted to a new domain with a low-rank adapter, and "
+            "how the result is measured honestly. No prior experience with LoRA or Whisper is assumed: each term is explained where it is first "
+            "needed and again in the glossary below. A 16 GiB-class GPU (Colab T4) is required. The **Prerequisites** give the details.\n\n"
+            "**Running it.** In Colab choose *Runtime → Change runtime type → T4 GPU*, then *Runtime → Run all*. The default path needs no edit, "
+            "no upload, no account, no token and no runtime restart. Section 1 builds the isolated environment (the CUDA build of `torch` is "
+            "several GB, so it is one of the slowest steps); training in Section 8 is the longest. A second Run all in the same runtime reuses the "
+            "environment.\n\n"
+            "**Where the code runs.** The first two code cells run in the notebook kernel: they build the environment and start one Python process "
+            "inside it. Every later cell is sent to that process, so the pinned `torch`, `transformers`, `peft`, `numpy` and `datasets` are used "
+            "without replacing anything the hosted runtime had already loaded. Printed output and errors come back to the notebook as usual, and "
+            "variables persist from cell to cell.\n\n"
+            "**Two kinds of cell.** *Infrastructure cells* (Sections 1–3: the isolated install and router, the carried pipeline module and the "
+            "pinned-model staging) are collapsed and labelled **Infrastructure**; you may run them without studying their implementation. "
+            "*Learner cells* (Sections 4–10) are the machine-learning workflow.\n\n"
+            "**Form controls.** Some learner cells start with fields Colab renders as a form: `LOCALE`, `TRAIN_CLIPS`, `EVAL_CLIPS`, `SEED`, "
+            "`USE_BYOD`, `BYOD_LANGUAGE`, `BYOD_PATH` and `BYOD_TRAIN_FRACTION` (Section 4); `LORA_RANK` and `LORA_ALPHA` (Section 7); `EPOCHS`, "
+            "`BATCH_SIZE`, `GRAD_ACCUM` and `LEARNING_RATE` (Section 8). Leave them at their defaults for the first run. After a change, select "
+            "the cell you changed and choose *Runtime → Run after*: every later cell, including the baseline, runs again (Section 6 rebuilds the "
+            "baseline pipeline itself).\n\n"
+            "**Section tags.** Each learner heading carries one tag. **[Concept]** — what the model does and why. **[Evaluation practice]** — how "
+            "the evidence is produced and how to read it. **[Engineering]** — reproducibility, provenance and packaging.\n\n"
+            "**Predict, then check.** Before each principal result a **Predict before running** prompt asks you to commit to an expectation; after "
+            "it, **What to notice** describes normal output and a collapsed **Check your reasoning** block gives a worked answer. Write your own "
+            "answer first, then open it. The numbers the answers quote come from the recorded P100 run of an earlier version of this notebook "
+            "with the same defaults (11 September 2026); no run of this revision is recorded yet."
+        ),
+        (
+            "## The task: Input → Model/System → Output\n\n"
+            "| Stage | Input | Model / system | Output |\n"
+            "|---|---|---|---|\n"
+            "| **Load and validate** | one MINDS-14 locale at a pinned revision (or your `.csv` + audio), resampled to 16 kHz | the carried `validate_inputs` plus two training rules | a seeded train / held-out split and an input manifest |\n"
+            "| **Baseline** | the held-out clips | Whisper large-v3-turbo, zero-shot, through `WhisperASRPipeline` | baseline corpus WER and its edit breakdown |\n"
+            "| **Adapt** | the training clips and their transcripts | LoRA (rank 32) on the q/v projections, AdamW, mixed precision | a trained adapter (under 1 % of the parameters) |\n"
+            "| **Evaluate and reload** | the same held-out clips | the adapted model, then the exported bundle reloaded on the verified base | adapted and reloaded WER, a merge check, an adapter bundle |\n\n"
+            "## Roadmap\n\n"
+            "| Section | Tag | What happens | What you read |\n"
+            "|---|---|---|---|\n"
+            "| 1. Install the pinned runtime | [Engineering] | isolated environment built; later cells routed to it | versions, CUDA |\n"
+            "| 2. Pipeline code | [Engineering] | the repository's module, carried verbatim | nothing to run by hand |\n"
+            "| 3. Pin, stage and verify the model | [Engineering] | snapshot downloaded and digest-checked | the verified files |\n"
+            "| 4. Load the data | [Evaluation practice] | corpus (or BYOD), resampling, seeded split | counts, dropped clips, duplicates |\n"
+            "| 5. Validate | [Evaluation practice] | every clip checked; findings recorded | the manifest summary |\n"
+            "| 6. Baseline | [Evaluation practice] | zero-shot WER on the held-out clips | WER and edit breakdown |\n"
+            "| 7. Attach LoRA | [Concept] | adapters on the verified base weights | trainable share |\n"
+            "| 8. Train | [Concept] | a plain PyTorch loop | losses per epoch |\n"
+            "| 9. Evaluate | [Evaluation practice] | adapted WER beside the baseline | the gain and what it is made of |\n"
+            "| 10. Export and reload | [Engineering] | adapter bundle, fresh reload, merge check | reloaded WER, agreement |\n"
+            "| 11. Activity (optional) | [Concept] | change `EPOCHS` and compare | your comparison |\n"
+            "| Troubleshooting, Conclusion | — | recovery, your notes | when needed |\n\n"
+            "**Fast path.** Short on time? Run all, then read Sections 6, 8 and 9 and the conclusion."
+        ),
+        (
+            "<details>\n<summary><strong>Glossary</strong> — open when a term is unfamiliar</summary>\n\n"
+            "| Term | Meaning in this notebook |\n"
+            "|---|---|\n"
+            "| **LoRA** | Low-Rank Adaptation: the original weights stay frozen and a small correction `B @ A` is learned for chosen layers. |\n"
+            "| **Rank `r` / alpha** | The inner size of `B @ A` (here 32) and its scale (`alpha / r`); larger rank means more trainable parameters. |\n"
+            "| **q / v projections** | The query and value matrices of each attention block, where the adapters are attached. |\n"
+            "| **Log-Mel spectrogram** | The 128-band time-frequency picture of 30 seconds of audio that Whisper's encoder reads. |\n"
+            "| **Teacher forcing** | During training the decoder is fed the correct previous tokens and scored on predicting the next one. |\n"
+            "| **`-100` label** | A padding position the loss ignores. |\n"
+            "| **Mixed precision / gradient scaler** | Matrix products run in float16 for speed; the scaler keeps small gradients from rounding to zero. |\n"
+            "| **Training / validation loss** | Teacher-forced cross-entropy on the training and held-out clips: optimisation evidence, not the result. |\n"
+            "| **Corpus WER** | Total word edits (substitutions + insertions + deletions) over total reference words, after case and punctuation normalisation. |\n"
+            "| **Edit breakdown** | The same errors split by type; shows whether adaptation changed spelling (substitutions) or what was heard. |\n"
+            "| **Zero-shot baseline** | The unmodified model on the same held-out clips: the number every adapted figure is read against. |\n"
+            "| **Adapter bundle** | The exported adapter weights, configuration, metrics, provenance and a digest manifest. |\n"
+            "| **Merge check** | Proof that a fresh load really applied the saved adapter: `W_reloaded = W_base + (alpha / r) B @ A` on one probe layer. |\n"
+            "| **Forgetting** | Adaptation can make the model worse outside the training domain; this notebook does not measure it. |\n"
+            "| **Isolated environment** | A separate Python built from hash-locked pins, in which every learner cell runs. |\n\n"
+            "</details>"
+        ),
+    ],
     "prerequisites": [
-        "- **Runtime:** a fresh supported runtime with a 16 GiB-class CUDA GPU (Google Colab **T4** or Kaggle P100/T4; Python 3.12 on Colab). Measured on a Kaggle P100 with the default configuration by the previous, clone-based revision of this notebook: 4.5 GiB peak GPU memory and about 27 minutes end to end, of which about 18 minutes is training (100 optimizer steps) and 4 minutes is the pinned install. CPU execution is supported only as a reduced smoke test: lower `TRAIN_CLIPS`, `EVAL_CLIPS` and `EPOCHS` first, or the training cell will take hours.",
+        "- **Runtime:** a fresh **Linux x86_64** runtime with a 16 GiB-class CUDA GPU (Google Colab **T4** or Kaggle P100/T4). The kernel's own Python version does not matter: Section 1 builds a separate environment with CPython 3.12.12 from the hash-locked pins and every later cell runs there. Timing of earlier versions of this notebook with the default configuration: 1002 s end to end on a Kaggle T4 (14 September 2026, the standalone version before this one; it needed one manual restart after the install cell); 1617.7 s on a Kaggle P100 (11 September 2026: 236 s install, 109 s baseline, 1106.7 s training for 100 optimizer steps, 72 s adapted evaluation, 75 s export and reload; 4.48 GiB peak GPU memory). This version has not been timed yet; the isolated-environment build replaces the in-kernel install. CPU execution is supported only as a reduced smoke test: lower `TRAIN_CLIPS`, `EVAL_CLIPS` and `EPOCHS` first, or the training cell will take hours.",
         "- **Knowledge:** basic Python and PyTorch; what a waveform, a sampling rate, a log-mel spectrogram, teacher forcing and a word error rate are; the idea of a low-rank adapter.",
-        "- **Data:** the default sample is one locale of the public `PolyAI/minds14` banking-intent corpus (CC-BY-4.0), fetched from the Hugging Face Hub at the pinned dataset revision `40ce77cb32a384e4d50a568e1ec39ac804019d33` and decoded with the pinned `soundfile`/`torchaudio` — no private data is needed. Optional BYOD upload is gated off by default so the sample path can run top-to-bottom without interaction. Expected BYOD input: a `transcripts.csv` with `file,text` columns plus the referenced audio files (WAV/FLAC/OGG readable by `soundfile`, any rate, mono or stereo, each at most 30 seconds), all selected in the same upload dialog; set `BYOD_LANGUAGE` to the ISO code Whisper should decode in. Do not upload confidential or restricted data to a hosted notebook environment unless you are authorized to do so. Uploaded inputs remain in the notebook runtime; this pipeline does not send them to a third-party inference API. An adapter trained on the default sample inherits CC-BY-4.0 attribution obligations.",
+        "- **Data:** the default sample is one locale of the public `PolyAI/minds14` banking-intent corpus (CC-BY-4.0), fetched from the Hugging Face Hub at the pinned dataset revision `40ce77cb32a384e4d50a568e1ec39ac804019d33` and decoded with the pinned `soundfile`/`torchaudio` — no private data is needed. Optional BYOD upload is gated off by default so the sample path can run top-to-bottom without interaction. Expected BYOD input: one `.csv` with `file,text` columns plus the audio files it names (WAV/FLAC/OGG readable by `soundfile`, any rate, mono or stereo, each at most 30 seconds; longer clips are dropped and listed), as a folder or `.zip` in `BYOD_PATH` or all selected in one upload dialog; at least 10 usable clips, split 80 / 20 by default (`BYOD_TRAIN_FRACTION`); set `BYOD_LANGUAGE` to the ISO code Whisper should decode in. A few dozen clips are enough to run the pipeline end to end, not to measure a reliable gain. Do not upload confidential or restricted data to a hosted notebook environment unless you are authorized to do so. Uploaded inputs remain in the notebook runtime; this pipeline does not send them to a third-party inference API. An adapter trained on the default sample inherits CC-BY-4.0 attribution obligations.",
     ],
     "cells": [
         {
             "md": (
-                "## 4. Load a public labelled speech set or optional BYOD\n\n"
+                "## 4. Load a public labelled speech set or optional BYOD · [Evaluation practice]\n\n"
                 "The default path loads one locale of the public `PolyAI/minds14` banking-intent corpus (CC-BY-4.0) at the "
                 "pinned dataset revision `40ce77cb32a384e4d50a568e1ec39ac804019d33` so the bytes cannot drift: short "
                 "telephone-quality utterances stored at **8 kHz**, each with a cased, punctuated transcription. Whisper "
@@ -98,14 +191,24 @@ TEMPLATE = {
                 "error rate splits on whitespace, so it is not a meaningful metric for the corpus's `zh-CN` and `ko-KR` "
                 "locales. BYOD is optional and disabled by default; expected input is a `transcripts.csv` with `file,text` "
                 "columns plus the referenced audio files, all selected in the same upload dialog, and `BYOD_LANGUAGE` names "
-                "the decoding language. Look for a dictionary naming the corpus, the language, the clip counts, the split "
-                "digest and the clip-length statistics."
+                "the decoding language. BYOD files come from `BYOD_PATH` (a folder or a `.zip`; works in any Jupyter runtime) "
+                "or, when it is empty, from the upload dialog; a missing `.csv`, a missing `file,text` header and every audio file the "
+                "`.csv` names but you did not supply are refused by name. For BYOD the split is derived from what you supplied: "
+                "`BYOD_TRAIN_FRACTION` (0.8) of the usable clips train and the rest are held out, and at least `BYOD_MIN_CLIPS` (10) "
+                "usable clips are required; `TRAIN_CLIPS` and `EVAL_CLIPS` apply to the public sample only.\n\n"
+                "**Clips longer than 30 seconds.** Whisper's window is 30 seconds, so a longer clip would have its supervision cut. "
+                "Such clips are **dropped before the split**, counted in the printed dictionary and listed by id as a finding in the "
+                "Section 5 input manifest — nothing is dropped silently. Look for a dictionary naming the corpus, the language, the "
+                "clip counts (including any dropped), the split digest, the clip-length statistics and how many held-out transcripts "
+                "also occur, word for word, in the training split."
             ),
             "code": (
                 "import csv\n"
                 "import hashlib\n"
                 "import io\n"
-                "import random\n\n"
+                "import random\n"
+                "import zipfile\n"
+                "from pathlib import Path\n\n"
                 "import soundfile as sf\n"
                 "import torchaudio\n"
                 "from datasets import Audio, load_dataset\n\n"
@@ -115,56 +218,87 @@ TEMPLATE = {
                 "SEED = 0  # @param {{type:\"integer\"}}\n"
                 "USE_BYOD = False  # @param {{type:\"boolean\"}}\n"
                 "BYOD_LANGUAGE = 'en'  # @param {{type:\"string\"}}\n"
+                "BYOD_PATH = ''  # @param {{type:\"string\"}}\n"
+                "BYOD_TRAIN_FRACTION = 0.8  # @param {{type:\"number\"}}\n"
+                "BYOD_MIN_CLIPS = 10\n"
                 "SAMPLE_DATASET = 'PolyAI/minds14'\n"
                 "SAMPLE_DATASET_REVISION = '40ce77cb32a384e4d50a568e1ec39ac804019d33'\n"
                 "TARGET_RATE = 16_000\n\n\n"
-                "def decode_clip(raw_bytes):\n"
-                "    # Decode with the pinned soundfile, then resample with the pinned torchaudio: the datasets\n"
-                "    # audio feature would decode through torchcodec/FFmpeg, which this runtime does not pin.\n"
-                "    waveform, rate = sf.read(io.BytesIO(raw_bytes), dtype='float32')\n"
-                "    if waveform.ndim > 1:\n"
-                "        waveform = waveform.mean(axis=1)\n"
+                "def decode_clip(name, raw_bytes):\n"
+                "    # Decode with the pinned soundfile (decode_audio names the file it refuses), then resample with the pinned\n"
+                "    # torchaudio: the datasets audio feature would decode through torchcodec/FFmpeg, which this runtime does not pin.\n"
+                "    waveform, rate = decode_audio(name, raw_bytes)\n"
                 "    if rate != TARGET_RATE:\n"
                 "        waveform = torchaudio.functional.resample(torch.from_numpy(waveform), rate, TARGET_RATE).numpy()\n"
                 "    return waveform\n\n\n"
+                "def read_byod_files(path):\n"
+                "    source = Path(path)\n"
+                "    if source.is_dir():\n"
+                "        return {{p.name: p.read_bytes() for p in sorted(source.iterdir()) if p.is_file() and not p.name.startswith('.')}}\n"
+                "    if source.suffix.lower() == '.zip':\n"
+                "        with zipfile.ZipFile(source) as archive:\n"
+                "            return {{Path(n).name: archive.read(n) for n in archive.namelist() if not n.endswith('/') and '__MACOSX/' not in n and not Path(n).name.startswith('.')}}\n"
+                "    raise ValueError(f'BYOD_PATH must be a folder or a .zip holding the .csv and the audio files: {{path}}')\n\n\n"
                 "if USE_BYOD:\n"
-                "    from google.colab import files\n"
-                "    uploaded = files.upload()\n"
-                "    manifest_name = next(name for name in uploaded if name.lower().endswith('.csv'))\n"
+                "    if BYOD_PATH:\n"
+                "        uploaded = read_byod_files(BYOD_PATH)\n"
+                "    else:\n"
+                "        from google.colab import files\n"
+                "        uploaded = files.upload()\n"
+                "    csv_names = [name for name in uploaded if name.lower().endswith('.csv')]\n"
+                "    if len(csv_names) != 1:\n"
+                "        raise ValueError(f'BYOD needs exactly one .csv with file,text columns; found {{csv_names or \"none\"}} among {{len(uploaded)}} file(s)')\n"
+                "    manifest_name = csv_names[0]\n"
                 "    rows = list(csv.DictReader(io.StringIO(uploaded[manifest_name].decode('utf-8-sig'))))\n"
-                "    clips = [{{'id': row['file'], 'audio': decode_clip(uploaded[row['file']]), 'text': row['text'].strip()}} for row in rows]\n"
+                "    if not rows or not {{'file', 'text'}} <= set(rows[0]):\n"
+                "        raise ValueError(f'{{manifest_name}}: needs a header with file,text columns and at least one row')\n"
+                "    missing = [row['file'] for row in rows if row['file'] not in uploaded]\n"
+                "    if missing:\n"
+                "        raise ValueError(f'{{manifest_name}} names {{len(missing)}} audio file(s) that were not supplied: {{missing[:5]}}')\n"
+                "    clips = [{{'id': row['file'], 'audio': decode_clip(row['file'], uploaded[row['file']]), 'text': row['text'].strip()}} for row in rows]\n"
                 "    LANGUAGE = BYOD_LANGUAGE.strip().lower()\n"
                 "    DATASET = {{'name': 'BYOD', 'config': manifest_name, 'revision': None, 'license': None}}\n"
                 "    sample_kind = 'BYOD'\n"
                 "else:\n"
                 "    ds = load_dataset(SAMPLE_DATASET, LOCALE, split='train', revision=SAMPLE_DATASET_REVISION)\n"
                 "    ds = ds.cast_column('audio', Audio(decode=False))\n"
-                "    clips = [{{'id': row['path'], 'audio': decode_clip(row['audio']['bytes']), 'text': row['transcription'].strip()}} for row in ds]\n"
+                "    clips = [{{'id': row['path'], 'audio': decode_clip(row['path'], row['audio']['bytes']), 'text': row['transcription'].strip()}} for row in ds]\n"
                 "    LANGUAGE = LOCALE.split('-')[0]\n"
                 "    DATASET = {{'name': SAMPLE_DATASET, 'config': LOCALE, 'revision': SAMPLE_DATASET_REVISION, 'license': 'CC-BY-4.0'}}\n"
                 "    sample_kind = 'public-sample'\n\n"
+                "# WSF-m1: clips over the 30 s window are dropped before the split, and listed (Section 5 records them as a finding).\n"
+                "DROPPED_OVER_30S = [c['id'] for c in clips if len(c['audio']) / TARGET_RATE > MAX_CHUNK_LENGTH_S]\n"
                 "clips = [c for c in clips if len(c['audio']) / TARGET_RATE <= MAX_CHUNK_LENGTH_S]\n"
+                "if USE_BYOD:\n"
+                "    if len(clips) < BYOD_MIN_CLIPS:\n"
+                "        raise ValueError(f'BYOD needs at least {{BYOD_MIN_CLIPS}} usable clips of at most {{MAX_CHUNK_LENGTH_S}} s; {{len(clips)}} remain ({{len(DROPPED_OVER_30S)}} dropped as too long)')\n"
+                "    TRAIN_CLIPS = min(len(clips) - 1, max(1, round(BYOD_TRAIN_FRACTION * len(clips))))\n"
+                "    EVAL_CLIPS = len(clips) - TRAIN_CLIPS\n"
                 "if TRAIN_CLIPS < 1 or EVAL_CLIPS < 1 or TRAIN_CLIPS + EVAL_CLIPS > len(clips):\n"
-                "    raise ValueError(f'TRAIN_CLIPS + EVAL_CLIPS must fit in the {{len(clips)}} available clips')\n"
+                "    raise ValueError(f'TRAIN_CLIPS + EVAL_CLIPS ({{TRAIN_CLIPS}} + {{EVAL_CLIPS}}) must fit in the {{len(clips)}} available clips; lower TRAIN_CLIPS or EVAL_CLIPS in this cell')\n"
                 "order = list(range(len(clips)))\n"
                 "random.Random(SEED).shuffle(order)\n"
                 "train_clips = [clips[i] for i in order[:TRAIN_CLIPS]]\n"
                 "eval_clips = [clips[i] for i in order[TRAIN_CLIPS:TRAIN_CLIPS + EVAL_CLIPS]]\n"
                 "SPLIT_DIGEST = hashlib.sha256('\\n'.join(c['id'] + '\\t' + c['text'] for c in train_clips + eval_clips).encode('utf-8')).hexdigest()\n"
                 "seconds = [len(c['audio']) / TARGET_RATE for c in train_clips + eval_clips]\n"
-                "print({{'dataset': DATASET, 'language': LANGUAGE, 'train_clips': len(train_clips), 'eval_clips': len(eval_clips), 'split_digest': SPLIT_DIGEST[:16], 'seconds_mean': round(sum(seconds) / len(seconds), 2), 'seconds_max': round(max(seconds), 2)}})\n"
+                "# WSF-m3: a held-out transcript that also occurs in training (after normalisation) is easier than a new phrasing.\n"
+                "train_texts = {{normalise_transcript(c['text']) for c in train_clips}}\n"
+                "EVAL_TRANSCRIPTS_IN_TRAIN = sum(normalise_transcript(c['text']) in train_texts for c in eval_clips)\n"
+                "print({{'dataset': DATASET, 'language': LANGUAGE, 'train_clips': len(train_clips), 'eval_clips': len(eval_clips), 'dropped_over_30s': len(DROPPED_OVER_30S), 'split_digest': SPLIT_DIGEST[:16], 'seconds_mean': round(sum(seconds) / len(seconds), 2), 'seconds_max': round(max(seconds), 2), 'eval_transcripts_also_in_train': EVAL_TRANSCRIPTS_IN_TRAIN}})\n"
                 "print({{'example_text': train_clips[0]['text']}})"
             ),
         },
         {
             "md": (
-                "## 5. Validate every clip → input manifest\n\n"
+                "## 5. Validate every clip → input manifest · [Evaluation practice]\n\n"
                 "`validate_inputs` is the pipeline's public validation stage and is applied to **every** train and held-out "
                 "clip before any model runs (VAL1): each waveform must satisfy the same contract `transcribe` enforces "
                 "(`TASKS`, the `MIN_CHUNK_LENGTH_S`–`MAX_CHUNK_LENGTH_S` window), and this notebook adds the two rules the "
                 "training loop needs — a non-empty transcript, and a clip no longer than `MAX_CHUNK_LENGTH_S` seconds, "
-                "because Whisper's fixed 30-second window would silently truncate a longer clip's supervision (VAL6/VAL7: "
-                "nothing is truncated; an offending clip is a rejection finding and stops the run). The per-clip manifests "
+                "because Whisper's fixed 30-second window would truncate a longer clip's supervision (VAL6/VAL7: nothing is "
+                "truncated; longer clips were dropped before the split in Section 4 and are recorded here as a `clips-over-30s` "
+                "finding with their ids, and a clip that still breaks either rule stops the run). The per-clip manifests "
                 "are folded into one input manifest written to `outputs/{stem}_input_manifest.json`. To show what rejection "
                 "looks like, the cell also validates a request that breaks the chunk ceiling and records the pipeline's own "
                 "error message as a finding."
@@ -183,6 +317,8 @@ TEMPLATE = {
                 "        if entry['seconds'] > MAX_CHUNK_LENGTH_S:\n"
                 "            raise ValueError(f\"{{clip['id']}}: {{entry['seconds']}} s exceeds the {{MAX_CHUNK_LENGTH_S}} s training window; trim it rather than letting the window truncate its supervision\")\n"
                 "        input_manifest['inputs'].append({{**entry, 'role': role, 'reference_words': len(clip['text'].split())}})\n"
+                "if DROPPED_OVER_30S:\n"
+                "    input_manifest['findings'].append({{'input': 'clips-over-30s', 'verdict': 'dropped before the split', 'count': len(DROPPED_OVER_30S), 'ids': DROPPED_OVER_30S}})\n"
                 "# Demonstrate rejection on a request that breaks a ceiling; the finding is recorded, not swallowed.\n"
                 "try:\n"
                 "    validate_inputs({{'array': eval_clips[0]['audio'], 'sampling_rate': TARGET_RATE}}, chunk_length_s=MAX_CHUNK_LENGTH_S + 1)\n"
@@ -195,13 +331,21 @@ TEMPLATE = {
         },
         {
             "md": (
-                "## 6. Record the zero-shot baseline\n\n"
-                "`pipe` was built in Section 3 from the digest-verified snapshot (float16 on CUDA, float32 on CPU). Before "
+                "## 6. Record the zero-shot baseline · [Evaluation practice]\n\n"
+                "`pipe` was built in Section 3 from the digest-verified snapshot (float16 on CUDA, float32 on CPU). This cell releases it "
+                "at the end, so when you re-run from Section 4 (BYOD, or the activity) it is rebuilt here from the same verified snapshot "
+                "with `WhisperASRPipeline.from_pretrained(weights_dir=WEIGHTS_DIR, allow_download=False)` — no download, no need to go back "
+                "to Section 3. Before "
                 "anything is trained, the unmodified model transcribes the held-out clips through `WhisperASRPipeline.transcribe`, "
                 "and `corpus_word_error_rate` (total word edits over total reference words, after the package's case and "
                 "punctuation normalisation) is recorded as the **baseline** (EVAL10: the naive comparison every adapted number "
-                "is read against). The pipeline is then released so the training model has the GPU to itself. Look for the "
-                "baseline WER and three reference/hypothesis pairs."
+                "is read against). The errors are also split into **substitutions, insertions and deletions** "
+                "(`word_error_breakdown`), so you can later see which kind adaptation changes. The pipeline is then released so the "
+                "training model has the GPU to itself. Look for the baseline WER, its edit breakdown and three reference/hypothesis "
+                "pairs.\n\n"
+                "**Predict before running:** MINDS-14 references are written by people in their own style (lower case, little "
+                "punctuation, numbers sometimes spelled out), while Whisper writes cased, punctuated text with digits. Will the "
+                "zero-shot WER be near 0.05, near 0.2, or above 0.4? Which edit type will dominate?"
             ),
             "code": (
                 "import gc\n"
@@ -209,11 +353,15 @@ TEMPLATE = {
                 "def transcribe_all(asr, clip_list):\n"
                 "    return [asr.transcribe({{'array': c['audio'], 'sampling_rate': TARGET_RATE}}, language=LANGUAGE, task='transcribe')['text'] for c in clip_list]\n\n\n"
                 "eval_references = [c['text'] for c in eval_clips]\n"
+                "if 'pipe' not in globals():\n"
+                "    # This cell releases `pipe` below; a re-run from Section 4 rebuilds it from the verified snapshot (no download).\n"
+                "    pipe = WhisperASRPipeline.from_pretrained(weights_dir=WEIGHTS_DIR, allow_download=False)\n"
                 "DEVICE = pipe.device\n"
                 "started = time.time()\n"
                 "baseline_transcripts = transcribe_all(pipe, eval_clips)\n"
                 "baseline_wer = corpus_word_error_rate(eval_references, baseline_transcripts)\n"
-                "print({{'device': DEVICE, 'source': pipe.source, 'baseline_wer': round(baseline_wer, 4), 'seconds': round(time.time() - started, 1)}})\n"
+                "baseline_edits = word_error_breakdown(eval_references, baseline_transcripts)\n"
+                "print({{'device': DEVICE, 'source': pipe.source, 'baseline_wer': round(baseline_wer, 4), 'edits': baseline_edits, 'seconds': round(time.time() - started, 1)}})\n"
                 "for reference, hypothesis in list(zip(eval_references, baseline_transcripts))[:3]:\n"
                 "    print({{'reference': reference, 'baseline': hypothesis, 'wer': round(word_error_rate(reference, hypothesis), 3)}})\n"
                 "del pipe\n"
@@ -224,7 +372,13 @@ TEMPLATE = {
         },
         {
             "md": (
-                "## 7. Attach LoRA adapters to the verified base weights\n\n"
+                "**What to notice (Section 6):** the baseline WER, the three edit counts that add up to it, and how the three example "
+                "transcripts differ from their references.\n\n"
+                "<details><summary>Check your reasoning</summary>Expect a high number: the earlier recorded P100 run of this notebook measured "
+                "0.4387 on the same default split. Much of it is not mis-heard speech: the references are noisy, informal transcriptions, so "
+                "Whisper's spelling, numbers and contractions count as substitutions even when the words were understood. That is why the "
+                "baseline matters: the adapted number is read against it, on the same clips and references, not against zero.</details>\n\n"
+                "## 7. Attach LoRA adapters to the verified base weights · [Concept]\n\n"
                 "`load_model(weights_dir=WEIGHTS_DIR)` re-reads the **same digest-verified snapshot** Section 3 staged (no "
                 "second download, no Hub call) and the model is promoted to float32 master weights (mixed precision runs the "
                 "matmuls in float16); gradient checkpointing is enabled so the encoder's 30-second activations fit a 16 GiB "
@@ -255,12 +409,16 @@ TEMPLATE = {
         },
         {
             "md": (
-                "## 8. Train\n\n"
+                "## 8. Train · [Concept]\n\n"
                 "The loop is deliberately plain PyTorch rather than a `Trainer`, so every moving part is visible (FT4/FT6):\n\n"
                 "- **Features and labels.** Each clip becomes a 128-bin log-mel spectrogram padded to Whisper's fixed 30-second window by the pinned processor. The label sequence is the tokenizer's rendering of the transcript with its language/task prefix, minus the leading start token (the model prepends it when it shifts labels right), padded with `-100` so padding is ignored by the loss.\n"
                 "- **Mixed precision.** On CUDA the forward pass runs under float16 autocast with a gradient scaler; the LoRA weights and optimizer state stay in float32. On CPU everything is float32 (ENV5).\n"
                 "- **AdamW at a constant learning rate** (`1e-3` is the usual LoRA starting point for Whisper) with `GRAD_ACCUM` micro-batches per optimizer step; there is no warmup or decay schedule. `SEED` drives the split and the epoch shuffles; non-deterministic CUDA kernels remain a source of run-to-run variability (ENV7/ENV8).\n"
-                "- **Validation loss** is the teacher-forced cross-entropy on the held-out clips after each epoch. It tracks whether the adapter is still learning; WER, the metric that matters, is measured in the next section (FT7)."
+                "- **Validation loss** is the teacher-forced cross-entropy on the held-out clips after each epoch. It tracks whether the adapter is still learning; WER, the metric that matters, is measured in the next section (FT7). The held-out clips are scored for loss only; no "
+                "epoch or setting is chosen by it here, which is why they can also serve as the final test (do not copy this into a loop "
+                "that picks the best epoch on them).\n\n"
+                "**Predict before running:** over two epochs, will the training loss fall? Will the validation loss fall in both "
+                "epochs, or could it rise in the second while WER still improves?"
             ),
             "code": (
                 "EPOCHS = 2  # @param {{type:\"integer\"}}\n"
@@ -347,7 +505,14 @@ TEMPLATE = {
         },
         {
             "md": (
-                "## 9. Evaluate the adapted model → evaluation report\n\n"
+                "**What to notice (Section 8):** one row per epoch with training loss, validation loss and optimizer steps; the training "
+                "time and peak GPU memory.\n\n"
+                "<details><summary>Check your reasoning</summary>Training loss falls (0.517 → 0.283 in the earlier recorded run). Validation "
+                "loss can rise in epoch 2 (0.578 → 0.612 there) while WER still improves: loss scores the probability of every reference "
+                "token under teacher forcing, WER scores the words beam search actually writes, and a model can grow over-confident on "
+                "tokens it gets wrong while writing more matching words. A rising validation loss is a warning about overfitting, not a "
+                "verdict; the WER in Section 9 is the measurement.</details>\n\n"
+                "## 9. Evaluate the adapted model → evaluation report · [Evaluation practice]\n\n"
                 "The live LoRA model is wrapped in the same pipeline that produced the baseline (`WhisperASRPipeline.from_model`), "
                 "so the adapted transcripts come from exactly the decoding path a user of the package gets (5-beam search, the "
                 "model's 448-token limit) — not from a hand-rolled `generate` call with different settings, which can disagree "
@@ -355,7 +520,13 @@ TEMPLATE = {
                 "pipeline serves at. `adaptation_report` then writes `outputs/{stem}_evaluation_report.json`: baseline and "
                 "adapted corpus WER, the zero-shot baseline as the comparison, the loss history as optimisation evidence, and "
                 "the verdict `sample-sanity` (EVAL6) — one seeded split of one locale says whether the adapter helped *here*, "
-                "not how it generalises. A few changed clips are shown side by side."
+                "not how it generalises. The edit breakdown is printed beside the baseline's, with the count of held-out transcripts "
+                "that also occur word for word in the training split (Section 4). A few changed clips are shown side by side.\n\n"
+                "**Read the gain carefully.** In the earlier recorded run every held-out transcript moved toward the corpus's lower-case, "
+                "unpunctuated reference style. Part of any WER gain here can therefore be the adapter learning MINDS-14's spelling "
+                "conventions (`50` versus `fifty`, contractions) rather than hearing better. The normalisation removes case and "
+                "punctuation only, so compare the substitution counts and read the changed clips before calling it better recognition.\n\n"
+                "**Predict before running:** will the adapted WER be lower than the baseline? If so, which edit type will shrink most?"
             ),
             "code": (
                 "model.eval()\n"
@@ -369,7 +540,12 @@ TEMPLATE = {
                 "report = adaptation_report(baseline_wer=round(baseline_wer, 4), adapted_wer=round(adapted_wer, 4), reloaded_wer=None, n_eval=len(eval_clips), history=history, dataset=DATASET, sample_kind=sample_kind)\n"
                 "with open('outputs/{stem}_evaluation_report.json', 'w', encoding='utf-8') as handle:\n"
                 "    json.dump(report, handle, indent=2, ensure_ascii=False)\n"
+                "adapted_edits = word_error_breakdown(eval_references, adapted_transcripts)\n"
+                "report['edit_breakdown'] = {{'baseline': baseline_edits, 'adapted': adapted_edits, 'eval_transcripts_also_in_train': EVAL_TRANSCRIPTS_IN_TRAIN}}\n"
+                "with open('outputs/{stem}_evaluation_report.json', 'w', encoding='utf-8') as handle:\n"
+                "    json.dump(report, handle, indent=2, ensure_ascii=False)\n"
                 "print({{'baseline_wer': report['baselines'][0]['word_error_rate'], 'adapted_wer': adapted_wer, 'wer_delta': round(adapted_wer - baseline_wer, 4), 'verdict': report['verdict']}})\n"
+                "print({{'edits_baseline': baseline_edits, 'edits_adapted': adapted_edits, 'eval_transcripts_also_in_train': EVAL_TRANSCRIPTS_IN_TRAIN}})\n"
                 "changed = [(r, b, a) for r, b, a in zip(eval_references, baseline_transcripts, adapted_transcripts) if b != a]\n"
                 "print({{'clips_with_changed_transcript': len(changed)}})\n"
                 "for reference, before, after in changed[:3]:\n"
@@ -378,7 +554,14 @@ TEMPLATE = {
         },
         {
             "md": (
-                "## 10. Export the adapter bundle, then prove it reloads against the verified base\n\n"
+                "**What to notice (Section 9):** the adapted WER beside the baseline, both edit breakdowns, the duplicate count, and the "
+                "changed clips.\n\n"
+                "<details><summary>Check your reasoning</summary>In the earlier recorded run WER fell from 0.4387 to 0.4066 on 100 clips. "
+                "That is about three points on one seeded split, a size another seed can reverse, and the changed clips showed the "
+                "transcripts adopting the references' style. If substitutions fall while deletions and insertions barely move, the "
+                "adapter mostly changed how words are written. If many held-out transcripts also occur in training, part of the gain may be "
+                "memorised phrasing. Either way, it is evidence about this corpus's conventions, not that recognition improved in general.</details>\n\n"
+                "## 10. Export the adapter bundle, then prove it reloads against the verified base · [Engineering]\n\n"
                 "The deliverable is the **adapter bundle**, not a copy of the base model (ART1/ART4): `export_adapter_bundle` "
                 "writes `adapter_model.safetensors` (a few tens of MB) and `adapter_config.json`, `metrics.json`, "
                 "`provenance.json` (notebook source revision, base model identifier and immutable revision, dataset identity "
@@ -439,6 +622,7 @@ TEMPLATE = {
                 "metrics['clips_changed_vs_baseline'] = sum(b != r for b, r in zip(baseline_transcripts, reloaded_transcripts))\n"
                 "metrics['reload_weight_check'] = reload_weight_check\n"
                 "report = adaptation_report(baseline_wer=metrics['baseline_wer'], adapted_wer=metrics['adapted_wer'], reloaded_wer=metrics['reloaded_wer'], n_eval=len(eval_clips), history=history, dataset=DATASET, sample_kind=sample_kind)\n"
+                "report['edit_breakdown'] = {{'baseline': baseline_edits, 'adapted': adapted_edits, 'reloaded': word_error_breakdown(eval_references, reloaded_transcripts), 'eval_transcripts_also_in_train': EVAL_TRANSCRIPTS_IN_TRAIN}}\n"
                 "with open('outputs/{stem}_evaluation_report.json', 'w', encoding='utf-8') as handle:\n"
                 "    json.dump(report, handle, indent=2, ensure_ascii=False)\n"
                 "print({{'reloaded_wer': metrics['reloaded_wer'], 'reload_agreement': metrics['reload_agreement'], 'clips_changed_vs_baseline': metrics['clips_changed_vs_baseline'], 'adapter': reloaded.adapter, 'adapter_sha256': reloaded.adapter_sha256, 'source': reloaded.source, 'reload_weight_check': reload_weight_check}})\n\n"
@@ -465,26 +649,69 @@ TEMPLATE = {
         },
     ],
     "closing": (
+        "**What to notice (Section 10):** `reload_agreement` (at least 95 of 100), the reloaded WER equal or close to the adapted WER, a "
+        "`reload_weight_check` that passed, and the exported files.\n\n"
+        "## 11. Activity: change one thing — the number of epochs · [Concept]\n\n"
+        "Optional; **Predict → Change one thing → Run → Observe → Explain**. It changes nothing unless you do it.\n\n"
+        "1. **Predict:** with `EPOCHS = 1` instead of 2, will the adapted WER be higher or lower than with two epochs? What will the "
+        "validation loss do?\n"
+        "2. **Change:** in Section 8 set `EPOCHS = 1`. Change nothing else. Note the Section 8 and 9 numbers of your first run first: the "
+        "next step overwrites `outputs/`.\n"
+        "3. **Run:** select the **Section 4** cell and choose *Runtime → Run after*. Section 4 rebuilds the same seeded split, Section 6 "
+        "rebuilds the baseline pipeline from the verified snapshot (no download) and records the baseline again, and Sections 7–10 train, "
+        "evaluate, export and reload a fresh adapter.\n"
+        "4. **Observe:** compare the loss history, the adapted WER, the edit breakdown and the number of changed clips with your first run.\n"
+        "5. **Explain:** in one sentence, why can one epoch give a WER close to two epochs while the validation loss tells a different story, "
+        "and why does a difference of a point or two on 100 clips not settle which setting is better?\n\n"
+        "<details><summary>Check your reasoning</summary>With half the optimizer steps the adapter moves less, so expect a smaller change from "
+        "the baseline; in the earlier run the epoch-1 validation loss (0.578) was lower than the epoch-2 one (0.612), so loss alone would "
+        "favour one epoch while WER favoured two. Loss and WER measure different things (Section 8). With 100 clips and one seed, a point or "
+        "two of WER is within what another seed can produce; to choose a setting you would need several seeds, and the choice must not be "
+        "made on the same clips you report as the final result.</details>\n\n"
         "## Interpretation and limits\n\n"
-        "The adapted transcripts are model-generated. The baseline, adapted and reloaded WER figures are corpus-level "
-        "numbers on one seeded held-out split of one locale of one public corpus (or of the uploaded BYOD set) and must "
-        "not be generalized to other languages, speakers, domains, or capture conditions; a WER that moved by a few points "
-        "on 100 short utterances is within the range where a different seed can change the sign, and no dispersion "
-        "estimate is computed (EVAL5/ENV8). The adapter specializes the model toward the training distribution and can "
-        "degrade it elsewhere (catastrophic forgetting); the tutorial measures nothing outside the held-out split. Training "
-        "and validation loss are optimisation evidence only. The pipeline provides no diarization, speaker identity, "
-        "biometric inference, or calibrated transcript-confidence threshold, and the adapter inherits the license "
-        "obligations of both the base weights (MIT) and the training data (CC-BY-4.0 for the default sample).\n\n"
-        "Successful execution proves that the recorded repository revision's pipeline module, carried in this notebook, "
-        "can acquire and digest-verify the pinned model, load and resample the demonstrated data, validate it, record a "
-        "zero-shot baseline through the public pipeline, train LoRA adapters with the shown configuration, export a "
-        "manifested adapter bundle, and reload that bundle against the verified base with a weight-level merge check and "
-        "transcript agreement — in the tested runtime, without the repository being reachable. It does **not** establish "
-        "benchmark superiority, deployment calibration, safety for high-consequence use, or that the adapter generalises "
-        "beyond the split it was measured on.\n\n"
-        "**Try next:** change `LOCALE` to another whitespace-delimited language and compare the baseline/adapted delta; halve "
-        "`LEARNING_RATE` or set `EPOCHS = 1` and watch whether the validation loss and the WER move together; upload a few "
-        "minutes of your own domain speech through BYOD and read the report's `needs` field before trusting the number.\n\n"
+        "The adapted transcripts are model-generated. The baseline, adapted and reloaded WER figures are corpus-level numbers on one seeded "
+        "held-out split of one locale of one public corpus (or of the uploaded BYOD set) and must not be generalized to other languages, "
+        "speakers, domains, or capture conditions; a WER that moved by a few points on 100 short utterances is within the range where a "
+        "different seed can change the sign, and no dispersion estimate is computed (EVAL5/ENV8). The corpus's references are informal "
+        "transcriptions, so part of a gain can be the adapter learning their spelling conventions; the edit breakdown and the changed clips "
+        "show how much, and the duplicate count shows how many held-out phrasings were also seen in training. The adapter specializes the "
+        "model toward the training distribution and can degrade it elsewhere (catastrophic forgetting); the tutorial measures nothing outside "
+        "the held-out split. Training and validation loss are optimisation evidence only. The pipeline provides no diarization, speaker "
+        "identity, biometric inference, or calibrated transcript-confidence threshold, and the adapter inherits the license obligations of "
+        "both the base weights (MIT) and the training data (CC-BY-4.0 for the default sample).\n\n"
+        "Successful execution proves that the recorded repository revision's pipeline module, carried in this notebook, can acquire and "
+        "digest-verify the pinned model, load and resample the demonstrated data, validate it, record a zero-shot baseline through the public "
+        "pipeline, train LoRA adapters with the shown configuration in an isolated, hash-locked environment, export a manifested adapter "
+        "bundle, and reload that bundle against the verified base with a weight-level merge check and transcript agreement — in the tested "
+        "runtime, without the repository being reachable. It does **not** establish benchmark superiority, deployment calibration, safety for "
+        "high-consequence use, or that the adapter generalises beyond the split it was measured on.\n\n"
+        "**Try next** (each changes only form fields; re-run from the cell you changed with *Runtime → Run after*): change `LOCALE` to "
+        "another whitespace-delimited language and compare the baseline/adapted delta; change `SEED` and see how much the delta moves; "
+        "halve `LEARNING_RATE` and watch whether the validation loss and the WER move together; bring a few dozen clips of your own domain "
+        "speech through BYOD and read the report's `needs` field before trusting the number.\n\n"
+        "## Troubleshooting\n\n"
+        "| Symptom | Likely cause | What to do |\n"
+        "|---|---|---|\n"
+        "| Section 1 stops with `This notebook needs a Linux x86_64 runtime` | a local Windows or macOS kernel, or an ARM machine | Use Google Colab or Kaggle; the lock holds manylinux x86_64 wheels. |\n"
+        "| Section 1 fails while downloading, or `The pinned uv wheel failed its size/SHA-256 check` | a network failure, or an altered download | Run the Section 1 install cell again; a repeated mismatch means the download is being altered — never edit the digest. |\n"
+        "| `holds Python …, not 3.12.12` in Section 1 | an older `dimer_isolated_env/` folder from another notebook version | Delete that folder (or start a fresh runtime) and run the install cell again. |\n"
+        "| `The isolated environment's Python process exited` | the worker ran out of memory | Lower `BATCH_SIZE` (and raise `GRAD_ACCUM`) in Section 8, restart the session and choose *Runtime → Run all*. |\n"
+        "| `CUDA out of memory` in Section 8 | the GPU is smaller than 16 GiB or another process holds memory | Lower `BATCH_SIZE`, raise `GRAD_ACCUM` to keep the effective batch, and run again from Section 7. |\n"
+        "| Everything is very slow and Section 1 reports `cuda: False` | no GPU is attached | Choose *Runtime → Change runtime type → T4 GPU* and *Runtime → Run all*; on CPU lower `TRAIN_CLIPS`, `EVAL_CLIPS` and `EPOCHS` first. |\n"
+        "| A Hub download fails in Section 3 or 4, or `sha256 … != manifest` | a transient Hugging Face failure, or a changed file | Run that cell again; a digest mismatch is never loaded — do not edit the manifest. |\n"
+        "| `NameError: name 'pipe' is not defined` | a notebook from before this fix | Regenerate or reopen this version; Section 6 now rebuilds `pipe` itself on a re-run. |\n"
+        "| `BYOD needs exactly one .csv …` or `… names N audio file(s) that were not supplied` in Section 4 | the CSV is missing, doubled, or names files you did not include | Supply one `.csv` with `file,text` columns and every audio file it names (same names, no folders inside the zip needed). |\n"
+        "| `…: not an audio file soundfile can read` in Section 4 | a file is not audio, is corrupt, or uses an unsupported format | Convert it to WAV or FLAC and try again. |\n"
+        "| `BYOD needs at least 10 usable clips …` | too few clips, or many over 30 s | Add clips, or cut long recordings into pieces of at most 30 s. |\n"
+        "| `TRAIN_CLIPS + EVAL_CLIPS … must fit` | the locale has fewer clips than requested | Lower `TRAIN_CLIPS` or `EVAL_CLIPS` in Section 4. |\n"
+        "| `Reloaded adapter reproduces only …` in Section 10 | the bundle did not reload as trained | Re-run from Section 7; do not ship the bundle if it repeats. |\n\n"
+        "## Conclusion (your notes)\n\n"
+        "Optional. Fill in from your own run, one sentence each:\n\n"
+        "1. The zero-shot WER was ___ (S ___ / I ___ / D ___); after adaptation it was ___ (S ___ / I ___ / D ___); reloaded ___.\n"
+        "2. Training loss went ___ → ___ and validation loss ___ → ___, which means ___.\n"
+        "3. ___ held-out transcripts also occurred in training, and the changed clips show the adapter mainly changed ___.\n"
+        "4. What this result can show about LoRA adaptation on this corpus, and what it cannot: ___.\n"
+        "5. What I would need before using such an adapter on my own recordings: ___.\n\n"
         "## References\n\n"
         "- Repository README: https://github.com/kurtvalcorza/whisper-asr-pipeline/blob/main/README.md\n"
         "- Repository model card: https://github.com/kurtvalcorza/whisper-asr-pipeline/blob/main/MODEL_CARD.md\n"
@@ -493,6 +720,6 @@ TEMPLATE = {
         "- Upstream code: https://github.com/openai/whisper\n"
         "- Whisper paper: https://arxiv.org/abs/2212.04356\n"
         "- LoRA paper: https://arxiv.org/abs/2106.09685\n"
-        "- Public sample: https://huggingface.co/datasets/PolyAI/minds14\n"
+        "- Public sample: https://huggingface.co/datasets/PolyAI/minds14"
     ),
 }

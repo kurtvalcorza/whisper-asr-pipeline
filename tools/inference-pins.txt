@@ -1,0 +1,11 @@
+# Runtime pins for the standalone task-inference notebook (tools/notebook_template.py, NOTEBOOK_SPEC 2.2 ENV2).
+# = pyproject [project].dependencies + `datasets` from the `tutorial` extra (the default sample loader, WSP-M2),
+# verbatim; tests/test_review_fixes.py fails when this file and pyproject.toml drift.
+torch==2.6.0
+torchvision==0.21.0
+torchaudio==2.6.0
+transformers==4.52.1
+accelerate==1.3.0
+numpy==1.26.4
+soundfile==0.13.1
+datasets==4.4.0

@@ -22,8 +22,18 @@ from .pipeline import (
     word_error_count,
     word_error_rate,
 )
+from .tutorial_support import (
+    decode_audio,
+    normalise_transcript,
+    with_empty_transcript_baseline,
+    word_error_breakdown,
+)
 
 __all__ = [
+    "decode_audio",
+    "normalise_transcript",
+    "with_empty_transcript_baseline",
+    "word_error_breakdown",
     "adaptation_report",
     "adapter_digest",
     "corpus_word_error_rate",

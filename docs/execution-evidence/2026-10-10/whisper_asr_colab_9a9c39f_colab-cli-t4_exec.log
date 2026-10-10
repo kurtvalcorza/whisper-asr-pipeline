@@ -1,0 +1,101 @@
+[colab] Parsing notebook '/home/kurt/colab-runs/whisper-asr-pipeline-9a9c39f-e41ef9/whisper_asr_colab_9a9c39f_colab-cli-t4.ipynb'...
+[colab] Executing cell 1/12 - Infrastructure: install the locked runtime into an isolated environment...
+{'isolated_environment': '/content/dimer_isolated_env', 'isolated_python': '3.12.12', 'kernel_python': '3.13.15', 'locked_packages': 67, 'setup_seconds': 61}
+[colab] Executing cell 2/12 - Route the remaining cells to the isolated environment...
+Every later code cell now runs in /content/dimer_isolated_env/bin/python (pid 737).
+[colab] Executing cell 3/12 - Infrastructure: record the pinned runtime and the notebook source...
+{'notebook_source': {'repository': 'whisper-asr-pipeline', 'repository_revision': '382758b7254b11ed773e783ef85cbac487265de8', 'embedded_module': 'src/whisper_asr_pipeline/pipeline.py', 'embedded_modules': ['src/whisper_asr_pipeline/pipeline.py', 'src/whisper_asr_pipeline/tutorial_support.py'], 'module_sha256': 'bfa2693c8f58408d8d7d5a4d0213ccb228e799384e4cf86aa46addccc8a3db91', 'generator': 'build_notebook.py/2.1-swc', 'notebook_spec': '2.2'}, 'python': '3.12.12', 'torch': '2.6.0+cu124', 'transformers': '4.52.1', 'cuda': True}
+[colab] Executing cell 4/12 - whisper_asr-12...
+[colab] Executing cell 5/12 - whisper_asr-14...
+[colab] Executing cell 6/12 - Infrastructure: pin, stage and verify the model...
+{'model_id': 'openai/whisper-large-v3-turbo', 'revision': '41f01f3fe87f28c78e2fbf8b568835947dd65ed9', 'license': 'MIT', 'files': 12, 'total_bytes': 1622464535}
+{'weights_dir': '/content/weights/whisper-large-v3-turbo', 'fetched': ['README.md', 'added_tokens.json', 'config.json', 'generation_config.json', 'merges.txt', 'model.safetensors', 'normalizer.json', 'preprocessor_config.json', 'special_tokens_map.json', 'tokenizer.json', 'tokenizer_config.json', 'vocab.json']}
+{'verified_files': 12, 'revision': '41f01f3fe87f28c78e2fbf8b568835947dd65ed9'}
+{'device': 'cuda:0', 'source': 'local-snapshot'}
+Device set to use cuda:0
+[colab] Executing cell 7/12 - whisper_asr-18...
+{'sample_kind': 'public-sample', 'name': 'hf-internal-testing/librispeech_asr_dummy:clean:validation[0] (1272-128104-0000)', 'seconds': 5.86, 'sampling_rate': 16000, 'waveform_sha256': '22d472b40f913206b6917115d136306be88df3b278e77f68be5910423250fa4d', 'has_reference': True, 'task': 'transcribe', 'language': 'en', 'return_timestamps': False}
+
+Generating validation split:   0%|          | 0/73 [00:00<?, ? examples/s]
+Generating validation split: 100%|██████████| 73/73 [00:00<00:00, 791.64 examples/s]
+[colab] Executing cell 8/12 - whisper_asr-20...
+{'ceilings': {'TASKS': ['transcribe', 'translate'], 'MIN_CHUNK_LENGTH_S': 1, 'MAX_CHUNK_LENGTH_S': 30}}
+{
+  "schema": {
+    "input": "one audio input: a local file path readable by the ASR stack, an http(s) URL, or a dict {'array': float waveform, 'sampling_rate': int}",
+    "task": [
+      "transcribe",
+      "translate"
+    ],
+    "language": "optional ISO language name/code forwarded to Whisper; None lets the model detect it",
+    "chunk_length_s": [
+      1,
+      30
+    ],
+    "preprocessing": "the transformers ASR pipeline resamples to 16 kHz, computes 128-bin log-Mel features in 30 s windows and chunks longer audio; nothing is altered by this module"
+  },
+  "inputs": [
+    {
+      "id": "hf-internal-testing/librispeech_asr_dummy:clean:validation[0] (1272-128104-0000)",
+      "kind": "waveform",
+      "samples": 93680,
+      "sampling_rate": 16000,
+      "seconds": 5.855
+    }
+  ],
+  "task": "transcribe",
+  "language": "en",
+  "chunk_length_s": 30,
+  "verdict": "accepted",
+  "findings": [
+    {
+      "input": "oversized-chunk-probe",
+      "verdict": "rejected",
+      "message": "chunk_length_s must be between 1 and 30 seconds"
+    }
+  ],
+  "model_id": "openai/whisper-large-v3-turbo",
+  "model_revision": "41f01f3fe87f28c78e2fbf8b568835947dd65ed9"
+}
+[colab] Executing cell 9/12 - whisper_asr-22...
+/content/dimer_isolated_env/lib/python3.12/site-packages/transformers/models/whisper/generation_whisper.py:573: FutureWarning: The input name `inputs` is deprecated. Please make sure to use `input_features` instead.
+  warnings.warn(
+You have passed task=transcribe, but also have set `forced_decoder_ids` to [[1, None], [2, 50360]] which creates a conflict. `forced_decoder_ids` will be ignored in favor of task=transcribe.
+The attention mask is not set and cannot be inferred from input because pad token is same as eos token. As a consequence, you may observe unexpected behavior. Please pass your input's `attention_mask` to obtain reliable results.
+{'task': 'transcribe', 'language': 'en', 'device': 'cuda:0', 'source': 'local-snapshot'}
+transcript: Mr. Quilter is the apostle of the middle classes, and we are glad to welcome his gospel.
+reference:  MISTER QUILTER IS THE APOSTLE OF THE MIDDLE CLASSES AND WE ARE GLAD TO WELCOME HIS GOSPEL
+[colab] Executing cell 10/12 - whisper_asr-24...
+{
+  "task": "automatic speech recognition (transcribe)",
+  "score_semantics": "generated transcript; the pipeline exposes no confidence score or threshold",
+  "sample_kind": "public-sample",
+  "n_utterances": 1,
+  "language": "en",
+  "baselines": [
+    {
+      "id": "empty_transcript",
+      "word_error_rate": 1.0,
+      "meaning": "a system that outputs nothing; every reference word counts as a deletion"
+    }
+  ],
+  "model_id": "openai/whisper-large-v3-turbo",
+  "model_revision": "41f01f3fe87f28c78e2fbf8b568835947dd65ed9",
+  "metrics": [
+    {
+      "id": "word_error_rate",
+      "value": 0.058823529411764705,
+      "normalisation": "casefold, punctuation removed, curly apostrophes folded",
+      "estimation": "single utterance, no dispersion estimate"
+    }
+  ],
+  "verdict": "sample-sanity",
+  "reason": "one referenced utterance from the tutorial sample; not a benchmark",
+  "needs": "a referenced evaluation set from the deployment domain for any generalisable WER claim"
+}
+[colab] Executing cell 11/12 - whisper_asr-26...
+['whisper_asr_evaluation_report.json', 'whisper_asr_input_manifest.json', 'whisper_asr_result.json', 'whisper_asr_transcript.txt']
+[colab] Executing cell 12/12 - whisper_asr-28...
+{'activity_audio': 'silence', 'seconds': 5, 'words_written': 2}
+transcript: 'Thank you.'
+[colab] Saving notebook with outputs to '/home/kurt/colab-runs/whisper-asr-pipeline-9a9c39f-e41ef9/whisper_asr_colab_9a9c39f_colab-cli-t4_output.ipynb'...

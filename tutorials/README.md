@@ -41,7 +41,9 @@ Kaggle BYOD run used public FLEURS recordings as stand-ins, so a BYOD run on the
 recordings and human relevance review remain open. That run took 733 s including installs and downloads, with a peak allocated
 GPU memory of 1.61 GiB; blob `f890d97d` (`e4b3fed`) then passed a Colab CLI T4 default run in 615 s on
 2026-10-03. The 60-minute / 12-GiB / 20-GiB free-disk figures are budgets. The 2026-10-12 review fixes
-(FAS-M1, FAS-M2, FAS-m1 to FAS-m4) change the notebook text, so the current revision needs a new hosted
+(FAS-M1, FAS-M2, FAS-m1 to FAS-m4, plus a peer-review follow-up) change both notebook text and executable
+code (subprocess handling, BYOD validation, diagnostic selection, additional paired comparisons and
+same-candidate depth scoring), so the current revision needs a new hosted
 run, plus a hosted BYOD run with one refused input. See [capstone evidence](../docs/audio-capstone.md).
 
 ## Conformance notes

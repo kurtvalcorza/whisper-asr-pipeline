@@ -207,7 +207,7 @@ You will measure transcription errors, compare six search conditions, trace fail
 
 **Evidence boundary:** the 60 queries are AI-authored drafts. All 7,200 relevance cells are unjudged, including nominated anchors. Default results are **anchor-recovery engineering diagnostics**, not Recall@5, MRR or nDCG benchmark results. Human relevance review is required before qualification. Completion/reflection notes are optional, not required submissions.
 
-**How the queries were made (read before predicting):** each query was drafted as a paraphrase of its own target (anchor) recording's reference sentence, so it shares many words with that sentence. Computed from the carried `queries.json` and `sample_manifest.json` during the 2026-10-12 review (not recomputed by this notebook): on average 41.9% of a query's content words (longer than three characters) appear in its anchor's reference, against 1.3% for each of the other 119 recordings, and the anchor is the highest-overlap recording (or tied for highest) for 56 of the 60 queries. Among 120 topically unrelated sentences this makes the anchor easy to recover and gives the reference-transcript condition a lexical advantage by construction. Expect anchor recovery near its ceiling; §6 explains how to read that.
+**How the queries were made (read before predicting):** each query was drafted as a paraphrase of its own target (anchor) recording's reference sentence, so it shares many words with that sentence. Computed from the carried `queries.json` and `sample_manifest.json` during the 2026-10-12 review (not recomputed by this notebook): on average 41.9% of a query's normalised tokens longer than three characters appear in its anchor's reference, against 1.3% for each of the other 119 recordings, and the anchor is the highest-overlap recording (or tied for highest) for 56 of the 60 queries. Among 120 topically unrelated sentences this makes the anchor easy to recover and gives the reference-transcript condition a lexical advantage by construction. Expect anchor recovery near its ceiling; §6 explains how to read that.
 
 Use a **fresh Colab T4** and **Runtime → Run all**. No secret, login, paid API or repository clone is needed. Measured for revision `e4b3fed` (notebook blob `f890d97d`) and not re-run for this revision: 615 s wall on a fresh Colab T4 via the Colab CLI (2026-10-03), with a peak of 1.61 GiB allocated GPU memory in the transcription stage ([release verification](https://github.com/kurtvalcorza/whisper-asr-pipeline/blob/main/docs/release-verification.md#filipino-audio-archive-search-capstone)). Budget 60 minutes, 20 GiB free disk and ≤12 GiB peak allocated GPU memory; the run checks disk and GPU type before installing anything.""")
     md("""### 1. Orient and predict
@@ -296,6 +296,20 @@ print('Scientific WER/CER above use the documented normalized Levenshtein alignm
 Each recording is one document. BM25 counts matching normalized words, with fixed `k1=1.2, b=0.75` and no stopword removal; each transcript condition fits its own statistics. Dense search compares normalized Qwen3 embeddings by exact cosine similarity. Ties use ascending document ID.
 
 The reference and automatic indexes stay separate. Blank ASR documents retain their IDs. Query/document token ceilings are checked without silent truncation. Raw lexical, cosine and reranker scores are different ranking values, not comparable calibrated probabilities.""")
+    md("""#### Worked example by hand: candidates, embeddings and reranking
+
+- **Keyword search (BM25)** scores a document by the query words it shares, giving rare words more weight.
+- **An embedding** turns a text into a list of numbers so that texts with similar meaning lie close together. **Cosine similarity** measures how closely two such lists point the same way (1 means the same direction).
+- **A reranker** reads the query together with each *supplied* candidate and scores that pair. It can only reorder what it is given.
+
+Five recordings A–E; the nominated anchor is **D**. Dense search ranks them A, B, C, E, D, and suppose the candidate depth is 3.
+- Dense alone: D is at rank 5, so **hit@5 = 1** and **reciprocal rank = 1/5 = 0.2**.
+- Dense top 3 → reranker: the reranker sees only A, B, C and returns, say, B, A, C. D is absent, so **hit@5 = 0** and **reciprocal rank = 0**: a candidate miss that no reranker can fix.
+- With depth 5 the reranker would also see D and might put it first: **hit@5 = 1**, **reciprocal rank = 1.0**.
+
+Hit@5 counts an anchor at rank 1 and at rank 5 the same; reciprocal rank does not. That is why a metric can saturate while another still moves.
+
+**Building an index is not training.** No model weight changes anywhere in this notebook: Whisper, the embedder and the reranker stay frozen. The index is their stored output (transcripts, word statistics and embedding vectors), kept so queries can be answered quickly.""")
     code("stage('index')\nshow_json('index_manifest.json')")
     md("""### 6. Compare the six systems
 
@@ -303,11 +317,41 @@ The reference and automatic indexes stay separate. Blank ASR documents retain th
 
 The experiment lock binds source, annotations, model identities, prompts and candidate depth. Evaluate the untouched query set only after this lock. In this preview, **anchor hit@5** asks whether the nominated draft target appears in the first five results; **anchor reciprocal rank@10** measures where that target appears in the first ten. They do not account for other potentially relevant recordings.
 
-After complete human review, the graded branch reports Recall@5 over all grade-2 references, MRR@10 for the first grade-2 result and nDCG@10 with gains 0/1/3. Do not rename preview diagnostics to these metrics.
+After complete human review, the graded branch reports Recall@5 over all grade-2 references, MRR@10 for the first grade-2 result and nDCG@10 with gains 0/1/3. Grades: **0** unrelated, **1** partially useful, **2** directly answers; every query needs at least one grade-2 recording. Do not rename preview diagnostics to these metrics. The branch switches on when the annotation manifest validates: `benchmark_qualified` and `human_labels_verified` then mean the labels are complete and schema-valid and a human review is *declared* with reviewer metadata. They do not mean the notebook checked the review itself, nor that this query design suits the question; graded metrics would still describe this constructed task.
 
-**Reading a ceiling result.** If both transcript conditions recover nearly every evaluation anchor, the comparison is saturated: a paired difference of 0.0 with a 95% interval of [0.0, 0.0] means *this design cannot distinguish the conditions*, not that transcription errors do not matter. The queries paraphrase their anchor sentences among 120 unrelated sentences, so almost any method finds the anchor. Look instead at where misses do occur: BM25 on automatic transcripts, and the development queries traced below.""")
+**Reading a ceiling result.** The next cell prints, from this run's files, which systems reach 1.000 on each metric, and every paired difference with its interval: ASR minus reference for all three methods, rerank minus dense, and dense minus BM25, on anchor hit@5 and on anchor reciprocal rank@10. Saturation is per metric: two systems can both score hit@5 = 1.000 while their reciprocal ranks differ. Where a difference is 0.000 with a zero-width interval, read it as: *no difference was observed on this metric and cohort; this bootstrap interval is degenerate and does not establish equivalence.* It does not show that transcription errors leave search unaffected. All of this concerns anchor recovery; graded relevance, once reviewed, must be read on its own metrics.""")
     code(
-        "stage('evaluate')\nshow_json('retrieval_results.json')\npicture('evaluate.png')\nshow_json('paired_comparisons.json')\nshow_csv('error_trace.csv')"
+        """stage('evaluate')
+show_json('retrieval_results.json')
+picture('evaluate.png')
+import html
+retrieval, paired = record('retrieval_results.json'), record('paired_comparisons.json')
+comparisons = [(paired['measure'], name, v) for name, v in paired['comparisons'].items()]
+comparisons += [(m, name, v) for m, block in paired.get('additional_comparisons', {}).items()
+                for name, v in block.items()]
+head = ['measure', 'A − B', 'A', 'B', 'difference', '95% interval', 'interval']
+body = ''
+for measure, name, v in comparisons:
+    low, high = v['ci95'][2]
+    row = [measure, name.replace('_minus_', ' − '), f"{v['a']:.3f}", f"{v['b']:.3f}", f"{v['difference']:+.3f}",
+           f'[{low:+.3f}, {high:+.3f}]', 'zero width' if low == high else f'width {high - low:.3f}']
+    body += '<tr>' + ''.join('<td>' + html.escape(c) + '</td>' for c in row) + '</tr>'
+display(HTML('<table><tr>' + ''.join('<th>' + h + '</th>' for h in head) + '</tr>' + body + '</table>'))
+print('Evaluation queries only; whole target families resampled 2,000 times, seed 42. Exploratory differences.')
+print('Read from this run (generated, not written in advance):')
+for measure in dict.fromkeys(m for m, _, _ in comparisons):
+    top = [s for s, values in retrieval['scores']['test'].items() if values.get(measure) == 1.0]
+    print(f'- {measure}: systems at 1.000 on evaluation queries: ' + (', '.join(top) or 'none'))
+for measure, name, v in comparisons:
+    low, high = v['ci95'][2]
+    if low == high:
+        observed = ('no difference was observed on this metric and cohort'
+                    if v['difference'] == 0 else f'every resampled difference equals {low:+.3f}')
+        print(f'- {measure}, {name}: {observed}; this bootstrap interval is degenerate '
+              'and does not establish equivalence.')
+show_csv('error_trace.csv')
+print('error_trace.csv: evaluation queries with three selected diagnostics only. '
+      'Complete rankings for every query and system:', RESULTS / 'ranked_runs.json')"""
     )
     code("""draft_queries = json.loads((ROOT / 'queries.json').read_text(encoding='utf-8'))
 ranked_runs = record('ranked_runs.json')
@@ -317,23 +361,33 @@ dev_queries = [q for q in draft_queries if q['role'] == 'dev']
 def anchor_missed(query, system='asr_rerank'):
     return query['anchor_doc_id'] not in [r['doc_id'] for r in ranked_runs[query['query_id']][system][:5]]
 
-failed, trace_scope = [q for q in test_queries if anchor_missed(q)], 'evaluation'
-if not failed:
-    # Evaluation anchors at ceiling: trace a development miss instead. Diagnosis only; nothing is tuned.
-    failed = ([q for q in dev_queries if anchor_missed(q)]
-              or [q for q in dev_queries if anchor_missed(q, 'asr_bm25')])
-    trace_scope = 'development (diagnosis only, no setting is changed)'
-example = (failed or test_queries)[0]
+SYSTEM_ORDER = ('asr_rerank', 'asr_dense', 'asr_bm25', 'reference_rerank', 'reference_dense', 'reference_bm25')
+# First top-five anchor miss: evaluation queries under any system, else development (diagnosis only).
+example = missed_by = trace_scope = None
+for scope, queries in (('evaluation', test_queries),
+                       ('development (diagnosis only, no setting is changed)', dev_queries)):
+    for system in SYSTEM_ORDER:
+        misses = [q for q in queries if anchor_missed(q, system)]
+        if misses:
+            example, missed_by, trace_scope = misses[0], system, scope
+            break
+    if example is not None:
+        break
+if example is None:
+    example = test_queries[0]
 anchor = next(r for r in corpus_rows if r['doc_id'] == example['anchor_doc_id'])
-display(Markdown('**Inspect a ' + ('missed ' + trace_scope if failed else 'recovered evaluation')
-                 + ' draft anchor:** ' + example['text']))
+display(Markdown(('**Inspect a draft anchor missed from the top five by `' + missed_by + '` (' + trace_scope
+                  + ' query):** ' if missed_by else
+                  '**No top-five anchor miss under any system in this run; inspect a recovered anchor:** ')
+                 + example['text']))
 display(Markdown('**Reference:** ' + anchor['reference']))
 display(Markdown('**Whisper:** ' + automatic[anchor['doc_id']]))
 display(Audio(filename=str(ROOT / anchor['path'])))
-for name in ('reference_bm25', 'asr_bm25', 'reference_rerank', 'asr_dense', 'asr_rerank'):
+for name in ('reference_bm25', 'asr_bm25', 'reference_dense', 'asr_dense', 'reference_rerank', 'asr_rerank'):
     ids = [r['doc_id'] for r in ranked_runs[example['query_id']][name]]
     print(name, 'anchor rank:', ids.index(anchor['doc_id']) + 1 if anchor['doc_id'] in ids else 'absent',
           'top ten:', ids[:10])
+print('These ranks locate where the anchor was lost; they do not show that a transcription edit caused it.')
 print('An anchor miss is not proof that every returned recording is irrelevant; all qrels remain unjudged.')""")
     code("""# Competing evidence: what outranked the anchor? Automatic transcripts are what search saw.
 PLAY_COMPETITORS = False  # set True to hear the top competing recordings
@@ -367,41 +421,54 @@ def candidate_table(query):
                 display(Markdown('Competitor **' + row['doc_id'] + '**'))
                 display(Audio(filename=str(ROOT / locations[row['doc_id']]['path'])))
 
-def failure_categories(queries):
+def stage_observations(queries):
     return {
-        'Candidate miss (anchor not among the 10 dense candidates; reranking cannot recover it)':
+        'Candidate miss: anchor absent from the 10 ASR dense candidates (reranking cannot recover it)':
             [q for q in queries if rank_of(ranked_runs[q['query_id']]['asr_dense'][:10], q['anchor_doc_id']) is None],
-        'Reranker demotion (anchor among the candidates but ranked lower after reranking)':
+        'Top-five miss after ASR reranking: anchor not in the first five (including anchors whose rank did not change)':
+            [q for q in queries if anchor_missed(q, 'asr_rerank')],
+        'Anchor rank demotion: ASR reranking placed the anchor lower than ASR dense did (not necessarily a top-five miss)':
             [q for q in queries
              if (d := rank_of(ranked_runs[q['query_id']]['asr_dense'][:10], q['anchor_doc_id'])) is not None
              and rank_of(ranked_runs[q['query_id']]['asr_rerank'], q['anchor_doc_id']) > d],
     }
 
+counts = ', '.join(f'`{s}` {sum(anchor_missed(q, s) for q in test_queries)}/{len(test_queries)}' for s in SYSTEM_ORDER)
+display(Markdown('**Top-five anchor misses on evaluation queries, per system:** ' + counts))
 for scope, queries in (('evaluation', test_queries), ('development (diagnosis only)', dev_queries)):
-    categories = failure_categories(queries)
-    for label, cases in categories.items():
+    observations = stage_observations(queries)
+    for label, cases in observations.items():
         display(Markdown(f'#### {label}: {len(cases)} of {len(queries)} {scope} queries'))
         if not cases:
-            print('This category did not occur in this run.')
+            print('Not observed in this run.')
             continue
         display(Markdown('**Query:** ' + cases[0]['text'] + ' · **draft anchor:** ' + cases[0]['anchor_doc_id']))
         candidate_table(cases[0])
-    if any(categories.values()):
+    if any(observations.values()):
         break
     if scope == 'evaluation':
-        print('No evaluation failure to trace (ceiling). Showing development queries as diagnosis; '
-              'they were not used to change any setting.')
+        print('None of these ASR-rerank observations occurred on evaluation queries in this run (other systems '
+              'may still miss; see the counts above). Development queries follow as diagnosis; they were not used '
+              'to change any setting.')
 print('Competing recordings are unjudged, not negatives: a competitor may also be relevant.')""")
-    md("""**What to notice:** primary paired differences compare automatic versus reference transcripts under the same method. Rerank-minus-dense isolates the reranking stage; dense-minus-BM25 compares semantic and lexical search. Uncertainty resamples entire target-family query groups, 2,000 times with seed 42. Small curated drafts do not represent real user traffic.
+    md("""**What to notice:** primary paired differences compare automatic versus reference transcripts under the same method, for BM25, dense and rerank, on anchor hit@5 and anchor reciprocal rank@10. Rerank-minus-dense isolates the reranking stage; dense-minus-BM25 compares semantic and lexical search. Uncertainty resamples entire target-family query groups, 2,000 times with seed 42. Small curated drafts do not represent real user traffic.
 
-Trace a missed target through its source audio → reference → Whisper transcript → dense candidates → reranked list. A missing candidate cannot be rescued by reranking. A present candidate can be demoted. Good transcription does not guarantee search success. Log potential annotation issues for a new version and complete rerun; do not edit labels after seeing results.
+Trace a missed target through its source audio → reference → Whisper transcript → dense candidates → reranked list. Keep four observations apart:
+- the anchor is **absent from the dense candidates**, so reranking cannot recover it;
+- the anchor is **below the top-five cutoff after reranking** (a rank demotion is not necessarily a miss, and with unjudged competitors not necessarily worse search);
+- the **reference and ASR conditions differ** for the same method (for BM25 the whole corpus's word statistics change, not only the anchor's text);
+- a **suspected transcription contribution**, which stays a hypothesis until you have listened to the audio and checked which query words the transcript lost.
 
-**When the evaluation set has no failure.** At ceiling the two cells above trace a *development* query instead and say so. Development queries are used here only to show a failure mechanism; no setting, label or query is changed after seeing them, and the evaluation results stay the reported ones. Full per-query evidence for every query and system is in `per_query_results.csv` and `error_trace.csv` in the results folder.
+Good transcription does not guarantee search success. Log potential annotation issues for a new version and complete rerun; do not edit labels after seeing results.
+
+**Which query is traced.** The trace takes the first top-five anchor miss among evaluation queries under any of the six systems and names that system. Only if no evaluation query has one does it trace a development query, labelled as diagnosis: no setting, label or query is changed after seeing it, and the evaluation results stay the reported ones. `error_trace.csv` covers the 40 evaluation queries with three selected diagnostics (ASR dense candidate missing, ASR and reference rerank top-five missing). Complete rankings for every query and system are in `ranked_runs.json`, and per-query anchor scores in `per_query_results.csv`.
 
 <details><summary>Worked answer</summary>A reranker only reorders the candidates supplied to it. If the target is absent, improving its pairwise scoring cannot recover that target. Increasing candidate depth changes that constraint, but may increase latency.</details>""")
     md("""### 7. Change one thing — development candidate depth
 
 **Predict → run → observe → explain:** increase candidate depth from **10 to 20** on development queries only. Keep models, corpus, prompts and labels fixed. Canonical evaluation files remain unchanged. Compare anchor recovery and measured latency; after label qualification, compare graded relevance too. More candidates do not guarantee improvement.
+
+**Same candidates, two depths.** The activity re-embeds the development queries, and re-batched embeddings can reorder near-tied dense candidates. So the second table scores the depth-10 and depth-20 rerankings of the *same* dense candidates from one computation, side by side, and counts how many depth-10 rankings reproduce the canonical development rankings. Compare depth-20 results with the development scores above only when every depth-10 ranking matched; otherwise compare the two depths within that table.
 
 **Fair cost comparison:** the canonical run reranked 60 queries and this activity reranks 20, so their raw durations measure different workloads. The activity therefore times depth 10 and depth 20 on the **same 20 development queries**, in the same process with the reranker already loaded, alternating which depth runs first. Depth changes only reranking, so query embedding and dense search are excluded from both columns.""")
     code(
@@ -415,7 +482,15 @@ for role, systems in activity['scores'].items():
 print('Full record, including per-query timings:', RESULTS / 'activity_summary.json')
 show_csv('activity_results.csv')
 show_csv('activity_candidates.csv')
-print('Compare against development scores above; evaluation configuration remains depth 10.')"""
+same = activity.get('same_candidate_depth_quality', {})
+differs = {c: v['queries'] - v['depth10_matches_canonical'] for c, v in same.items()}
+if same and not any(differs.values()):
+    print('Every depth-10 activity ranking equals the canonical development ranking, '
+          'so these depth-20 scores can be compared with the development scores above.')
+else:
+    print('Depth-10 activity rankings differ from canonical for', differs,
+          'queries per condition: compare depth 10 and 20 only in the same-candidate table below.')
+print('Evaluation configuration remains depth 10.')"""
     )
     code("""import csv
 summary = record('activity_summary.json')
@@ -439,7 +514,17 @@ head = ['transcripts', 'same dev queries', 'anchor in candidates @10', 'anchor i
 display(HTML('<table><tr>' + ''.join('<th>' + h + '</th>' for h in head) + '</tr>' + ''.join(
     '<tr>' + ''.join('<td>' + html.escape(str(v)) + '</td>' for v in r) + '</tr>' for r in rows) + '</table>'))
 print(summary['paired_latency']['conditions'])
-print('Per-query timings:', RESULTS / 'activity_latency.csv')""")
+print('Per-query timings:', RESULTS / 'activity_latency.csv')
+same = summary.get('same_candidate_depth_quality')
+if same:
+    names = list(same['reference']['depth10'])
+    head = ['transcripts', 'depth-10 ranking = canonical'] + [f'{m} @ depth {d}' for m in names for d in (10, 20)]
+    rows = [[c, f"{v['depth10_matches_canonical']}/{v['queries']}"]
+            + [f"{v[f'depth{d}'][m]:.3f}" for m in names for d in (10, 20)] for c, v in same.items()]
+    display(HTML('<table><tr>' + ''.join('<th>' + h + '</th>' for h in head) + '</tr>' + ''.join(
+        '<tr>' + ''.join('<td>' + html.escape(str(v)) + '</td>' for v in r) + '</tr>' for r in rows) + '</table>'))
+    print('Final ranking quality after reranking the same dense candidates at depth 10 and 20 '
+          '(one computation; development anchors only; not a benchmark).')""")
     md("""### 8. Reconstruct in a fresh process
 
 Reload the automatic-transcript artifact, verify hashes and dimensions, replay fixed queries, re-embed a document subset and retranscribe three frozen clips. Ranked IDs must match, with declared score tolerance `atol=1e-5, rtol=1e-4`. A mismatch stops the run; tolerances are not silently loosened. This verifies reconstruction beyond reading cached results.""")
@@ -448,20 +533,25 @@ Reload the automatic-transcript artifact, verify hashes and dimensions, replay f
 
 The automatic-transcript search artifact is separate from evaluation references and qrels. Numeric arrays use safe NumPy formats. The default ZIP excludes source audio and model weights, retaining source IDs, checksums and reacquisition information. Playback uses the validated local corpus, not stale exported Colab paths.
 
-**Conclude within the design.** On the evaluation set, anchor recovery is at or near its ceiling for every method and both transcript conditions, because each query paraphrases its anchor sentence. A zero paired difference therefore means the design cannot tell the conditions apart; it does not show that transcription errors leave search unaffected. What this run can show is mechanism: which development anchors are missed, whether a miss starts at transcription, candidate generation or reranking, and how BM25 on automatic transcripts loses anchors that dense search keeps. A discriminating comparison needs queries not paraphrased from the anchor sentence, topic-level queries with several relevant recordings, or a larger distractor pool, frozen as a new version together with the human relevance review.
+**Conclude from this run's evidence.** Base your conclusion on what §6 printed for this run: which systems reach 1.000 on each metric, and which paired differences have zero-width intervals. For orientation only, the recorded run of revision `e4b3fed` (notebook blob `f890d97d`, Colab CLI T4, 2026-10-03; not re-run for this revision) gave evaluation anchor hit@5 of 1.000 for dense and rerank in both transcript conditions and 0.975 for BM25 in both, so the hit@5 ASR-minus-reference rerank difference was 0.000 with a degenerate interval. Anchor reciprocal rank@10 was not saturated there except for rerank: 0.938 (reference) vs 0.906 (ASR) for BM25 and 0.946 vs 0.963 for dense. Development hit@5 for BM25 was 0.95 (reference) vs 0.90 (ASR). If your run matches, no difference was observed on hit@5 for this cohort; that does not establish that transcription errors leave search unaffected, because each query paraphrases its anchor sentence.
+
+A trace shows *where* an anchor was lost (absent from the candidates, or below the cutoff after reranking) and whether the reference and ASR conditions differ. A transcription contribution stays a hypothesis until you check the audio and the query words. A discriminating comparison needs queries not paraphrased from the anchor sentence, topic-level queries with several relevant recordings, or a larger distractor pool, frozen as a new version together with the human relevance review. These are anchor-recovery statements: if the reviewed-label branch is ever active, read Recall@5, MRR@10 and nDCG@10 on their own; anchor saturation says nothing about graded relevance.
 
 **Recommendation, with the evidence level of each part:**
-- Use the exported automatic-transcript search package as a *reproducible engineering artifact*: its fresh-process reload check is verified in this run (engineering evidence).
+- Reuse the exported automatic-transcript search package as a *reproducible engineering artifact* only if the export cell below reports `Fresh-process reload passed: True` for your run. That check covers the scope it lists (the replayed queries, re-embedded documents and retranscribed clips in `verification.json`), not every query or document (engineering evidence).
 - Treat the six-condition scores as anchor-recovery diagnostics on draft queries only (preview evidence, unreviewed labels); do not quote them as search quality or as the effect of transcription errors.
 - Before choosing a method for a real archive, obtain human relevance judgements and a non-paraphrase query set (not yet available; no evidence either way).
 
-**Optional reflection:** What evidence changed your prediction? Which failure entered at transcription, candidate generation or reranking? What cannot be concluded while relevance labels are unreviewed? Would your conclusion transfer to noisy conversations? Record measured results and limitations rather than declaring a winning model in advance.""")
+**Optional reflection:** What evidence changed your prediction? Where was each missed anchor lost (candidates or cutoff), and what would you check before attributing it to transcription? What cannot be concluded while relevance labels are unreviewed? Would your conclusion transfer to noisy conversations? Record measured results and limitations rather than declaring a winning model in advance.""")
     code(
         """stage('report')
 run_summary = record('run_summary.json')
 for key in ('status', 'annotation_qualified', 'scope', 'mode', 'warning'):
     print(f'{key}: {run_summary[key]}')
-print('Fresh-process reload passed:', run_summary['verification']['passed'])
+check = run_summary['verification']
+print(f"Fresh-process reload passed: {check['passed']} (tested scope: {check.get('queries_replayed')} queries "
+      f"replayed, {check.get('documents_reembedded')} documents re-embedded, "
+      f"{check.get('clips_retranscribed')} clips retranscribed)")
 for name, receipt in run_summary['stages'].items():
     peak = receipt.get('peak_allocated_gpu_bytes')
     print(f"  {name}: completed={receipt['completed']}, {receipt['seconds']:.1f} s, peak allocated GPU "
@@ -507,7 +597,7 @@ Disabled by default; no microphone or upload dialog opens during Run all. Use re
 
 **Getting files into Colab:** after Run all has created `/content/dimer_fil_audio_preview/`, open the **Files** pane (folder icon), create the folder `dimer_fil_audio_preview/my_audio/`, upload `manifest.json` and your clips into it, set `RUN_BYOD = True` and run the next cell. Uploaded files disappear when the runtime is recycled.
 
-**If an input is refused**, the cell prints one line naming the clip (`doc_id` and path), the rule it broke and how to fix it, builds nothing and clears any earlier BYOD archive from this session. Fix the file or manifest and re-run the cell. Other failures still stop with an error.
+**If an input is refused**, the cell prints one line naming the clip (`doc_id` and path), the rule it broke and how to fix it, builds nothing and clears the active notebook BYOD handle, so the query cell cannot search an earlier archive by mistake (earlier bundles under `byod/` and `byod/latest.json` stay on disk). Fix the file or manifest and re-run the cell. Other failures still stop with an error.
 
 The BYOD build transcribes and embeds your recordings once, then exports a search package in **the same format as the default archive**, with the same `search_archive.py` consumer. A fresh process then re-embeds, replays a probe query and retranscribes up to three clips against your original audio.
 
@@ -522,7 +612,7 @@ BYOD_MANIFEST = ROOT / 'my_audio/manifest.json'
 DOWNLOAD_BYOD = False
 BYOD_REFUSED = 3  # audio_byod.py exit status for a refused input; its one-line reason is printed above
 if RUN_BYOD:
-    globals().pop('BYOD', None)  # a refused or failed build must not leave an earlier archive searchable
+    globals().pop('BYOD', None)  # clear the active handle; earlier bundles and byod/latest.json stay on disk
     BYOD_STATUS = command([PY, ROOT / 'audio_byod.py', '--root', ROOT, '--manifest', BYOD_MANIFEST], 'byod.log',
                           allowed=(BYOD_REFUSED,))
 if not RUN_BYOD:

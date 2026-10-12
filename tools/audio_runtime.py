@@ -567,23 +567,27 @@ def run_search(root, queries, depth):
     return results, times
 
 
+def ranking_measures(q, qrels, ranking, qualified):
+    """Per-query measures of one ranked ID list: graded metrics if qualified, else anchor recovery."""
+    if len(ranking) != len(set(ranking)):
+        raise ValueError("Duplicate ranked documents")
+    if qualified:
+        labels = {r["doc_id"]: r["grade"] for r in qrels if r["query_id"] == q["query_id"]}
+        return core.retrieval_metrics(ranking, labels)
+    anchor = q["anchor_doc_id"]
+    rank = ranking.index(anchor) + 1 if anchor in ranking else None
+    return {
+        "anchor_hit_at_5": float(rank is not None and rank <= 5),
+        "anchor_reciprocal_rank_at_10": 1.0 / rank if rank is not None and rank <= 10 else 0.0,
+    }
+
+
 def score_runs(queries, qrels, runs, qualified):
     per_query = []
     for q in queries:
         for system in SYSTEMS:
             ranking = [p["doc_id"] for p in runs[q["query_id"]][system]]
-            if len(ranking) != len(set(ranking)):
-                raise ValueError("Duplicate ranked documents")
-            if qualified:
-                labels = {r["doc_id"]: r["grade"] for r in qrels if r["query_id"] == q["query_id"]}
-                measures = core.retrieval_metrics(ranking, labels)
-            else:
-                anchor = q["anchor_doc_id"]
-                rank = ranking.index(anchor) + 1 if anchor in ranking else None
-                measures = {
-                    "anchor_hit_at_5": float(rank is not None and rank <= 5),
-                    "anchor_reciprocal_rank_at_10": 1.0 / rank if rank is not None and rank <= 10 else 0.0,
-                }
+            measures = ranking_measures(q, qrels, ranking, qualified)
             per_query.append(
                 {
                     "query_id": q["query_id"],
@@ -640,9 +644,44 @@ def evaluate(root):
             [find(q, b) for q in ids], [find(q, a) for q in ids], [q["group_id"] for q in ids]
         )
         comparisons[b + "_minus_" + a] = {**result, "a_system": b, "b_system": a}
+    # Additive (2026-10-12 peer review): ASR-minus-reference for every method, and the rank-sensitive
+    # measure for every comparison. Same evaluation cohort, families, replicates and seed; the
+    # entries above keep their values. Exploratory paired differences, not hypothesis tests.
+    rank_measure = "mrr_at_10" if qualified else "anchor_reciprocal_rank_at_10"
+    pairs = [
+        ("reference_bm25", "asr_bm25"),
+        ("reference_dense", "asr_dense"),
+        ("reference_rerank", "asr_rerank"),
+        ("asr_dense", "asr_rerank"),
+        ("asr_bm25", "asr_dense"),
+    ]
+    evaluation = [q for q in queries if q["role"] == "test"]
+    lookup = {(p["query_id"], p["system"]): p for p in per_query}
+    additional = {}
+    for name in (measure, rank_measure):
+        additional[name] = {}
+        for a, b in pairs:
+            if name == measure and b + "_minus_" + a in comparisons:
+                continue
+            result = core.paired_bootstrap(
+                [lookup[q["query_id"], b][name] for q in evaluation],
+                [lookup[q["query_id"], a][name] for q in evaluation],
+                [q["group_id"] for q in evaluation],
+            )
+            additional[name][b + "_minus_" + a] = {**result, "a_system": b, "b_system": a}
     write(
         out(root) / "paired_comparisons.json",
-        {"measure": measure, "provisional": not qualified, "comparisons": comparisons},
+        {
+            "measure": measure,
+            "provisional": not qualified,
+            "comparisons": comparisons,
+            "additional_comparisons": additional,
+            "additional_note": (
+                "Exploratory: ASR-minus-reference for every method and rank-sensitive versions of every "
+                "comparison, evaluation queries only. A zero-width interval means the resampled paired "
+                "differences were all equal; it does not establish equivalence."
+            ),
+        },
     )
     errors = []
     for q in queries:
@@ -692,9 +731,25 @@ def activity(root):
                     }
                 )
     table(out(root) / "activity_candidates.csv", candidates)
-    latency, paired = paired_depth_latency(root, dev, runs)
+    latency, paired, same_candidates = paired_depth_latency(root, dev, runs)
     table(out(root) / "activity_latency.csv", latency)
     write(out(root) / "activity_runs.json", runs)
+    same_quality = {}
+    for condition in ("reference", "asr"):
+        same_quality[condition] = {
+            "queries": len(dev),
+            "depth10_matches_canonical": sum(
+                r["depth10_matches_canonical"] for r in latency if r["condition"] == condition
+            ),
+        }
+        for depth in (10, 20):
+            measures = [
+                ranking_measures(q, qrels, same_candidates[q["query_id"]][condition][depth], qualified)
+                for q in dev
+            ]
+            same_quality[condition][f"depth{depth}"] = {
+                k: float(np.mean([m[k] for m in measures])) for k in measures[0]
+            }
     write(
         out(root) / "activity_summary.json",
         {
@@ -703,6 +758,13 @@ def activity(root):
             "scores": summary,
             "timing": timing,
             "paired_latency": paired,
+            "same_candidate_depth_quality": same_quality,
+            "same_candidate_note": (
+                "Depth-10 and depth-20 rerankings of the same dense candidates from one computation "
+                "(the paired-timing pass). depth10_matches_canonical counts queries whose depth-10 "
+                "ranking equals the canonical evaluation-stage ranking; re-embedded queries can "
+                "reorder near-tied candidates."
+            ),
         },
     )
     table(out(root) / "activity_results.csv", values)
@@ -718,7 +780,7 @@ def paired_depth_latency(root, queries, runs):
     """
     documents = {c: read(out(root) / f"{c}_index_documents.json") for c in ("reference", "asr")}
     canonical = read(out(root) / "ranked_runs.json")
-    rows = []
+    rows, rankings = [], {}
     reranker = models.load_model("reranker", root)
     try:
         first = queries[0]
@@ -731,6 +793,9 @@ def paired_depth_latency(root, queries, runs):
                     began = time.perf_counter()
                     ranked[depth] = ranked_rerank(reranker, q["text"], docs, dense, depth)
                     seconds[depth] = time.perf_counter() - began
+                rankings.setdefault(q["query_id"], {})[condition] = {
+                    d: [r["doc_id"] for r in ranked[d]] for d in (10, 20)
+                }
                 rows.append(
                     {
                         "query_id": q["query_id"],
@@ -767,7 +832,7 @@ def paired_depth_latency(root, queries, runs):
         "depth order alternates per query; excludes model load, query embedding and dense search, "
         "which depth does not change. Wall-clock timing of one run, not a benchmark."
     )
-    return rows, paired
+    return rows, paired, rankings
 
 
 def verify_package(package, model_manifest):

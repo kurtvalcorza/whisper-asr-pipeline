@@ -134,17 +134,91 @@ def test_byod_markdown_states_the_input_contract_and_upload_route():
     assert "Files** pane" in text and "my_audio/" in text and "If an input is refused" in text
 
 
-def test_ceiling_interpretation_query_drafting_and_development_tracing():
+def test_wording_ceiling_reading_is_conditional_and_labelled():
+    # Wording test: the interpretation is generated or labelled with its revision (CX2, CX4).
     markdown = "\n".join(_cells("markdown"))
     assert "paraphrase of its own target (anchor) recording's reference sentence" in markdown
-    assert "41.9%" in markdown and "56 of the 60" in markdown
+    assert "normalised tokens longer than three characters" in markdown
     assert "not recomputed by this notebook" in markdown
-    assert "Reading a ceiling result" in markdown and "cannot distinguish the conditions" in markdown
-    assert "Conclude within the design" in markdown
+    assert "this bootstrap interval is degenerate and does not establish equivalence" in markdown
+    assert "cannot distinguish the conditions" not in markdown and "verified in this run" not in markdown
+    assert "revision `e4b3fed` (notebook blob `f890d97d`" in markdown
+    assert "starts at transcription" not in markdown
+    evaluate = _code("stage('evaluate')")
+    assert "additional_comparisons" in evaluate and "does not establish equivalence" in evaluate
+
+
+def _trace_namespace(ranked_runs, queries):
+    shown = []
+    return shown, {
+        "ROOT": Path("."), "json": json, "ranked_runs": ranked_runs, "record": lambda name: ranked_runs,
+        "corpus_rows": [{"doc_id": d, "reference": d, "path": d} for d in DOCS],
+        "automatic": {d: d for d in DOCS}, "display": shown.append,
+        "Markdown": lambda text: text, "Audio": lambda **kwargs: "[audio]",
+        "draft_queries": queries,
+    }
+
+
+DOCS = [f"doc-{i:02d}" for i in range(16)]
+SYSTEMS = [f"{c}_{m}" for c in ("reference", "asr") for m in ("bm25", "dense", "rerank")]
+
+
+def _runs(placements):
+    """placements: {query_id: {system: ranked doc IDs}}; unspecified systems put the anchor first."""
+    runs = {}
+    for query_id, (anchor, overrides) in placements.items():
+        others = [d for d in DOCS if d != anchor]
+        runs[query_id] = {s: [{"doc_id": d, "score": 0.0} for d in overrides.get(s, [anchor, *others])]
+                          for s in SYSTEMS}
+    return runs
+
+
+def test_observations_separate_cutoff_misses_from_rank_demotions():
+    # Behaviour test (CX7) on a synthetic ranking.
+    others = DOCS[3:]
+    placements = {
+        # candidate miss
+        "test-01": ("doc-00", {"asr_dense": [*others, "doc-00"], "asr_rerank": others[:10]}),
+        # demotion from rank 1 to rank 2, still a top-five hit
+        "test-02": ("doc-01", {"asr_dense": ["doc-01", *others],
+                               "asr_rerank": [others[0], "doc-01", *others[1:9]]}),
+        "test-03": ("doc-02", {"asr_dense": [*others[:6], "doc-02", *others[6:]],
+                               "asr_rerank": [*others[:6], "doc-02", *others[6:9]]}),  # unchanged rank 7
+    }
+    queries = [{"query_id": q, "anchor_doc_id": a, "role": "test", "text": q}
+               for q, (a, _) in placements.items()]
+    shown, ns = _trace_namespace(_runs(placements), queries)
     trace = _code("def anchor_missed(")
-    assert "dev_queries" in trace and "diagnosis only" in trace
-    categories = _code("def failure_categories(")
-    assert "('development (diagnosis only)', dev_queries)" in categories
+    exec("def anchor_missed" + trace.split("def anchor_missed", 1)[1].split("\nSYSTEM_ORDER", 1)[0], ns)
+    cell = _code("def stage_observations(")
+    exec(cell[cell.index("def rank_of("):cell.index("def candidate_table(")], ns)
+    exec(cell[cell.index("def stage_observations("):cell.index("\ncounts =")], ns)
+    observed = {label.split(":")[0]: [q["query_id"] for q in cases]
+                for label, cases in ns["stage_observations"](queries).items()}
+    assert observed == {
+        "Candidate miss": ["test-01"],
+        "Top-five miss after ASR reranking": ["test-01", "test-03"],
+        "Anchor rank demotion": ["test-02"],
+    }
+
+
+def test_trace_picks_an_evaluation_miss_under_any_system_before_development():
+    # Behaviour test (CX7): a BM25-only evaluation miss is traced and named; development is not used.
+    others = DOCS[2:]
+    placements = {
+        "test-01": ("doc-00", {"asr_bm25": [*others[:7], "doc-00", *others[7:]]}),
+        "dev-01": ("doc-01", {"asr_rerank": others[:10]}),
+    }
+    queries = [{"query_id": q, "anchor_doc_id": a, "role": q.split("-")[0], "text": q}
+               for q, (a, _) in placements.items()]
+    shown, ns = _trace_namespace(_runs(placements), queries)
+    cell = _code("def anchor_missed(")
+    out = io.StringIO()
+    with contextlib.redirect_stdout(out):
+        exec(cell.split("\n", 2)[2], ns)  # skip the two record-loading lines
+    assert ns["missed_by"] == "asr_bm25" and ns["trace_scope"] == "evaluation"
+    assert ns["example"]["query_id"] == "test-01"
+    assert "missed from the top five by `asr_bm25` (evaluation query)" in shown[0]
 
 
 def test_spec_declaration_and_write_up_layer():

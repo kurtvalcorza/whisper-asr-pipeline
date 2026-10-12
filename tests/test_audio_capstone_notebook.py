@@ -45,8 +45,8 @@ def test_byod_is_searchable_without_rebuilding():
 
 def test_failure_trace_shows_competing_evidence_for_both_categories():
     text = _code_cells()[_index("def candidate_table(")][1]
-    assert "Candidate miss" in text and "Reranker demotion" in text
-    assert "This category did not occur" in text and "automatic[row['doc_id']]" in text
+    assert "Candidate miss" in text and "Anchor rank demotion" in text and "Top-five miss" in text
+    assert "Not observed in this run" in text and "automatic[row['doc_id']]" in text
     assert "not negatives" in text
 
 

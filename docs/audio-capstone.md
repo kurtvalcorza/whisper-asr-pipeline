@@ -101,7 +101,8 @@ Audio is not resampled or downmixed: convert other recordings first, e.g.
 `ffmpeg -i in.m4a -ac 1 -ar 16000 clip.wav`. A refused input ends the BYOD command
 with exit status 3 and one line, `BYOD input refused: <doc_id> (<path>): <problem>.
 Fix: <action>`, before any model loads; the notebook then prints "Nothing was built"
-and clears any earlier BYOD archive from the session instead of raising:
+and clears the active notebook `BYOD` handle instead of raising (earlier bundles under
+`byod/` and `byod/latest.json` stay on disk):
 
 ```json
 {
@@ -197,17 +198,20 @@ under the 1 MB GitHub contents limit). The hosted runs above were of blob
 
 The Notebook Review Framework v1 review of `629a98f` (blob `f890d97d`) found two
 major and four minor issues (FAS-M1, FAS-M2, FAS-m1 to FAS-m4) and one suggestion
-(FAS-S1, not addressed). All changes are in the generator, the carried
-`audio_byod.py` and the validator; no computed result changes.
+(FAS-S1, not addressed). The changes are both narrative (notebook text) and executable
+(subprocess handling, BYOD validation, diagnostic selection, additional comparisons). All are in the generator, the carried
+`audio_byod.py` and `audio_runtime.py` (additive outputs only) and the validator;
+no existing computed result changes.
 
 | Finding | Change |
 | --- | --- |
-| FAS-M1 (provisional, owner decision pending) | Discloses that each query paraphrases its anchor's reference sentence (41.9% vs 1.3% content-word overlap; anchor highest or tied for 56 of 60 queries; computed from the carried files at review time), interprets the saturated evaluation comparison in §6 and §9, and lets the failure-tracing cells fall back to development misses labelled as diagnosis. The query/distractor redesign is left to the owner, tied to the human relevance review re-freeze. |
-| FAS-M2 | BYOD input contract (16 kHz mono, 2–25 s, ≤4 MB, 1–120 clips), conversion recipe and Files-pane upload route in §11. `audio_byod.py` validates first and reports a refusal as one line naming the clip, the rule and the fix (exit status 3); `command()` returns that status instead of raising; the cell prints a recovery line and clears a stale BYOD archive. Audio is still not resampled automatically. |
+| FAS-M1 (provisional, owner decision pending) | Discloses that each query paraphrases its anchor's reference sentence (41.9% vs 1.3% overlap of normalised tokens longer than three characters; anchor highest or tied for 56 of 60 queries; computed from the carried files at review time), interprets the saturated evaluation comparison in §6 and §9, and lets the failure-tracing cells fall back to development misses labelled as diagnosis. The query/distractor redesign is left to the owner, tied to the human relevance review re-freeze. |
+| FAS-M2 | BYOD input contract (16 kHz mono, 2–25 s, ≤4 MB, 1–120 clips), conversion recipe and Files-pane upload route in §11. `audio_byod.py` validates first and reports a refusal as one line naming the clip, the rule and the fix (exit status 3); `command()` returns that status instead of raising; the cell prints a recovery line and clears the active notebook `BYOD` handle (earlier bundles stay on disk). Audio is still not resampled automatically. |
 | FAS-m1 | Stale "hosted run pending" text replaced with the recorded runs and the real open gates (notebook, `README.md`, `tutorials/README.md`, this page). |
 | FAS-m2 | `metadata.dimer` uses `notebook_spec` (kept at 2.2), `notebook_profile`, `notebook_mode` and `notebook_kind: CAPSTONE`; problem statement, use notice, closing recommendation with evidence levels and References added. |
 | FAS-m3 | Troubleshooting table (runtime/GPU, disk, downloads and hashes, stage logs, reload mismatch, BYOD refusals). |
 | FAS-m4 | The activity and export cells print compact summaries and the record paths instead of whole JSON records. |
+| Peer-review follow-up | `paired_comparisons.json` keeps its three hit@5 entries unchanged and gains `additional_comparisons`: ASR minus reference for BM25 and dense, and anchor reciprocal rank@10 (MRR@10 when qualified) for all five comparisons. `activity_summary.json` gains `same_candidate_depth_quality`: depth-10 and depth-20 rerankings of the same dense candidates from the paired-timing pass, scored side by side, with the count of depth-10 rankings equal to canonical. The notebook prints its ceiling reading from the current outputs (per metric; a zero-width interval is called degenerate, not equivalence), labels the earlier run's numbers with their revision, traces the first top-five miss under any system and names it, separates candidate misses, top-five misses and anchor rank demotions, uses observational stage language, explains what `benchmark_qualified` means, gives the 0/1/2 grade rubric and adds a worked example. No existing output value changes. |
 
 ## Release evidence still required
 

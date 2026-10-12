@@ -39,8 +39,10 @@ T4 run on 2026-09-28 with every optional journey enabled (reload, export, search
 default Colab T4 `Run all` the same day; both hosts produced byte-identical model outputs. The
 Kaggle BYOD run used public FLEURS recordings as stand-ins, so a BYOD run on the maintainer's own
 recordings and human relevance review remain open. That run took 733 s including installs and downloads, with a peak allocated
-GPU memory of 1.61 GiB; the 60-minute / 12-GiB / 20-GiB free-disk figures remain engineering
-targets. See [capstone evidence](../docs/audio-capstone.md).
+GPU memory of 1.61 GiB; blob `f890d97d` (`e4b3fed`) then passed a Colab CLI T4 default run in 615 s on
+2026-10-03. The 60-minute / 12-GiB / 20-GiB free-disk figures are budgets. The 2026-10-12 review fixes
+(FAS-M1, FAS-M2, FAS-m1 to FAS-m4) change the notebook text, so the current revision needs a new hosted
+run, plus a hosted BYOD run with one refused input. See [capstone evidence](../docs/audio-capstone.md).
 
 ## Conformance notes
 

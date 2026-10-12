@@ -113,8 +113,8 @@ UV.chmod(0o755)
 ENV = dict(os.environ, UV_PYTHON_INSTALL_DIR=str(ROOT / 'python'), TOKENIZERS_PARALLELISM='false',
            MPLBACKEND='Agg', HF_HUB_DISABLE_TELEMETRY='1')
 
-def command(args, log_name):
-    """Stream output and preserve the real subprocess exit code."""
+def command(args, log_name, allowed=()):
+    """Stream output and preserve the real subprocess exit code; statuses in `allowed` are returned."""
     with (ROOT / log_name).open('w', encoding='utf-8') as log:
         process = subprocess.Popen([str(a) for a in args], cwd=ROOT, env=ENV,
                                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
@@ -124,8 +124,9 @@ def command(args, log_name):
             log.write(line)
             log.flush()
         status = process.wait()
-    if status:
+    if status and status not in allowed:
         raise RuntimeError(f'Command failed ({status}); inspect {ROOT / log_name}')
+    return status
 
 command([UV, 'python', 'install', '3.12.12'], 'python-install.log')
 PY = ROOT / 'venv/bin/python'
@@ -190,17 +191,25 @@ def build() -> dict:
     md("""# Filipino Audio Archive Search
 ## How do transcription errors affect what we find?
 
-**Engineering preview · Candidate · DIMER composed-systems capstone**
+**Engineering preview · Candidate · DIMER composed-systems CAPSTONE**
 
-**Standard:** DIMER NOTEBOOK_SPEC 2.2 · **Profile:** `E2E` · **Mode:** `GUIDED` · **Carrier:** standalone.
+**Standard:** DIMER NOTEBOOK_SPEC 2.2 · **Profile:** `E2E` · **Mode:** `GUIDED` · **Kind:** `CAPSTONE` · **Carrier:** standalone.
+
+> **Use notice:** this is an educational engineering preview, not a validated archive-search product. Its scores are anchor-recovery diagnostics on draft, unreviewed queries and must not be quoted as search quality. The optional bring-your-own-recordings path is for recordings you have the rights and consent to process; they stay in this Colab runtime, and you remain responsible for what you upload and export.
+
+#### Problem statement
+
+Archivists, librarians and researchers hold Filipino speech recordings that nobody has transcribed by hand. Automatic transcription makes them searchable, but transcription errors may hide a recording from the person looking for it. A useful outcome is evidence about *where* in the pipeline (transcription, candidate retrieval or reranking) a wanted recording gets lost, plus a reproducible search artifact you can rebuild and query. Scope: 120 read-speech FLEURS clips, three frozen pretrained models, draft queries; no fine-tuning, no speaker identification and no claim about meetings, regional accents or noisy archives.
 
 **Input → System → Output:** Filipino read-speech recordings → Whisper transcripts → lexical or Qwen3 search → ranked, playable recordings with visible evidence.
 
 You will measure transcription errors, compare six search conditions, trace failures through the pipeline, change one development-only setting and export a reproducible search artifact. Basic Python and Colab familiarity is enough; no prior ML experience is assumed.
 
-**Evidence boundary:** the 60 queries are AI-authored drafts. All 7,200 relevance cells are unjudged, including nominated anchors. Default results are **anchor-recovery engineering diagnostics**, not Recall@5, MRR or nDCG benchmark results. Human review and a fresh hosted run are required before qualification. Completion/reflection notes are optional, not required submissions.
+**Evidence boundary:** the 60 queries are AI-authored drafts. All 7,200 relevance cells are unjudged, including nominated anchors. Default results are **anchor-recovery engineering diagnostics**, not Recall@5, MRR or nDCG benchmark results. Human relevance review is required before qualification. Completion/reflection notes are optional, not required submissions.
 
-Use a **fresh Colab T4** and **Runtime → Run all**. No secret, login, paid API or repository clone is needed. Resource targets are 60 minutes, 20 GiB free disk and ≤12 GiB peak allocated GPU memory; these are unverified targets, not measured guarantees.""")
+**How the queries were made (read before predicting):** each query was drafted as a paraphrase of its own target (anchor) recording's reference sentence, so it shares many words with that sentence. Computed from the carried `queries.json` and `sample_manifest.json` during the 2026-10-12 review (not recomputed by this notebook): on average 41.9% of a query's content words (longer than three characters) appear in its anchor's reference, against 1.3% for each of the other 119 recordings, and the anchor is the highest-overlap recording (or tied for highest) for 56 of the 60 queries. Among 120 topically unrelated sentences this makes the anchor easy to recover and gives the reference-transcript condition a lexical advantage by construction. Expect anchor recovery near its ceiling; §6 explains how to read that.
+
+Use a **fresh Colab T4** and **Runtime → Run all**. No secret, login, paid API or repository clone is needed. Measured for revision `e4b3fed` (notebook blob `f890d97d`) and not re-run for this revision: 615 s wall on a fresh Colab T4 via the Colab CLI (2026-10-03), with a peak of 1.61 GiB allocated GPU memory in the transcription stage ([release verification](https://github.com/kurtvalcorza/whisper-asr-pipeline/blob/main/docs/release-verification.md#filipino-audio-archive-search-capstone)). Budget 60 minutes, 20 GiB free disk and ≤12 GiB peak allocated GPU memory; the run checks disk and GPU type before installing anything.""")
     md("""### 1. Orient and predict
 
 A transcript can contain many errors yet preserve the key concept. One wrong name can also make a mostly correct transcript hard to find. **Predict:** which matters more for your search query—overall transcription accuracy or preservation of its useful evidence?
@@ -211,7 +220,7 @@ A transcript can contain many errors yet preserve the key concept. One wrong nam
 | Qwen3 cosine similarity | R-Dense | A-Dense |
 | Dense top 10 → Qwen3 reranking | R-Rerank | A-Rerank |
 
-All six conditions use the same 120 document IDs and 60 queries. The 40 development and 80 evaluation recordings contribute 20 and 40 query anchors respectively. All recordings are searchable distractors in both roles. Reference text is an oracle **input condition**, not a guaranteed performance ceiling.
+All six conditions use the same 120 document IDs and 60 queries. The 40 development and 80 evaluation recordings contribute 20 and 40 query anchors respectively. All recordings are searchable distractors in both roles. Reference text is an oracle **input condition**, not a guaranteed performance ceiling. Because each query paraphrases its anchor's reference sentence (see the evidence boundary above), predict also: will this design leave room for transcription errors to show up in anchor recovery at all?
 
 The pinned models are [Whisper large-v3-turbo](https://huggingface.co/openai/whisper-large-v3-turbo), [Qwen3 Embedding 0.6B](https://huggingface.co/Qwen/Qwen3-Embedding-0.6B) and [Qwen3 Reranker 0.6B](https://huggingface.co/Qwen/Qwen3-Reranker-0.6B). Immutable revisions and file hashes are carried in `model_manifest.json`. **No fine-tuning occurs:** you construct and evaluate a search system around frozen pretrained models.
 
@@ -294,22 +303,34 @@ The reference and automatic indexes stay separate. Blank ASR documents retain th
 
 The experiment lock binds source, annotations, model identities, prompts and candidate depth. Evaluate the untouched query set only after this lock. In this preview, **anchor hit@5** asks whether the nominated draft target appears in the first five results; **anchor reciprocal rank@10** measures where that target appears in the first ten. They do not account for other potentially relevant recordings.
 
-After complete human review, the graded branch reports Recall@5 over all grade-2 references, MRR@10 for the first grade-2 result and nDCG@10 with gains 0/1/3. Do not rename preview diagnostics to these metrics.""")
+After complete human review, the graded branch reports Recall@5 over all grade-2 references, MRR@10 for the first grade-2 result and nDCG@10 with gains 0/1/3. Do not rename preview diagnostics to these metrics.
+
+**Reading a ceiling result.** If both transcript conditions recover nearly every evaluation anchor, the comparison is saturated: a paired difference of 0.0 with a 95% interval of [0.0, 0.0] means *this design cannot distinguish the conditions*, not that transcription errors do not matter. The queries paraphrase their anchor sentences among 120 unrelated sentences, so almost any method finds the anchor. Look instead at where misses do occur: BM25 on automatic transcripts, and the development queries traced below.""")
     code(
         "stage('evaluate')\nshow_json('retrieval_results.json')\npicture('evaluate.png')\nshow_json('paired_comparisons.json')\nshow_csv('error_trace.csv')"
     )
     code("""draft_queries = json.loads((ROOT / 'queries.json').read_text(encoding='utf-8'))
 ranked_runs = record('ranked_runs.json')
 test_queries = [q for q in draft_queries if q['role'] == 'test']
-failed = [q for q in test_queries if q['anchor_doc_id'] not in
-          [r['doc_id'] for r in ranked_runs[q['query_id']]['asr_rerank'][:5]]]
+dev_queries = [q for q in draft_queries if q['role'] == 'dev']
+
+def anchor_missed(query, system='asr_rerank'):
+    return query['anchor_doc_id'] not in [r['doc_id'] for r in ranked_runs[query['query_id']][system][:5]]
+
+failed, trace_scope = [q for q in test_queries if anchor_missed(q)], 'evaluation'
+if not failed:
+    # Evaluation anchors at ceiling: trace a development miss instead. Diagnosis only; nothing is tuned.
+    failed = ([q for q in dev_queries if anchor_missed(q)]
+              or [q for q in dev_queries if anchor_missed(q, 'asr_bm25')])
+    trace_scope = 'development (diagnosis only, no setting is changed)'
 example = (failed or test_queries)[0]
 anchor = next(r for r in corpus_rows if r['doc_id'] == example['anchor_doc_id'])
-display(Markdown('**Inspect a ' + ('missed' if failed else 'recovered') + ' draft anchor:** ' + example['text']))
+display(Markdown('**Inspect a ' + ('missed ' + trace_scope if failed else 'recovered evaluation')
+                 + ' draft anchor:** ' + example['text']))
 display(Markdown('**Reference:** ' + anchor['reference']))
 display(Markdown('**Whisper:** ' + automatic[anchor['doc_id']]))
 display(Audio(filename=str(ROOT / anchor['path'])))
-for name in ('reference_rerank', 'asr_dense', 'asr_rerank'):
+for name in ('reference_bm25', 'asr_bm25', 'reference_rerank', 'asr_dense', 'asr_rerank'):
     ids = [r['doc_id'] for r in ranked_runs[example['query_id']][name]]
     print(name, 'anchor rank:', ids.index(anchor['doc_id']) + 1 if anchor['doc_id'] in ids else 'absent',
           'top ten:', ids[:10])
@@ -346,25 +367,36 @@ def candidate_table(query):
                 display(Markdown('Competitor **' + row['doc_id'] + '**'))
                 display(Audio(filename=str(ROOT / locations[row['doc_id']]['path'])))
 
-categories = {
-    'Candidate miss (anchor not among the 10 dense candidates; reranking cannot recover it)':
-        [q for q in test_queries if rank_of(ranked_runs[q['query_id']]['asr_dense'][:10], q['anchor_doc_id']) is None],
-    'Reranker demotion (anchor among the candidates but ranked lower after reranking)':
-        [q for q in test_queries
-         if (d := rank_of(ranked_runs[q['query_id']]['asr_dense'][:10], q['anchor_doc_id'])) is not None
-         and rank_of(ranked_runs[q['query_id']]['asr_rerank'], q['anchor_doc_id']) > d],
-}
-for label, cases in categories.items():
-    display(Markdown(f'#### {label}: {len(cases)} of {len(test_queries)} evaluation queries'))
-    if not cases:
-        print('This category did not occur in this run.')
-        continue
-    display(Markdown('**Query:** ' + cases[0]['text'] + ' · **draft anchor:** ' + cases[0]['anchor_doc_id']))
-    candidate_table(cases[0])
+def failure_categories(queries):
+    return {
+        'Candidate miss (anchor not among the 10 dense candidates; reranking cannot recover it)':
+            [q for q in queries if rank_of(ranked_runs[q['query_id']]['asr_dense'][:10], q['anchor_doc_id']) is None],
+        'Reranker demotion (anchor among the candidates but ranked lower after reranking)':
+            [q for q in queries
+             if (d := rank_of(ranked_runs[q['query_id']]['asr_dense'][:10], q['anchor_doc_id'])) is not None
+             and rank_of(ranked_runs[q['query_id']]['asr_rerank'], q['anchor_doc_id']) > d],
+    }
+
+for scope, queries in (('evaluation', test_queries), ('development (diagnosis only)', dev_queries)):
+    categories = failure_categories(queries)
+    for label, cases in categories.items():
+        display(Markdown(f'#### {label}: {len(cases)} of {len(queries)} {scope} queries'))
+        if not cases:
+            print('This category did not occur in this run.')
+            continue
+        display(Markdown('**Query:** ' + cases[0]['text'] + ' · **draft anchor:** ' + cases[0]['anchor_doc_id']))
+        candidate_table(cases[0])
+    if any(categories.values()):
+        break
+    if scope == 'evaluation':
+        print('No evaluation failure to trace (ceiling). Showing development queries as diagnosis; '
+              'they were not used to change any setting.')
 print('Competing recordings are unjudged, not negatives: a competitor may also be relevant.')""")
     md("""**What to notice:** primary paired differences compare automatic versus reference transcripts under the same method. Rerank-minus-dense isolates the reranking stage; dense-minus-BM25 compares semantic and lexical search. Uncertainty resamples entire target-family query groups, 2,000 times with seed 42. Small curated drafts do not represent real user traffic.
 
 Trace a missed target through its source audio → reference → Whisper transcript → dense candidates → reranked list. A missing candidate cannot be rescued by reranking. A present candidate can be demoted. Good transcription does not guarantee search success. Log potential annotation issues for a new version and complete rerun; do not edit labels after seeing results.
+
+**When the evaluation set has no failure.** At ceiling the two cells above trace a *development* query instead and say so. Development queries are used here only to show a failure mechanism; no setting, label or query is changed after seeing them, and the evaluation results stay the reported ones. Full per-query evidence for every query and system is in `per_query_results.csv` and `error_trace.csv` in the results folder.
 
 <details><summary>Worked answer</summary>A reranker only reorders the candidates supplied to it. If the target is absent, improving its pairwise scoring cannot recover that target. Increasing candidate depth changes that constraint, but may increase latency.</details>""")
     md("""### 7. Change one thing — development candidate depth
@@ -373,7 +405,17 @@ Trace a missed target through its source audio → reference → Whisper transcr
 
 **Fair cost comparison:** the canonical run reranked 60 queries and this activity reranks 20, so their raw durations measure different workloads. The activity therefore times depth 10 and depth 20 on the **same 20 development queries**, in the same process with the reranker already loaded, alternating which depth runs first. Depth changes only reranking, so query embedding and dense search are excluded from both columns.""")
     code(
-        "stage('activity')\nshow_json('activity_summary.json')\nshow_csv('activity_results.csv')\nshow_csv('activity_candidates.csv')\nprint('Compare against development scores above; evaluation configuration remains depth 10.')"
+        """stage('activity')
+activity = record('activity_summary.json')
+for role, systems in activity['scores'].items():
+    print(f"Depth {activity['candidate_depth']}, {role} queries (provisional: {activity['provisional']}):")
+    for system, values in systems.items():
+        print('  ' + system.ljust(18) + '  '.join(
+            f'{k}={v:.3f}' if isinstance(v, float) else f'{k}={v}' for k, v in values.items()))
+print('Full record, including per-query timings:', RESULTS / 'activity_summary.json')
+show_csv('activity_results.csv')
+show_csv('activity_candidates.csv')
+print('Compare against development scores above; evaluation configuration remains depth 10.')"""
     )
     code("""import csv
 summary = record('activity_summary.json')
@@ -406,9 +448,30 @@ Reload the automatic-transcript artifact, verify hashes and dimensions, replay f
 
 The automatic-transcript search artifact is separate from evaluation references and qrels. Numeric arrays use safe NumPy formats. The default ZIP excludes source audio and model weights, retaining source IDs, checksums and reacquisition information. Playback uses the validated local corpus, not stale exported Colab paths.
 
+**Conclude within the design.** On the evaluation set, anchor recovery is at or near its ceiling for every method and both transcript conditions, because each query paraphrases its anchor sentence. A zero paired difference therefore means the design cannot tell the conditions apart; it does not show that transcription errors leave search unaffected. What this run can show is mechanism: which development anchors are missed, whether a miss starts at transcription, candidate generation or reranking, and how BM25 on automatic transcripts loses anchors that dense search keeps. A discriminating comparison needs queries not paraphrased from the anchor sentence, topic-level queries with several relevant recordings, or a larger distractor pool, frozen as a new version together with the human relevance review.
+
+**Recommendation, with the evidence level of each part:**
+- Use the exported automatic-transcript search package as a *reproducible engineering artifact*: its fresh-process reload check is verified in this run (engineering evidence).
+- Treat the six-condition scores as anchor-recovery diagnostics on draft queries only (preview evidence, unreviewed labels); do not quote them as search quality or as the effect of transcription errors.
+- Before choosing a method for a real archive, obtain human relevance judgements and a non-paraphrase query set (not yet available; no evidence either way).
+
 **Optional reflection:** What evidence changed your prediction? Which failure entered at transcription, candidate generation or reranking? What cannot be concluded while relevance labels are unreviewed? Would your conclusion transfer to noisy conversations? Record measured results and limitations rather than declaring a winning model in advance.""")
     code(
-        "stage('report')\nshow_json('run_summary.json')\nprint('Evidence bundle:', RESULTS / 'results.zip')\nDOWNLOAD_RESULTS = False\nif DOWNLOAD_RESULTS:\n    from google.colab import files\n    files.download(str(RESULTS / 'results.zip'))"
+        """stage('report')
+run_summary = record('run_summary.json')
+for key in ('status', 'annotation_qualified', 'scope', 'mode', 'warning'):
+    print(f'{key}: {run_summary[key]}')
+print('Fresh-process reload passed:', run_summary['verification']['passed'])
+for name, receipt in run_summary['stages'].items():
+    peak = receipt.get('peak_allocated_gpu_bytes')
+    print(f"  {name}: completed={receipt['completed']}, {receipt['seconds']:.1f} s, peak allocated GPU "
+          + ('none' if peak is None else f'{peak / 1024**3:.2f} GiB'))
+print('Stage identities and output hashes:', RESULTS / 'run_summary.json')
+print('Evidence bundle:', RESULTS / 'results.zip')
+DOWNLOAD_RESULTS = False
+if DOWNLOAD_RESULTS:
+    from google.colab import files
+    files.download(str(RESULTS / 'results.zip'))"""
     )
     md("""### 10. Optional free-form search
 
@@ -440,19 +503,33 @@ if RUN_SEARCH:
 
 Disabled by default; no microphone or upload dialog opens during Run all. Use recordings you have rights and consent to process. Prepare a local JSON manifest with `rights_confirmed: true`, nonempty `source_notes`, optional `probe_query`, and `records` containing stable `doc_id`, safe relative `path`, and optional nonempty `reference`. Example: `{"rights_confirmed": true, "source_notes": "My consented recording", "records": [{"doc_id": "clip_01", "path": "clip_01.wav"}]}`.
 
-WAV/FLAC inputs are bounded to 1–120 clips, 4 MB each and the same audio eligibility checks. The BYOD build transcribes and embeds your recordings once, then exports a search package in **the same format as the default archive**, with the same `search_archive.py` consumer. A fresh process then re-embeds, replays a probe query and retranscribes up to three clips against your original audio.
+**Input contract** (checked before any model loads): WAV or FLAC, **16 kHz, mono**, 2–25 seconds and at most 4 MB per clip; 1–120 clips; each `path` relative to the manifest's folder. These are the same eligibility checks as the default sample. The notebook does **not** resample or downmix. Most phone and laptop recordings are 44.1 or 48 kHz and often stereo, so convert a copy first, for example `ffmpeg -i my_recording.m4a -ac 1 -ar 16000 clip_01.wav` (Colab has `ffmpeg`; run it in a new cell prefixed with `!`). Split anything longer than 25 seconds into shorter clips.
+
+**Getting files into Colab:** after Run all has created `/content/dimer_fil_audio_preview/`, open the **Files** pane (folder icon), create the folder `dimer_fil_audio_preview/my_audio/`, upload `manifest.json` and your clips into it, set `RUN_BYOD = True` and run the next cell. Uploaded files disappear when the runtime is recycled.
+
+**If an input is refused**, the cell prints one line naming the clip (`doc_id` and path), the rule it broke and how to fix it, builds nothing and clears any earlier BYOD archive from this session. Fix the file or manifest and re-run the cell. Other failures still stop with an error.
+
+The BYOD build transcribes and embeds your recordings once, then exports a search package in **the same format as the default archive**, with the same `search_archive.py` consumer. A fresh process then re-embeds, replays a probe query and retranscribes up to three clips against your original audio.
 
 Each build gets its own folder under `byod/`; the default index is never touched:
 - `search/` and `search_index.zip`: the portable automatic-transcript package (transcripts, embeddings, audio identities, consumer, lock, `RECONSTRUCT.md`). It contains no references or evaluation records.
 - `evaluation.json`: kept separate. WER/CER require references; retrieval metrics require reviewed labels. Missing evidence is reported as **not measurable**, never zero error.
 - `verification.json`: the fresh-process reconstruction check.
 
-BYOD needs separate hosted verification.""")
+Hosted evidence so far: the BYOD build, re-query and clean-directory reuse passed on a Kaggle T4 at revision `5664f61` using public FLEURS 16 kHz clips as stand-ins (not re-run for this revision). A BYOD run on your own recordings and a hosted run with a refused input have not been recorded yet.""")
     code("""RUN_BYOD = False
 BYOD_MANIFEST = ROOT / 'my_audio/manifest.json'
 DOWNLOAD_BYOD = False
+BYOD_REFUSED = 3  # audio_byod.py exit status for a refused input; its one-line reason is printed above
 if RUN_BYOD:
-    command([PY, ROOT / 'audio_byod.py', '--root', ROOT, '--manifest', BYOD_MANIFEST], 'byod.log')
+    globals().pop('BYOD', None)  # a refused or failed build must not leave an earlier archive searchable
+    BYOD_STATUS = command([PY, ROOT / 'audio_byod.py', '--root', ROOT, '--manifest', BYOD_MANIFEST], 'byod.log',
+                          allowed=(BYOD_REFUSED,))
+if not RUN_BYOD:
+    print('BYOD disabled (RUN_BYOD = False).')
+elif BYOD_STATUS == BYOD_REFUSED:
+    print('Nothing was built. Fix the input named above, then re-run this cell.')
+else:
     BYOD = json.loads((ROOT / 'byod/latest.json').read_text(encoding='utf-8'))
     evaluation = json.loads(Path(BYOD['evaluation']).read_text(encoding='utf-8'))
     display(Markdown(
@@ -467,9 +544,7 @@ if RUN_BYOD:
         print(f'{label}: {BYOD[key]}')
     if DOWNLOAD_BYOD:
         from google.colab import files
-        files.download(BYOD['search_index_zip'])
-else:
-    print('BYOD disabled (RUN_BYOD = False).')""")
+        files.download(BYOD['search_index_zip'])""")
     md("""**Query your archive.** Change `BYOD_QUERY` and re-run only the next cell as often as you like: it searches the saved BYOD package without re-transcribing, and plays only your own recordings. To reuse the archive in a later session, keep `search_index.zip` and follow its `RECONSTRUCT.md`, or upload it with your audio and point `show_search` at the extracted folder.""")
     code("""BYOD_QUERY = ''
 if 'BYOD' in globals() and BYOD_QUERY.strip():
@@ -478,11 +553,29 @@ elif 'BYOD' in globals():
     print('Enter a BYOD_QUERY and re-run this cell to search your archive.')
 else:
     print('No BYOD archive in this session; enable RUN_BYOD above first.')""")
+    md("""### Troubleshooting
+
+| Symptom | What to do |
+|---|---|
+| `This candidate targets a Colab T4` or `nvidia-smi` not found | Runtime → Change runtime type → **T4 GPU**, then Runtime → Run all. CPU, L4 and A100 runtimes are outside the verified runtime and are refused. |
+| `At least 20 GiB free disk required` | Start a fresh runtime (Runtime → Disconnect and delete runtime) so earlier files are gone, then Run all. |
+| A download times out, or an `assert` on a size or SHA-256 fails | Re-run the cell once (a network hiccup is the usual cause). Never edit or bypass a hash: a persistent mismatch means the pinned source changed, so stop and report it. |
+| `Command failed (N); inspect …/<stage>.log` | Open that log in the Files pane (under `/content/dimer_fil_audio_preview/`). Stages are sequential; re-run from the failed stage's cell after fixing the cause, or Run all on a fresh runtime. |
+| `reload` reports a mismatch | Do not loosen the tolerances. Run all again on a fresh T4; a repeat mismatch is a reproducibility failure to report. |
+| BYOD prints `BYOD input refused: …` | The line names the clip, the rule and the fix (usually: convert to 16 kHz mono with `ffmpeg -ac 1 -ar 16000`, or split clips longer than 25 s). Fix the file or manifest and re-run the BYOD cell only. |
+| BYOD manifest not found | Upload `manifest.json` to `/content/dimer_fil_audio_preview/my_audio/` or set `BYOD_MANIFEST` to its path. |""")
     md("""### AI Assistance Disclosure
 
 Code, instructional text and initial query drafts were developed with generative AI assistance under maintainer direction. Draft annotations are explicitly distinguished from completed human review. The maintainer remains responsible for reviewing implementation, validating results and release decisions. AI assistance is not independent verification, provider endorsement or release approval.
 
-**Current scope:** read-speech engineering preview; no speaker identification, translation, generated answers, weight training or production archive claim. Hosted execution and human relevance qualification remain separate evidence gates.""")
+**Current scope:** read-speech engineering preview; no speaker identification, translation, generated answers, weight training or production archive claim. Open evidence gates: human relevance review (0 of 7,200 cells judged), a hosted run of this revision, a BYOD run on the maintainer's own recordings and a hosted run with a refused BYOD input. Default-path hosted runs are recorded in the repository's `docs/release-verification.md`.
+
+### References
+
+1. A. Radford, J. W. Kim, T. Xu, G. Brockman, C. McLeavey and I. Sutskever, "Robust speech recognition via large-scale weak supervision," in *Proc. 40th Int. Conf. Machine Learning (ICML)*, 2023. arXiv:2212.04356. Model: [openai/whisper-large-v3-turbo](https://huggingface.co/openai/whisper-large-v3-turbo).
+2. Y. Zhang *et al.*, "Qwen3 Embedding: Advancing text embedding and reranking through foundation models," arXiv:2506.05176, 2025. Models: [Qwen/Qwen3-Embedding-0.6B](https://huggingface.co/Qwen/Qwen3-Embedding-0.6B), [Qwen/Qwen3-Reranker-0.6B](https://huggingface.co/Qwen/Qwen3-Reranker-0.6B).
+3. A. Conneau *et al.*, "FLEURS: Few-shot learning evaluation of universal representations of speech," in *Proc. IEEE Spoken Language Technology Workshop (SLT)*, 2022. arXiv:2205.12446. Dataset: [google/fleurs](https://huggingface.co/datasets/google/fleurs), `fil_ph`, CC BY 4.0.
+4. S. Robertson and H. Zaragoza, "The probabilistic relevance framework: BM25 and beyond," *Foundations and Trends in Information Retrieval*, vol. 3, no. 4, pp. 333–389, 2009.""")
     return {
         "nbformat": 4,
         "nbformat_minor": 5,
@@ -492,9 +585,10 @@ Code, instructional text and initial query drafts were developed with generative
             "colab": {"name": NOTEBOOK.name, "provenance": []},
             "accelerator": "GPU",
             "dimer": {
-                "spec_version": "2.2",
-                "profile": "E2E",
-                "mode": "GUIDED",
+                "notebook_spec": "2.2",
+                "notebook_profile": "E2E",
+                "notebook_mode": "GUIDED",
+                "notebook_kind": "CAPSTONE",
                 "status": "Candidate",
                 "annotation_status": "engineering_preview",
             },

@@ -29,32 +29,110 @@ def write(path: Path, value: object) -> None:
     path.write_text(json.dumps(value, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
+# Exit status of the command-line entry point when an input is refused (see __main__).
+REFUSED_EXIT = 3
+CONVERT = (
+    "convert a copy first, e.g. `ffmpeg -i <input> -ac 1 -ar 16000 <clip>.wav`, and point the manifest at it"
+)
+
+
+class InputRefused(ValueError):
+    """A BYOD input breaks the input contract; the message names the input, the rule and the fix."""
+
+    def __init__(self, where: object, problem: str, fix: str):
+        super().__init__(f"{where}: {problem}. Fix: {fix}")
+
+
+def check_audio(where: str, source: Path) -> dict:
+    """Run the shared eligibility checks, explaining a refusal in terms the learner can act on."""
+    if not source.is_file():
+        raise InputRefused(
+            where, f"file not found at {source}", "upload it next to the manifest or correct `path`"
+        )
+    if source.suffix.lower() not in (".wav", ".flac"):
+        raise InputRefused(where, "only WAV or FLAC files are accepted", CONVERT)
+    size = source.stat().st_size
+    if not 0 < size <= 4_000_000:
+        raise InputRefused(
+            where, f"file is {size:,} bytes; the limit is 4,000,000", "use a shorter clip (2–25 s)"
+        )
+    try:
+        info = sf.info(str(source))
+    except Exception as exc:  # undecodable input: soundfile raises its own runtime error types
+        raise InputRefused(where, f"could not be decoded as audio ({exc})", CONVERT) from exc
+    if info.samplerate != 16000 or info.channels != 1:
+        raise InputRefused(
+            where, f"{info.samplerate} Hz, {info.channels} channel(s); 16 kHz mono is required", CONVERT
+        )
+    duration = info.frames / info.samplerate
+    if not 2 <= duration <= 25:
+        raise InputRefused(
+            where, f"{duration:.1f} s long; 2–25 seconds is required", "trim or split it into 2–25 s clips"
+        )
+    try:
+        return inspect_audio(source.read_bytes())  # the authoritative check shared with the default sample
+    except (ValueError, RuntimeError) as exc:
+        raise InputRefused(where, str(exc), "use a recording that contains audible speech") from exc
+
+
 def validate_input(path: Path) -> tuple[dict, list[dict]]:
     """Validate explicit rights and bounded local inputs before downloading models."""
+    if not path.is_file():
+        raise InputRefused(
+            path, "manifest not found", "upload manifest.json there or set BYOD_MANIFEST to its path"
+        )
     if path.stat().st_size > 1_000_000:
-        raise ValueError("BYOD manifest exceeds 1 MB")
-    manifest = read(path)
+        raise InputRefused(path, "BYOD manifest exceeds 1 MB", "list at most 120 recordings")
+    try:
+        manifest = read(path)
+    except (ValueError, UnicodeDecodeError) as exc:
+        raise InputRefused(path, f"not valid UTF-8 JSON ({exc})", "fix the JSON syntax") from exc
+    if not isinstance(manifest, dict):
+        raise InputRefused(path, "the manifest must be a JSON object", "follow the example manifest")
     if manifest.get("rights_confirmed") is not True or not str(manifest.get("source_notes", "")).strip():
-        raise ValueError("Explicit rights/consent acknowledgement and source notes required")
+        raise InputRefused(
+            path,
+            "Explicit rights/consent acknowledgement and source notes required",
+            'set "rights_confirmed": true and describe the source in "source_notes"',
+        )
     records = manifest.get("records", [])
-    if not 1 <= len(records) <= 120:
-        raise ValueError("BYOD accepts 1–120 recordings")
+    if not isinstance(records, list) or not 1 <= len(records) <= 120:
+        raise InputRefused(path, "BYOD accepts 1–120 recordings", 'list 1–120 entries under "records"')
+    if any(not isinstance(r, dict) or "doc_id" not in r or "path" not in r for r in records):
+        raise InputRefused(path, "every record needs `doc_id` and `path`", "follow the example manifest")
     ids = [r["doc_id"] for r in records]
-    if len(set(ids)) != len(ids) or any(not re.fullmatch(r"[A-Za-z0-9_-]{1,80}", name) for name in ids):
-        raise ValueError("Invalid/duplicate document IDs")
+    if len(set(map(str, ids))) != len(ids) or any(
+        not isinstance(name, str) or not re.fullmatch(r"[A-Za-z0-9_-]{1,80}", name) for name in ids
+    ):
+        raise InputRefused(
+            path,
+            "Invalid/duplicate document IDs",
+            "use unique IDs of 1–80 letters, digits, `_` or `-`",
+        )
     verified = []
     for record in sorted(records, key=lambda r: r["doc_id"]):
-        source = safe_path(path.parent, record["path"])
-        if source.suffix.lower() not in (".wav", ".flac") or not 0 < source.stat().st_size <= 4_000_000:
-            raise ValueError("Only bounded WAV/FLAC inputs (4 MB each) are supported")
-        data = source.read_bytes()
-        verified.append({**record, **inspect_audio(data), "local_path": str(source)})
+        where = f"{record['doc_id']} ({record['path']})"
+        try:
+            source = safe_path(path.parent, record["path"])
+        except (ValueError, TypeError) as exc:
+            raise InputRefused(
+                where, "Unsafe relative path", "give a path inside the manifest's folder, e.g. clip_01.wav"
+            ) from exc
+        verified.append({**record, **check_audio(where, source), "local_path": str(source)})
         reference = record.get("reference")
         if reference is not None and (not isinstance(reference, str) or not core.normalize(reference)):
-            raise ValueError("Supplied references must contain valid nonempty text")
+            raise InputRefused(
+                where,
+                "Supplied references must contain valid nonempty text",
+                "remove `reference` or fill it in",
+            )
     query = manifest.get("probe_query")
     if query is not None and (not isinstance(query, str) or not query.strip() or len(query) > 2000):
-        raise ValueError("Optional probe query must be nonempty and at most 2000 characters")
+        raise InputRefused(
+            path,
+            "Optional probe query must be nonempty and at most 2000 characters",
+            "remove `probe_query` or shorten it",
+        )
     return manifest, verified
 
 
@@ -288,4 +366,11 @@ if __name__ == "__main__":
     if args.verify:
         verify(args.root.resolve(), args.manifest.resolve(), args.verify.resolve())
     else:
+        # Validate first: every ValueError raised here is an input refusal (InputRefused), reported
+        # as one line naming the input, the rule and the fix. Failures after validation still raise.
+        try:
+            validate_input(args.manifest.resolve())
+        except ValueError as exc:
+            print(f"BYOD input refused: {exc}", flush=True)
+            sys.exit(REFUSED_EXIT)
         print(build(args.root.resolve(), args.manifest.resolve()))

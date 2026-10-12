@@ -49,8 +49,8 @@ fresh Colab T4 and performs no weight training. It is an **engineering preview**
 60 query drafts and all 7,200 relevance pairs still need human review, so the
 default retrieval scores describe nominated-anchor recovery, not benchmark
 relevance. Default Run all passed on a fresh Colab T4 for blob `f890d97d` (2026-10-03,
-615 s); open gates are human relevance review, a BYOD run on the maintainer's own recordings,
-a hosted run with a refused BYOD input and a hosted run of the current revision (see
+615 s) and for the current blob `6cc75045` (2026-10-12, Colab CLI, 589 s); open gates are human relevance
+review, a BYOD run on the maintainer's own recordings and a hosted run with a refused BYOD input (see
 [release verification](docs/release-verification.md#filipino-audio-archive-search-capstone)). See the
 [build and validation guide](docs/audio-capstone.md) and
 [annotation review protocol](docs/audio-annotation-review.md).

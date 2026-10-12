@@ -43,8 +43,8 @@ GPU memory of 1.61 GiB; blob `f890d97d` (`e4b3fed`) then passed a Colab CLI T4 d
 2026-10-03. The 60-minute / 12-GiB / 20-GiB free-disk figures are budgets. The 2026-10-12 review fixes
 (FAS-M1, FAS-M2, FAS-m1 to FAS-m4, plus a peer-review follow-up) change both notebook text and executable
 code (subprocess handling, BYOD validation, diagnostic selection, additional paired comparisons and
-same-candidate depth scoring), so the current revision needs a new hosted
-run, plus a hosted BYOD run with one refused input. See [capstone evidence](../docs/audio-capstone.md).
+same-candidate depth scoring); blob `6cc75045` (`ca5cffb`) passed a Colab CLI T4 default run in 589 s on
+2026-10-12 with every existing metric unchanged. A hosted BYOD run with one refused input is still open. See [capstone evidence](../docs/audio-capstone.md).
 
 ## Conformance notes
 

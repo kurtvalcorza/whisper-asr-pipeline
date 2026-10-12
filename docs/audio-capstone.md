@@ -175,6 +175,7 @@ pretrained-model or relevance evidence.
 
 | Date (UTC) | Commit / notebook blob | Result |
 | --- | --- | --- |
+| 2026-10-12 | `ca5cffb` / `6cc750453096` | **PASSED via the Colab CLI on a fresh Colab Tesla T4.** All 18 code cells in order, no errors, 589.2 s wall, default path only. Every existing metric (WER/CER, retrieval scores, the three hit@5 comparisons, depth-20 development scores) equals the 2026-10-03 run; the additional comparisons and same-candidate depth scores appear as intended. See [release verification](release-verification.md#filipino-audio-archive-search-capstone). |
 | 2026-10-03 | `e4b3fed` / `f890d97d43fd` | **PASSED via the Colab CLI on a fresh Colab Tesla T4.** All 18 code cells in order, no errors, 615.3 s wall. Every output equals the `ad42d18` Colab run except model-download progress bars. See [release verification](release-verification.md#filipino-audio-archive-search-capstone). |
 | 2026-09-28 | `ad42d18` (`main`) / `47da982901db` | **PASSED on Colab Tesla T4** (maintainer-supplied). Default `Run all`, toggles off, 18/18 cells. Reload passed; stage-output digests are byte-identical to the Kaggle run of `5664f61`. See [release verification](release-verification.md#maintainer-supplied-colab-execution-of-ad42d18--2026-09-28). |
 | 2026-09-28 | `5664f61` / `47da982901db` | **PASSED on Kaggle Tesla T4.** Blob-verified serial test-suite execution, 21/21 cells, with search, competitor playback and BYOD on plus harness cells for BYOD re-query, export re-run, a no-reference build and clean-directory reuse. Reload passed (4 queries, 4 documents, 3 clips replayed; tolerances unchanged); metrics equal the `d58ab28` run; peak allocated GPU 1.61 GiB. BYOD used FLEURS train clips as stand-ins. See [release verification](release-verification.md#kaggle-execution-of-5664f61--2026-09-28). |
@@ -231,8 +232,9 @@ fixtures and are not stored as notebook outputs or scientific results.
 
 1. Filipino-language query review, full relevance annotation, independent review
    or disclosed single-reviewer limitation, and a frozen review record.
-2. A hosted default Run all of the current notebook blob (the 2026-10-12 review
-   fixes change notebook text; blob `f890d97d` passed on 2026-10-03).
+2. Reviewer confirmation of the hosted default run of the current notebook blob
+   (`6cc75045` at `ca5cffb`, Colab CLI T4, 2026-10-12: PASS, existing metrics
+   unchanged; a CLI sequential execution, not a browser Run all).
 3. A hosted BYOD run on the maintainer's own recordings (so far only FLEURS
    stand-ins on Kaggle at `5664f61`), including one refused input showing the
    single-line refusal.

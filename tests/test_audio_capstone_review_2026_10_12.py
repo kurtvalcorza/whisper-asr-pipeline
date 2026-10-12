@@ -102,11 +102,9 @@ def _notebook_command():
     return install[install.index("def command(") : install.index("\ncommand([UV")]
 
 
-def test_byod_cell_reports_refusal_without_runtime_error_or_stale_archive(carried_root, tmp_path):
+def test_byod_cell_reports_refusal_without_runtime_error_or_stale_archive(tmp_path):
     root = tmp_path / "root"
-    root.mkdir()
-    for path in carried_root.iterdir():
-        (root / path.name).write_bytes(path.read_bytes())
+    builder.materialize(root)
     _manifest(root / "my_audio", rate=44100, channels=2)
     cell = _code("RUN_BYOD = False").replace("RUN_BYOD = False", "RUN_BYOD = True", 1)
     namespace = {"ROOT": root, "PY": Path(sys.executable), "ENV": _env(), "BYOD": {"stale": True}}

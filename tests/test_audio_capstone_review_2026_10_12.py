@@ -33,11 +33,13 @@ def _code(fragment):
     return matches[0]
 
 
-def _manifest(folder, rate=16000, channels=1, seconds=5.0, path="clip_01.wav"):
+def _manifest(folder, rate=16000, channels=1, seconds=5.0, path="clip_01.wav", garbage=False):
     folder.mkdir(parents=True, exist_ok=True)
     t = np.linspace(0, seconds, int(rate * seconds), endpoint=False)
     wave = (0.1 * np.sin(2 * np.pi * 220 * t)).astype("float32")
     sf.write(folder / "clip_01.wav", np.stack([wave, wave], 1) if channels == 2 else wave, rate)
+    if garbage:
+        (folder / "clip_01.wav").write_bytes(b"this is not audio" * 100)
     value = {
         "rights_confirmed": True,
         "source_notes": "synthetic test tone",
@@ -60,9 +62,9 @@ def carried_root(tmp_path_factory):
 
 
 REFUSALS = {
-    "stereo_44k1": ({"rate": 44100, "channels": 2}, "44100 Hz, 2 channel(s)"),
-    "mono_48k": ({"rate": 48000}, "48000 Hz, 1 channel(s)"),
-    "too_long": ({"seconds": 30.0}, "30.0 s long"),
+    # Sample rate and channels are converted since 2026-10-13; these inputs are still refused.
+    "too_long_48k_stereo": ({"rate": 48000, "channels": 2, "seconds": 30.0}, "30.0 s long"),
+    "unreadable": ({"garbage": True}, "could not be decoded"),
     "missing_file": ({"path": "clip_02.wav"}, "file not found"),
 }
 
@@ -90,8 +92,8 @@ def test_refused_byod_input_is_one_actionable_line(case, carried_root, tmp_path)
 def test_refusals_stay_value_errors_and_accepted_inputs_are_unchanged(tmp_path):
     _, records = validate_input(_manifest(tmp_path / "ok"))
     assert records[0]["sample_rate"] == 16000 and records[0]["channels"] == 1
-    with pytest.raises(InputRefused, match="16 kHz mono is required"):
-        validate_input(_manifest(tmp_path / "stereo", rate=44100, channels=2))
+    with pytest.raises(InputRefused, match="2-25 seconds is required"):
+        validate_input(_manifest(tmp_path / "long", seconds=30.0))
     assert issubclass(InputRefused, ValueError)
     with pytest.raises(InputRefused, match="manifest not found"):
         validate_input(tmp_path / "absent" / "manifest.json")
@@ -105,7 +107,7 @@ def _notebook_command():
 def test_byod_cell_reports_refusal_without_runtime_error_or_stale_archive(tmp_path):
     root = tmp_path / "root"
     builder.materialize(root)
-    _manifest(root / "my_audio", rate=44100, channels=2)
+    _manifest(root / "my_audio", seconds=30.0)
     cell = _code("RUN_BYOD = False").replace("RUN_BYOD = False", "RUN_BYOD = True", 1)
     namespace = {"ROOT": root, "PY": Path(sys.executable), "ENV": _env(), "BYOD": {"stale": True}}
     exec("import json, subprocess\nfrom pathlib import Path\n" + _notebook_command(), namespace)
@@ -114,7 +116,7 @@ def test_byod_cell_reports_refusal_without_runtime_error_or_stale_archive(tmp_pa
         exec(cell, namespace)  # must not raise RuntimeError
     text = out.getvalue()
     assert "Traceback" not in text and text.count("BYOD input refused: clip_01 (clip_01.wav)") == 1
-    assert "16 kHz mono is required" in text and "Nothing was built" in text
+    assert "30.0 s long" in text and "Nothing was built" in text
     assert "BYOD" not in namespace, "a refused build must not leave an earlier archive searchable"
 
 
@@ -129,17 +131,17 @@ def test_command_still_raises_for_genuine_failures(tmp_path):
 
 def test_byod_markdown_states_the_input_contract_and_upload_route():
     text = next(t for t in _cells("markdown") if t.startswith("### 11. Optional bring-your-own"))
-    assert "16 kHz, mono" in text and "2–25 seconds" in text and "4 MB" in text
-    assert "does **not** resample or downmix" in text and "-ac 1 -ar 16000" in text
+    assert "**16 kHz mono**" in text and "2–25 seconds" in text and "16 MB" in text
+    assert "scipy.signal.resample_poly" in text and "replays the conversion" in text
     assert "Files** pane" in text and "my_audio/" in text and "If an input is refused" in text
 
 
 def test_wording_ceiling_reading_is_conditional_and_labelled():
     # Wording test: the interpretation is generated or labelled with its revision (CX2, CX4).
     markdown = "\n".join(_cells("markdown"))
-    assert "paraphrase of its own target (anchor) recording's reference sentence" in markdown
-    assert "normalised tokens longer than three characters" in markdown
-    assert "not recomputed by this notebook" in markdown
+    assert "query version `ai-draft-v2`" in markdown and "never from the sentence itself" in markdown
+    assert "draft pending native-speaker review" in markdown and "41.9%" not in markdown
+    assert "previous query version** `ai-draft-v1`" in markdown
     assert "this bootstrap interval is degenerate and does not establish equivalence" in markdown
     assert "cannot distinguish the conditions" not in markdown and "verified in this run" not in markdown
     assert "revision `e4b3fed` (notebook blob `f890d97d`" in markdown

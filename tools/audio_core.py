@@ -164,6 +164,50 @@ def retrieval_metrics(ranked_ids: list[str], qrels: dict[str, int]) -> dict:
     )
 
 
+def query_overlap_audit(queries: list[dict], documents: list[dict]) -> dict:
+    """Lexical overlap between each query and the reference text of every document.
+
+    Unit: normalised tokens longer than three characters (a crude proxy, not linguistic content
+    words). Overlap with a document = share of the query's tokens that also occur in that
+    document's reference. Reported per query and summarised; computed from frozen files only.
+    """
+
+    def tokens(text: str) -> set[str]:
+        return {word for word in normalize(text).split() if len(word) > 3}
+
+    references = {d["doc_id"]: tokens(d["reference"]) for d in documents}
+    rows = []
+    for q in queries:
+        words = tokens(q["text"])
+        share = {d: (len(words & ref) / len(words) if words else 0.0) for d, ref in references.items()}
+        anchor = share[q["anchor_doc_id"]]
+        others = [v for d, v in share.items() if d != q["anchor_doc_id"]]
+        rows.append(
+            {
+                "query_id": q["query_id"],
+                "role": q["role"],
+                "query_tokens": len(words),
+                "anchor_overlap": anchor,
+                "max_other_overlap": max(others),
+                "mean_other_overlap": sum(others) / len(others),
+                "anchor_strictly_highest": anchor > max(others),
+                "anchor_highest_or_tied": anchor > 0 and anchor >= max(others),
+            }
+        )
+    n = len(rows)
+    return {
+        "unit": "normalised tokens longer than three characters",
+        "queries": n,
+        "documents": len(references),
+        "mean_anchor_overlap": sum(r["anchor_overlap"] for r in rows) / n,
+        "max_anchor_overlap": max(r["anchor_overlap"] for r in rows),
+        "mean_other_overlap": sum(r["mean_other_overlap"] for r in rows) / n,
+        "anchor_strictly_highest": sum(r["anchor_strictly_highest"] for r in rows),
+        "anchor_highest_or_tied": sum(r["anchor_highest_or_tied"] for r in rows),
+        "per_query": rows,
+    }
+
+
 def validate_annotations(
     documents: list[dict], queries: list[dict], qrels: list[dict], manifest: dict
 ) -> dict:

@@ -96,9 +96,15 @@ would be a different computation, not a reconstruction. Rankings must match exac
 tolerances are `atol=1e-5, rtol=1e-4`. No tolerance is widened automatically.
 
 Optional BYOD is disabled by default. Supply an authorized local JSON manifest
-and 1–120 mono 16 kHz WAV/FLAC recordings, each 2–25 seconds and at most 4 MB.
-Audio is not resampled or downmixed: convert other recordings first, e.g.
-`ffmpeg -i in.m4a -ac 1 -ar 16000 clip.wav`. A refused input ends the BYOD command
+and 1–120 WAV/FLAC recordings, each 2–25 seconds and at most 16 MB, at any sample
+rate, mono or stereo. Since 2026-10-13 (owner decision) the build converts inputs that
+are not 16 kHz mono before validation: channel mean, `scipy.signal.resample_poly` to
+16 kHz (SciPy 1.17.1, already in the hash lock), rounded 16-bit PCM WAV.
+`audio_acquisition.json` records the original identity (`sha256`, `original`: sample
+rate, channels, frames) and the converted identity (`converted`: sha256, 16 kHz, mono,
+frames, method), and the fresh-process check replays the conversion and must reproduce
+the converted hash. Missing files, clips outside 2–25 s or over 16 MB, and unreadable
+or silent audio are still refused. A refused input ends the BYOD command
 with exit status 3 and one line, `BYOD input refused: <doc_id> (<path>): <problem>.
 Fix: <action>`, before any model loads; the notebook then prints "Nothing was built"
 and clears the active notebook `BYOD` handle instead of raising (earlier bundles under
@@ -204,9 +210,22 @@ major and four minor issues (FAS-M1, FAS-M2, FAS-m1 to FAS-m4) and one suggestio
 `audio_byod.py` and `audio_runtime.py` (additive outputs only) and the validator;
 no existing computed result changes.
 
+Owner decisions (Kurt, 2026-10-13): **FAS-M1 = B** (redesign now) and **BYOD = B**
+(convert inside the build). Both are implemented; no owner decision is pending.
+
+- FAS-M1 = B: new frozen query version `ai-draft-v2` (information-need drafts written
+  from one-line summaries, never from the anchor sentence; same IDs, anchors and split;
+  draft pending native-speaker review). Declared threshold: mean anchor overlap at most 0.10,
+  per query at most 0.25 (normalised tokens longer than three characters). v2: mean 0.0101,
+  max 0.1429, anchor strictly highest for 0 of 60. v1: 0.4193, 0.8000, 50 of 60. The prepare
+  stage writes `query_audit.json` and refuses a set over the threshold. v1 stays as
+  `tools/audio_queries_v1.json` + `tools/audio_annotations_v1.json`. All retrieval numbers
+  change; the distractor pool is unchanged (120 recordings).
+- BYOD = B: see the BYOD section above.
+
 | Finding | Change |
 | --- | --- |
-| FAS-M1 (provisional, owner decision pending) | Discloses that each query paraphrases its anchor's reference sentence (41.9% vs 1.3% overlap of normalised tokens longer than three characters; anchor highest or tied for 56 of 60 queries; computed from the carried files at review time), interprets the saturated evaluation comparison in §6 and §9, and lets the failure-tracing cells fall back to development misses labelled as diagnosis. The query/distractor redesign is left to the owner, tied to the human relevance review re-freeze. |
+| FAS-M1 (first round, before the owner decision; superseded by B) | Discloses that each query paraphrases its anchor's reference sentence (41.9% vs 1.3% overlap of normalised tokens longer than three characters; anchor highest or tied for 56 of 60 queries; computed from the carried files at review time), interprets the saturated evaluation comparison in §6 and §9, and lets the failure-tracing cells fall back to development misses labelled as diagnosis. The query/distractor redesign is left to the owner, tied to the human relevance review re-freeze. |
 | FAS-M2 | BYOD input contract (16 kHz mono, 2–25 s, ≤4 MB, 1–120 clips), conversion recipe and Files-pane upload route in §11. `audio_byod.py` validates first and reports a refusal as one line naming the clip, the rule and the fix (exit status 3); `command()` returns that status instead of raising; the cell prints a recovery line and clears the active notebook `BYOD` handle (earlier bundles stay on disk). Audio is still not resampled automatically. |
 | FAS-m1 | Stale "hosted run pending" text replaced with the recorded runs and the real open gates (notebook, `README.md`, `tutorials/README.md`, this page). |
 | FAS-m2 | `metadata.dimer` uses `notebook_spec` (kept at 2.2), `notebook_profile`, `notebook_mode` and `notebook_kind: CAPSTONE`; problem statement, use notice, closing recommendation with evidence levels and References added. |

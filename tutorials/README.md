@@ -28,7 +28,9 @@ Generate it with `python tools/build_audio_capstone.py`; use `--check` for parit
 The default path uses 120 FLEURS Filipino clips, three pinned models, six search
 conditions, a development-only candidate-depth experiment, automatic-transcript
 search export and fresh-process replay. BYOD is disabled by default and accepts
-explicitly authorized local 16 kHz mono WAV/FLAC recordings of 2–25 seconds each.
+explicitly authorized local WAV/FLAC recordings of 2–25 seconds each at any sample rate, mono or
+stereo; the BYOD build converts them to 16 kHz mono (recorded and replayed). The default query set
+is `ai-draft-v2` (information-need drafts, pending native-speaker review).
 No adaptation or fine-tuning occurs.
 
 **Engineering preview / Candidate.** Query drafts have not received human review;

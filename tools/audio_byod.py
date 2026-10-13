@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
+import io
 import json
+import math
 import os
 import re
 import subprocess
@@ -13,7 +16,9 @@ import zipfile
 from pathlib import Path
 
 import numpy as np
+import scipy
 import soundfile as sf
+from scipy.signal import resample_poly
 
 import audio_core as core
 import audio_models as models
@@ -31,9 +36,16 @@ def write(path: Path, value: object) -> None:
 
 # Exit status of the command-line entry point when an input is refused (see __main__).
 REFUSED_EXIT = 3
-CONVERT = (
-    "convert a copy first, e.g. `ffmpeg -i <input> -ac 1 -ar 16000 <clip>.wav`, and point the manifest at it"
-)
+# Bounded original input: 25 s of 48 kHz 24-bit stereo WAV is about 7.2 MB.
+MAX_INPUT_BYTES = 16_000_000
+TARGET_RATE = 16000
+REEXPORT = "re-export it as WAV or FLAC (e.g. `ffmpeg -i <input> <clip>.wav`) and point the manifest at it"
+CONVERSION = {
+    "downmix": "arithmetic mean of channels (float64)",
+    "resampler": "scipy.signal.resample_poly (up/down reduced by gcd, default Kaiser window)",
+    "scipy": scipy.__version__,
+    "output": "16 kHz mono 16-bit PCM WAV, samples clipped to [-32768, 32767] after rounding x * 32767",
+}
 
 
 class InputRefused(ValueError):
@@ -43,36 +55,75 @@ class InputRefused(ValueError):
         super().__init__(f"{where}: {problem}. Fix: {fix}")
 
 
+def convert(data: bytes) -> tuple[bytes | None, dict]:
+    """Return 16 kHz mono 16-bit WAV bytes (None if the input already is 16 kHz mono) and the
+    original identity. Deterministic: the same original bytes give the same converted bytes."""
+    values, rate = sf.read(io.BytesIO(data), dtype="float32", always_2d=True)
+    original = {
+        "sha256": hashlib.sha256(data).hexdigest(),
+        "sample_rate": int(rate),
+        "channels": int(values.shape[1]),
+        "frames": int(len(values)),
+    }
+    if rate == TARGET_RATE and values.shape[1] == 1:
+        return None, original
+    if not np.isfinite(values).all():
+        raise ValueError("Nonfinite or silent audio")
+    mono = values.astype(np.float64).mean(axis=1)
+    divisor = math.gcd(TARGET_RATE, int(rate))
+    resampled = resample_poly(mono, TARGET_RATE // divisor, int(rate) // divisor)
+    pcm = np.clip(np.round(resampled * 32767.0), -32768, 32767).astype("<i2")
+    buffer = io.BytesIO()
+    sf.write(buffer, pcm, TARGET_RATE, format="WAV", subtype="PCM_16")
+    return buffer.getvalue(), original
+
+
 def check_audio(where: str, source: Path) -> dict:
-    """Run the shared eligibility checks, explaining a refusal in terms the learner can act on."""
+    """Convert to 16 kHz mono when needed, then run the eligibility checks shared with the default
+    sample, explaining a refusal in terms the learner can act on."""
     if not source.is_file():
         raise InputRefused(
             where, f"file not found at {source}", "upload it next to the manifest or correct `path`"
         )
     if source.suffix.lower() not in (".wav", ".flac"):
-        raise InputRefused(where, "only WAV or FLAC files are accepted", CONVERT)
+        raise InputRefused(where, "only WAV or FLAC files are accepted", REEXPORT)
     size = source.stat().st_size
-    if not 0 < size <= 4_000_000:
+    if not 0 < size <= MAX_INPUT_BYTES:
         raise InputRefused(
-            where, f"file is {size:,} bytes; the limit is 4,000,000", "use a shorter clip (2–25 s)"
+            where, f"file is {size:,} bytes; the limit is {MAX_INPUT_BYTES:,}", "use a shorter clip (2-25 s)"
         )
     try:
         info = sf.info(str(source))
     except Exception as exc:  # undecodable input: soundfile raises its own runtime error types
-        raise InputRefused(where, f"could not be decoded as audio ({exc})", CONVERT) from exc
-    if info.samplerate != 16000 or info.channels != 1:
-        raise InputRefused(
-            where, f"{info.samplerate} Hz, {info.channels} channel(s); 16 kHz mono is required", CONVERT
-        )
-    duration = info.frames / info.samplerate
+        raise InputRefused(where, f"could not be decoded as audio ({exc})", REEXPORT) from exc
+    duration = info.frames / info.samplerate if info.samplerate else 0.0
     if not 2 <= duration <= 25:
         raise InputRefused(
-            where, f"{duration:.1f} s long; 2–25 seconds is required", "trim or split it into 2–25 s clips"
+            where, f"{duration:.1f} s long; 2-25 seconds is required", "trim or split it into 2-25 s clips"
         )
+    data = source.read_bytes()
     try:
-        return inspect_audio(source.read_bytes())  # the authoritative check shared with the default sample
+        converted, original = convert(data)
+    except Exception as exc:  # decode failure or nonfinite samples
+        raise InputRefused(where, f"could not be converted to 16 kHz mono ({exc})", REEXPORT) from exc
+    try:  # the authoritative check shared with the default sample, on what the model will hear
+        checked = inspect_audio(converted if converted is not None else data)
     except (ValueError, RuntimeError) as exc:
         raise InputRefused(where, str(exc), "use a recording that contains audible speech") from exc
+    return {
+        **checked,
+        "sha256": original["sha256"],  # identity of the user's file (playback, reacquisition)
+        "original": original,
+        "converted": None
+        if converted is None
+        else {
+            "sha256": checked["sha256"],
+            "sample_rate": TARGET_RATE,
+            "channels": 1,
+            "frames": checked["frames"],
+            "method": CONVERSION,
+        },
+    }
 
 
 def validate_input(path: Path) -> tuple[dict, list[dict]]:
@@ -137,12 +188,18 @@ def validate_input(path: Path) -> tuple[dict, list[dict]]:
 
 
 def waves(records: list[dict]) -> list[np.ndarray]:
+    """Model input: the original 16 kHz mono file, or its replayed and hash-checked conversion."""
     values = []
     for row in records:
-        source = Path(row["local_path"])
-        if sha256(source) != row["sha256"]:
+        data = Path(row["local_path"]).read_bytes()
+        if hashlib.sha256(data).hexdigest() != row["sha256"]:
             raise ValueError("BYOD audio changed after validation")
-        values.append(sf.read(source, dtype="float32")[0])
+        payload = data
+        if row.get("converted"):
+            payload, _ = convert(data)
+            if payload is None or hashlib.sha256(payload).hexdigest() != row["converted"]["sha256"]:
+                raise ValueError("BYOD conversion did not reproduce the recorded converted audio")
+        values.append(sf.read(io.BytesIO(payload), dtype="float32")[0])
     return values
 
 
@@ -179,8 +236,12 @@ def verify(root: Path, source: Path, bundle: Path) -> None:
     docs, vectors = runtime.verify_package(package, root / "model_manifest.json")
     _, records = validate_input(source)
     expected_audio = read(package / "audio_acquisition.json")["records"]
-    if [(r["doc_id"], r["sha256"]) for r in records] != [(r["doc_id"], r["sha256"]) for r in expected_audio]:
-        raise ValueError("Audio identity changed")
+    def identity(rows):
+        return [(r["doc_id"], r["sha256"], (r.get("converted") or {}).get("sha256")) for r in rows]
+
+    # Replays the conversion: validate_input re-converts every original and must reproduce its hash.
+    if identity(records) != identity(expected_audio):
+        raise ValueError("Audio identity changed (original or converted)")
     count = min(3, len(docs))
     # Re-embed exactly the build's first embedding batch: fp16 vectors depend on batch composition.
     embedded = min(models.SETTINGS["embedding_batch_size"], len(docs))
@@ -264,9 +325,20 @@ def build(root: Path, source: Path, verify_in_subprocess: bool = True) -> Path:
     if vectors.shape[0] != len(docs) or not np.isfinite(vectors).all():
         raise ValueError("Bad document embeddings")
     acquisition = {
-        "instructions": "Supply the original local audio at these relative paths; audio is not bundled.",
+        "instructions": (
+            "Supply the original local audio at these relative paths; audio is not bundled. sha256 is the "
+            "original file; sample_rate/channels/frames/duration describe the 16 kHz mono model input. "
+            "Inputs that were not 16 kHz mono are converted with the recorded method; the converted "
+            "identity lets the reconstruction check replay the conversion."
+        ),
         "records": [
-            {k: r[k] for k in ("doc_id", "path", "sha256", "sample_rate", "channels", "frames", "duration")}
+            {
+                k: r[k]
+                for k in (
+                    "doc_id", "path", "sha256", "sample_rate", "channels", "frames", "duration",
+                    "original", "converted",
+                )
+            }
             for r in records
         ],
     }

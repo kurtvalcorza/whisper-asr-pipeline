@@ -1,6 +1,6 @@
 {
   "format_version": 1,
-  "annotation_version": "ai-draft-v1",
+  "annotation_version": "ai-draft-v2",
   "status": "engineering_preview",
   "human_review_complete": false,
   "benchmark_qualified": false,
@@ -18,19 +18,17 @@
     "test": 40
   },
   "query_type_counts": {
-    "relationship_action": 20,
-    "paraphrased_fact": 17,
-    "distinctive_term": 23
+    "information_need": 60
   },
-  "provenance": "60 individually AI-authored Filipino query drafts based only on pinned source references. No ASR predictions or rankings consulted. Nominated anchor IDs are engineering targets, not relevance judgements; every qrel remains null, including anchors.",
+  "provenance": "60 AI-authored Filipino information-need drafts (ai-draft-v2), each written from a one-line summary of its anchor's pinned reference sentence rather than from the sentence; draft pending native-speaker review. Same query IDs, anchors, families and split as ai-draft-v1. No ASR predictions or rankings consulted. Nominated anchor IDs are engineering targets, not relevance judgements; every qrel remains null, including anchors.",
   "selection": "Python random.Random(42), dev then test; sample 20/40 without replacement from document-ID-sorted role lists.",
   "review_required": "Competent Filipino-language human review of naturalness, answerability and audio/reference correspondence; full 7200 pair relevance judgments; independent review of nonzero and ambiguous labels and deterministic 20% zero sample; reconcile and freeze before model comparison.",
   "annotation_rights": "AI-assisted maintainer-authored drafts derived from CC-BY-4.0 FLEURS reference material; preserve source attribution and transformation notice.",
   "files": {
     "queries.json": {
       "source_file": "audio_queries.json",
-      "sha256": "ec69e92f94be30c7741e037bf78c54930ffa709bd82881e15accee9b9eb90f23",
-      "bytes": 32200
+      "sha256": "3531679c5a65fee866f2e0145cbfbfbc4ef3160404b9fb783551cf5799bea249",
+      "bytes": 38488
     },
     "qrels.json": {
       "source_file": "audio_qrels.json",
@@ -42,5 +40,30 @@
       "sha256": "fff4e00572cc2dc74ff5813064ff95a5b82e139ec41ddc9db2d89c91026d6e16",
       "bytes": 102097
     }
+  },
+  "construction": {
+    "record": "audio_queries_v2_construction.json",
+    "procedure": [
+      "For each nominated anchor, a one-line English summary of the information the recording carries was written first.",
+      "The Filipino query was written from that summary only, as a topic or information need a searcher could ask without knowing the sentence, avoiding the anchor's wording and its proper names where possible.",
+      "The lexical-overlap audit (tools/audit_audio_queries.py; normalised tokens longer than three characters) was run against all 120 references; queries over the declared threshold were rewritten before freezing.",
+      "Query IDs, anchors, target families and the development/evaluation split were kept from ai-draft-v1; queries, anchors and the null relevance matrix were frozen before any system was run on this version."
+    ],
+    "limitations": [
+      "One AI-assisted author saw each reference sentence when writing its summary; the summary step is not an independent elicitation.",
+      "Draft pending native-speaker review: Filipino naturalness, answerability and whether each query still identifies its anchor have not been checked by a competent speaker.",
+      "Topic-level queries may be satisfied by other recordings; every relevance cell remains unjudged."
+    ]
+  },
+  "overlap_threshold": {
+    "mean_anchor_overlap_max": 0.1,
+    "per_query_anchor_overlap_max": 0.25
+  },
+  "previous_version": {
+    "annotation_version": "ai-draft-v1",
+    "queries_source_file": "audio_queries_v1.json",
+    "queries_sha256": "ec69e92f94be30c7741e037bf78c54930ffa709bd82881e15accee9b9eb90f23",
+    "manifest_source_file": "audio_annotations_v1.json",
+    "note": "Paraphrase drafts of each anchor sentence; hosted runs up to 2026-10-13 used this version."
   }
 }

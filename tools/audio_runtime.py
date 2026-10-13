@@ -222,6 +222,20 @@ def prepare(root):
         raise ValueError("Frozen corpus must contain 40 development and 80 evaluation clips")
     write(out(root) / "corpus.json", records)
     queries, qrels, qualified = annotations(root)
+    # Frozen query-set audit (2026-10-13): lexical overlap with the anchors and every other reference.
+    audit = core.query_overlap_audit(queries, records)
+    manifest = read(root / "annotation_manifest.json")
+    limits = manifest.get("overlap_threshold")
+    audit["annotation_version"] = manifest.get("annotation_version")
+    audit["declared_threshold"] = limits
+    if limits:
+        audit["within_threshold"] = (
+            audit["mean_anchor_overlap"] <= limits["mean_anchor_overlap_max"]
+            and audit["max_anchor_overlap"] <= limits["per_query_anchor_overlap_max"]
+        )
+        if not audit["within_threshold"]:
+            raise ValueError("Frozen query set exceeds its declared lexical-overlap threshold")
+    write(out(root) / "query_audit.json", audit)
     write(
         out(root) / "qualification.json",
         {

@@ -353,3 +353,20 @@ def test_activity_scores_same_candidate_depths_side_by_side(experiment):
         # Every depth-10 ranking matched canonical, so its scores equal the canonical rerank scores.
         expected = {k: v for k, v in canonical[condition + "_rerank"].items() if k != "n"}
         assert same[condition]["depth10"] == pytest.approx(expected)
+
+
+def test_prepare_writes_query_audit_and_enforces_the_declared_threshold(experiment):
+    # FAS-M1 option B (2026-10-13): query set ai-draft-v2 is audited and gated at prepare.
+    audit = rt.read(rt.out(experiment) / "query_audit.json")
+    assert audit["annotation_version"] == "ai-draft-v2" and audit["within_threshold"] is True
+    assert audit["mean_anchor_overlap"] <= audit["declared_threshold"]["mean_anchor_overlap_max"] == 0.10
+    tools = Path(rt.__file__).parent
+    v1 = rt.core.query_overlap_audit(
+        rt.read(tools / "audio_queries_v1.json"), rt.read(tools / "audio_sample.json")["records"]
+    )
+    assert v1["mean_anchor_overlap"] > 0.4 and v1["anchor_strictly_highest"] == 50
+    manifest = rt.read(experiment / "annotation_manifest.json")
+    manifest["overlap_threshold"]["per_query_anchor_overlap_max"] = 0.0
+    rt.write(experiment / "annotation_manifest.json", manifest)
+    with pytest.raises(ValueError, match="overlap threshold"):
+        rt.prepare(experiment)

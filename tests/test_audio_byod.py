@@ -205,3 +205,59 @@ def test_separate_byod_attempts_do_not_overwrite(tmp_path, monkeypatch):
     first = byod.build(root, manifest, verify_in_subprocess=False)
     second = byod.build(root, manifest, verify_in_subprocess=False)
     assert first != second and (first / "search" / "index_manifest.json").is_file()
+
+
+def _stereo_44k1(folder, seconds=3.0):
+    folder.mkdir(parents=True, exist_ok=True)
+    t = np.linspace(0, seconds, int(44100 * seconds), endpoint=False)
+    left, right = 0.2 * np.sin(2 * np.pi * 220 * t), 0.1 * np.sin(2 * np.pi * 330 * t)
+    sf.write(folder / "phone.wav", np.stack([left, right], 1), 44100)
+    path = folder / "manifest.json"
+    path.write_text(
+        json.dumps({"rights_confirmed": True, "source_notes": "Consented fixture",
+                    "records": [{"doc_id": "phone", "path": "phone.wav"}]}),
+        encoding="utf-8",
+    )
+    return path
+
+
+def test_44k1_stereo_is_converted_to_16k_mono_with_both_identities(tmp_path):
+    import audio_byod as byod
+
+    manifest = _stereo_44k1(tmp_path / "in")
+    _, (record,) = validate_input(manifest)
+    assert record["original"]["sample_rate"] == 44100 and record["original"]["channels"] == 2
+    assert record["original"]["sha256"] == record["sha256"] == sha256(manifest.parent / "phone.wav")
+    converted = record["converted"]
+    assert converted["sample_rate"] == 16000 and converted["channels"] == 1
+    assert converted["frames"] == record["frames"] == 48000 and record["sample_rate"] == 16000
+    assert converted["method"]["resampler"].startswith("scipy.signal.resample_poly")
+    # Deterministic replay: converting the same original again gives the same converted bytes.
+    payload, _ = byod.convert((manifest.parent / "phone.wav").read_bytes())
+    assert hashlib.sha256(payload).hexdigest() == converted["sha256"]
+    (wave,) = byod.waves([record])
+    assert wave.ndim == 1 and len(wave) == 48000
+    # A 16 kHz mono input is not converted.
+    (tmp_path / "plain").mkdir()
+    _, (plain,) = validate_input(source(tmp_path / "plain"))
+    assert plain["converted"] is None and plain["original"]["sample_rate"] == 16000
+
+
+def test_converted_byod_build_records_and_replays_the_conversion(tmp_path, monkeypatch):
+    byod = _fake_models(monkeypatch)
+    root = _run_root(tmp_path)
+    manifest = _stereo_44k1(tmp_path / "in")
+    bundle = byod.build(root, manifest, verify_in_subprocess=False)
+    acquisition = json.loads((bundle / "search" / "audio_acquisition.json").read_text(encoding="utf-8"))
+    (row,) = acquisition["records"]
+    assert row["original"]["sample_rate"] == 44100 and row["original"]["channels"] == 2
+    assert row["converted"]["sample_rate"] == 16000 and row["converted"]["channels"] == 1
+    receipt = json.loads((bundle / "build_receipt.json").read_text(encoding="utf-8"))
+    monkeypatch.setattr(byod.os, "getpid", lambda: receipt["pid"] + 1)
+    byod.verify(root, manifest, bundle)
+    assert json.loads((bundle / "verification.json").read_text(encoding="utf-8"))["passed"] is True
+    # A conversion that no longer reproduces the recorded converted audio is refused on replay.
+    real = byod.convert
+    monkeypatch.setattr(byod, "convert", lambda data: (real(data)[0] + b"\0\0", real(data)[1]))
+    with pytest.raises(ValueError, match="Audio identity changed"):
+        byod.verify(root, manifest, bundle)

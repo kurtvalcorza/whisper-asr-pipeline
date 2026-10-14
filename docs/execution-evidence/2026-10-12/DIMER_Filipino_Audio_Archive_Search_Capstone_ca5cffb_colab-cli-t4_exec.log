@@ -1,0 +1,1681 @@
+[colab] Parsing notebook '/home/kurt/colab-runs/whisper-asr-pipeline-ca5cffb-3c2127/DIMER_Filipino_Audio_Archive_Search_Capstone_ca5cffb_colab-cli-t4.ipynb'...
+[colab] Executing cell 1/18 - 71a2dcca093a...
+GPU: Tesla T4
+Engineering preview: human relevance review is pending. No benchmark-quality claim.
+[colab] Executing cell 2/18 - Infrastructure: embedded source, manifests and locked install (expand to inspect)...
+Downloading cpython-3.12.12-linux-x86_64-gnu (download) (32.3MiB)
+ Downloaded cpython-3.12.12-linux-x86_64-gnu (download)
+Installed Python 3.12.12 in 1.93s
+ + cpython-3.12.12-linux-x86_64-gnu (python3.12)
+warning: `/root/.local/bin` is not on your PATH. To use installed Python executables, run `export PATH="/root/.local/bin:$PATH"` or `uv python update-shell`.
+warning: The `--system` flag has no effect, `uv venv` always ignores virtual environments when finding a Python interpreter; did you mean `--no-managed-python`?
+Using CPython 3.12.12
+Creating virtual environment at: venv
+Activate with: source venv/bin/activate
+Using Python 3.12.12 environment at: venv
+Resolved 60 packages in 441ms
+Downloading sympy (6.0MiB)
+Downloading tokenizers (3.1MiB)
+Downloading nvidia-curand (56.8MiB)
+Downloading sentencepiece (1.3MiB)
+Downloading nvidia-nccl-cu13 (187.4MiB)
+Downloading cuda-bindings (6.8MiB)
+Downloading nvidia-cusolver (191.6MiB)
+Downloading setuptools (1.0MiB)
+Downloading nvidia-cusparselt-cu13 (162.0MiB)
+Downloading pillow (6.6MiB)
+Downloading nvidia-cublas (403.5MiB)
+Downloading nvidia-cufft (204.2MiB)
+Downloading transformers (11.4MiB)
+Downloading networkx (2.0MiB)
+Downloading nvidia-cuda-nvrtc (86.0MiB)
+Downloading kiwisolver (1.4MiB)
+Downloading nvidia-cufile (1.2MiB)
+Downloading triton (179.5MiB)
+Downloading numpy (15.9MiB)
+Downloading nvidia-cuda-runtime (2.1MiB)
+Downloading nvidia-cudnn-cu13 (349.1MiB)
+Downloading fonttools (5.1MiB)
+Downloading nvidia-cusparse (139.2MiB)
+Downloading hf-xet (4.3MiB)
+Downloading soundfile (1.3MiB)
+Downloading scipy (33.6MiB)
+Downloading torch (506.1MiB)
+Downloading nvidia-nvjitlink (38.8MiB)
+Downloading pandas (10.4MiB)
+Downloading pyarrow (45.4MiB)
+Downloading nvidia-nvshmem-cu13 (57.6MiB)
+Downloading matplotlib (8.3MiB)
+Downloading nvidia-cuda-cupti (10.2MiB)
+ Downloaded setuptools
+ Downloaded nvidia-cufile
+ Downloaded soundfile
+ Downloaded kiwisolver
+ Downloaded sentencepiece
+ Downloaded networkx
+ Downloaded nvidia-cuda-runtime
+ Downloaded tokenizers
+ Downloaded hf-xet
+ Downloaded fonttools
+ Downloaded sympy
+ Downloaded pillow
+ Downloaded cuda-bindings
+ Downloaded matplotlib
+ Downloaded pandas
+ Downloaded nvidia-cuda-cupti
+ Downloaded transformers
+ Downloaded numpy
+ Downloaded scipy
+ Downloaded nvidia-nvjitlink
+ Downloaded pyarrow
+ Downloaded nvidia-curand
+ Downloaded nvidia-nvshmem-cu13
+ Downloaded nvidia-cuda-nvrtc
+ Downloaded nvidia-cusparse
+ Downloaded nvidia-cusparselt-cu13
+ Downloaded triton
+ Downloaded nvidia-nccl-cu13
+ Downloaded nvidia-cusolver
+ Downloaded nvidia-cufft
+ Downloaded nvidia-cudnn-cu13
+ Downloaded nvidia-cublas
+ Downloaded torch
+Prepared 60 packages in 40.74s
+Installed 60 packages in 475ms
+ + certifi==2026.7.22
+ + cffi==2.1.1
+ + charset-normalizer==3.5.1
+ + contourpy==1.4.0
+ + cuda-bindings==13.4.3
+ + cuda-pathfinder==1.8.2
+ + cuda-toolkit==13.0.2
+ + cycler==0.12.1
+ + filelock==4.0.4
+ + fonttools==4.66.0
+ + fsspec==2026.9.0
+ + hf-xet==1.6.0
+ + huggingface-hub==0.36.2
+ + idna==3.20
+ + jinja2==3.1.6
+ + kiwisolver==1.5.1
+ + markupsafe==3.0.3
+ + matplotlib==3.10.8
+ + mpmath==1.3.0
+ + networkx==3.7
+ + numpy==2.5.3
+ + nvidia-cublas==13.1.0.3
+ + nvidia-cuda-cupti==13.0.85
+ + nvidia-cuda-nvrtc==13.0.88
+ + nvidia-cuda-runtime==13.0.96
+ + nvidia-cudnn-cu13==9.19.0.56
+ + nvidia-cufft==12.0.0.61
+ + nvidia-cufile==1.15.1.6
+ + nvidia-curand==10.4.0.35
+ + nvidia-cusolver==12.0.4.66
+ + nvidia-cusparse==12.6.3.3
+ + nvidia-cusparselt-cu13==0.8.0
+ + nvidia-nccl-cu13==2.28.9
+ + nvidia-nvjitlink==13.0.88
+ + nvidia-nvshmem-cu13==3.4.5
+ + nvidia-nvtx==13.0.85
+ + packaging==26.3
+ + pandas==3.0.1
+ + pillow==12.3.0
+ + pyarrow==23.0.1
+ + pycparser==3.0
+ + pyparsing==3.3.3
+ + python-dateutil==2.9.0.post0
+ + pyyaml==6.0.3
+ + regex==2026.9.10
+ + requests==2.34.2
+ + safetensors==0.8.0
+ + scipy==1.17.1
+ + sentencepiece==0.2.1
+ + setuptools==81.0.0
+ + six==1.17.0
+ + soundfile==0.13.1
+ + sympy==1.14.0
+ + tokenizers==0.22.2
+ + torch==2.11.0
+ + tqdm==4.70.1
+ + transformers==4.57.6
+ + triton==3.6.0
+ + typing-extensions==4.16.0
+ + urllib3==2.8.0
+[colab] Executing cell 3/18 - 0a01e87f21bb...
+prepare: PASS
+                                                                                
+ {                                                                              
+   "human_labels_verified": false,                                              
+   "mode": "engineering_preview_anchor_recovery",                               
+   "limitations": [                                                             
+     "Read speech only",                                                        
+     "No verified speaker-independent claim",                                   
+     "Unknown pretraining overlap",                                             
+     "Curated queries are not representative user logs"                         
+   ],                                                                           
+   "queries": 60,                                                               
+   "judgement_cells": 7200,                                                     
+   "unjudged_cells": 7200                                                       
+ }                                                                              
+                                                                                
+<IPython.core.display.Image object>
+
+[Image saved to: /tmp/tmpfqclq7en.png]
+[colab] Executing cell 4/18 - aff499cd788e...
+fil-0c1a8429c9c00921 — Ang mga kilalang mang-aawit sa buong bansa ay naghandog  
+ng bhajans, o mga banal na kanta, sa mga paa ng Shri Shyam.                     
+Your browser does not support the audio element.                                
+fil-0df8fae152961b7a — Sinusubukan pa rin nilang alamin kung gaano talaga       
+kalawak ang banggaan at kung paano maaapektuhan ang Earth.                      
+Your browser does not support the audio element.                                
+fil-0eec85083746457c — Ang mga buwaya sa maalat na tubig ay hindi aktibong      
+nananahan sa karagatan, ang kanilang pangunahing tirahan ay sa mga wawa ng ilog 
+na nasa hilaga mula sa Rockhampton.                                             
+Your browser does not support the audio element.                                
+[colab] Executing cell 5/18 - 8ac3d7993497...
+
+Fetching 12 files:   0%|          | 0/12 [00:00<?, ?it/s]
+Fetching 12 files:  17%|█▋        | 2/12 [00:00<00:01,  6.26it/s]
+Fetching 12 files:  33%|███▎      | 4/12 [00:00<00:01,  7.18it/s]
+Fetching 12 files:  50%|█████     | 6/12 [00:01<00:01,  5.91it/s]
+Fetching 12 files:  67%|██████▋   | 8/12 [00:01<00:00,  5.29it/s]
+Fetching 12 files:  83%|████████▎ | 10/12 [00:02<00:00,  4.96it/s]
+Fetching 12 files: 100%|██████████| 12/12 [00:10<00:00,  1.19it/s]
+Fetching 12 files: 100%|██████████| 12/12 [00:10<00:00,  1.19it/s]
+`torch_dtype` is deprecated! Use `dtype` instead!
+Transcribed 4/120
+Transcribed 8/120
+Transcribed 12/120
+Transcribed 16/120
+Transcribed 20/120
+Transcribed 24/120
+Transcribed 28/120
+Transcribed 32/120
+Transcribed 36/120
+Transcribed 40/120
+Transcribed 44/120
+Transcribed 48/120
+Transcribed 52/120
+Transcribed 56/120
+Transcribed 60/120
+Transcribed 64/120
+Transcribed 68/120
+Transcribed 72/120
+Transcribed 76/120
+Transcribed 80/120
+Transcribed 84/120
+Transcribed 88/120
+Transcribed 92/120
+Transcribed 96/120
+Transcribed 100/120
+Transcribed 104/120
+Transcribed 108/120
+Transcribed 112/120
+Transcribed 116/120
+Transcribed 120/120
+asr: PASS
+
+                                                                                
+ doc_id           role             reference        hypothesis  empty_hypothes… 
+ ────────────────────────────────────────────────────────────────────────────── 
+ fil-027e061e5a…  test             Tinatanggap ang                              
+                                   mga pananaw ni                               
+                                   Aristotle                                    
+                                   tungkol                                      
+ sa lahat ng      Tinatanggap ang                                               
+ usapin sa        mga                                                           
+ siyensya,                                                                      
+ kabilang ang                                                                   
+ sikolohiya.                                                                    
+ pananaw ni                                                                     
+ Aristotle                                                                      
+ tungkol sa                                                                     
+ lahat ng usapin                                                                
+ sa siyensa,                                                                    
+ kabilang ang                                                                   
+ psikolohiya.     False                                                         
+ fil-044b100716…  test             Ang aspect                                   
+                                   ratio ng pormat                              
+                                   na ito                                       
+                                   (i-divide sa                                 
+ labindalawa                                                                    
+ upang makuha                                                                   
+ ang                                                                            
+ pinakasimpleng                                                                 
+ whole-number na                                                                
+ ratio) sa                                                                      
+ makatuwid ay     Ang aspect                                                    
+ 3:2.             ratio ng format                                               
+                  na ito sa mga                                                 
+                  ka-tweet ay 3s                                                
+                  to                                                            
+ 2.               False                                                         
+ fil-0a0ab810bf…  test             Matapos maitayo                              
+                                   ang dam noong                                
+                                   1963, ang pana-                              
+ panahong                                                                       
+ pagbaha na                                                                     
+ nagkakalat ng                                                                  
+ mga deposito sa                                                                
+ buong ilog ay                                                                  
+ nahinto.                                                                       
+ Matapos may                                                                    
+ tayo ang dam                                                                   
+ noong 1663, ang                                                                
+ panapanahong                                                                   
+ pagbaha na                                                                     
+ nagkakalat ng                                                                  
+ mga deposito sa  False                                                         
+ buong ilog ay                                                                  
+ nahinto.                                                                       
+ fil-0acc50d258…  test             Sinalakay din                                
+                                   nito ang                                     
+                                   anumang pumasok                              
+                                   sa tubig;                                    
+ kahit na ang                                                                   
+ higanteng                                                                      
+ dinosauro gaya                                                                 
+ ng T. rex ay                                                                   
+ hindi mananaig                                                                 
+ dito.                                                                          
+ Sinalakay din                                                                  
+ ito ang anumang                                                                
+ pumasok sa                                                                     
+ tubig. Kahit na                                                                
+ ang higanting                                                                  
+ dinasauro gaya   False                                                         
+ ng P. rex ay                                                                   
+ hindi mananaig                                                                 
+ dito.                                                                          
+ fil-0b24b1d224…  test             Kinansela ng                                 
+                                   Aerosmith ang                                
+                                   mga nalalabi                                 
+                                   nilang                                       
+ konsyerto sa     Kinansila ng                                                  
+ kanilang         Aerosmith ang                                                 
+ paglalakbay.     mga nalalabi                                                  
+ nilang           False                                                         
+ konsyerto sa                                                                   
+ kanilang                                                                       
+ paglalakbay.                                                                   
+ fil-0c1a8429c9…  dev              Ang mga                                      
+                                   kilalang                                     
+                                   mang-aawit sa                                
+                                   buong bansa ay                               
+ naghandog ng     Ang mga                                                       
+ bhajans, o mga                                                                 
+ banal na kanta,                                                                
+ sa mga paa ng                                                                  
+ Shri Shyam.                                                                    
+ kilalang mga                                                                   
+ awit sa buong                                                                  
+ bansa ay                                                                       
+ naghandog ng                                                                   
+ badyans o mga                                                                  
+ banal na kanta                                                                 
+ sa mga paa ng    False                                                         
+ shirisiam.                                                                     
+ fil-0df8fae152…  dev              Sinusubukan pa                               
+                                   rin nilang                                   
+                                   alamin kung                                  
+                                   gaano talaga                                 
+ kalawak ang      Sinusubukan pa                                                
+ banggaan at      rin                                                           
+ kung paano                                                                     
+ maaapektuhan                                                                   
+ ang Earth.                                                                     
+ ng alamin kung                                                                 
+ gaana ka talaga                                                                
+ kalawak ang                                                                    
+ banggaan at                                                                    
+ kung paano                                                                     
+ maapekto ka                                                                    
+ ng earth.        False                                                         
+ fil-0e11c0b26e…  test             Ang Casablanca                               
+                                   ay isa sa mga                                
+                                   lugar sa buong                               
+ Morocco na       Ang Casablanca                                                
+ hindi            ay isa sa                                                     
+ kawili-wiling                                                                  
+ puntahan para                                                                  
+ mamili.                                                                        
+ mga lugar sa     False                                                         
+ buong Morocco                                                                  
+ na hindi ka                                                                    
+ wiliwiling                                                                     
+ puntahan para                                                                  
+ mamili.                                                                        
+                                                                                
+Showing 8/120 rows. Full table: /content/dimer_fil_audio_preview/results/transcriptions.csv
+                                                                                
+ {                                                                              
+   "seconds": 52.5931100570001,                                                 
+   "audio_seconds": 1715.46,                                                    
+   "real_time_factor": 0.03065831325533682,                                     
+   "includes_loading": false,                                                   
+   "includes_audio_decode": true,                                               
+   "includes_unload": false,                                                    
+   "warm_state": "first clip cold; subsequent clips warm"                       
+ }                                                                              
+                                                                                
+[colab] Executing cell 6/18 - 2b309d0ab085...
+dev — WER 0.140; CER 0.036. Word edits: {'errors': 125, 'substitutions': 94,    
+'deletions': 14, 'insertions': 17, 'reference_units': 895}; character edits:    
+{'errors': 193, 'substitutions': 71, 'deletions': 82, 'insertions': 40,         
+'reference_units': 5387}                                                        
+test — WER 0.136; CER 0.042. Word edits: {'errors': 251, 'substitutions': 191,  
+'deletions': 32, 'insertions': 28, 'reference_units': 1844}; character edits:   
+{'errors': 462, 'substitutions': 161, 'deletions': 199, 'insertions': 102,      
+'reference_units': 11090}                                                       
+<Figure size 700x300 with 1 Axes>
+
+[Image saved to: /tmp/tmprxo79wvc.png]
+[colab] Executing cell 7/18 - fbfc267a6f69...
+fil-0c1a8429c9c00921                                                            
+
+Ang mga kilalang mang-aawit mga awit sa buong bansa ay naghandog ng bhajans,    
+badyans o mga banal na kanta, kanta sa mga paa ng Shri Shyam. shirisiam.        
+fil-0df8fae152961b7a                                                            
+
+Sinusubukan pa rin nilang ng alamin kung gaano gaana ka talaga kalawak ang      
+banggaan at kung paano maaapektuhan ang Earth. maapekto ka ng earth.            
+fil-0eec85083746457c                                                            
+
+Ang mga buwaya sa maalat na tubig ay hindi aktibong nananahan sa karagatan, ang 
+karagadan. Ang kanilang pangunahing tirahan pangunahitirahan ay sa mga wawa ng  
+ilog na nasa hilaga mula sa Rockhampton.                                        
+Visual word diff only: strikethrough = removed/replaced reference; highlight = ASR addition/replacement.
+Scientific WER/CER above use the documented normalized Levenshtein alignment, not this display diff.
+[colab] Executing cell 8/18 - 7bede9c6455f...
+
+Fetching 11 files:   0%|          | 0/11 [00:00<?, ?it/s]
+Fetching 11 files:  18%|█▊        | 2/11 [00:00<00:01,  6.34it/s]
+Fetching 11 files:  36%|███▋      | 4/11 [00:00<00:00,  7.05it/s]
+Fetching 11 files:  55%|█████▍    | 6/11 [00:00<00:00,  7.26it/s]
+Fetching 11 files:  73%|███████▎  | 8/11 [00:02<00:00,  3.07it/s]
+Fetching 11 files:  91%|█████████ | 10/11 [00:03<00:00,  3.10it/s]
+Fetching 11 files: 100%|██████████| 11/11 [00:10<00:00,  1.05it/s]
+`torch_dtype` is deprecated! Use `dtype` instead!
+You're using a Qwen2TokenizerFast tokenizer. Please note that with a fast tokenizer, using the `__call__` method is faster than using a method to encode the text followed by a call to the `pad` method to get a padded encoding.
+index: PASS
+                                                                                
+ {                                                                              
+   "format": "dimer_audio_archive",                                             
+   "version": 1,                                                                
+   "source": "fleurs_frozen_sample",                                            
+   "files": {                                                                   
+     "DATA_LICENSE.md":                                                         
+ "839d3227d29eeeb2af9d9dac7493512714e9f90536f4f45ee2f03ac85a3d4cbe",            
+     "RECONSTRUCT.md":                                                          
+ "d0e602efa8207c463c7e5739b11ace0f56419a80346ee77b5207c9e2f0975757",            
+     "asr_embeddings.npy":                                                      
+ "22e75637c9b77d70c6f5c64c586def24c978c9cfa5771cb584780f497c5424a3",            
+     "asr_index_documents.json":                                                
+ "dd38b9d01011ba3052f399d2fa7989315c397174469c1d992cf8516d46a40fe9",            
+     "asr_settings.json":                                                       
+ "0fdef677e0a28755abc2af98193c352f4b56259542b83cce2e8b6d708b65b44b",            
+     "audio_acquisition.json":                                                  
+ "6f6e776e9b9ce5aa61ce0e09ff3782dd83805b0509df6c4af63ff9a0988accb7",            
+     "audio_core.py":                                                           
+ "375d68b75e8068d99e2263be5bc6e585eb86db2eb9a6915d66eb96b9e4a81517",            
+     "audio_models.py":                                                         
+ "24ec4f34cfc8b15e4286e1ce6ecca8647f97c1b9aa70505442a9af8462784c0b",            
+     "lexical_statistics.json":                                                 
+ "c8fafa0532c4beaef16ece695f63b9791cdaff1ab633e24f062254c4bb79a6d6",            
+     "model_manifest.json":                                                     
+ "6e2f913cb4075cebd34683a2c3c6d653e12cd5d648b318de242d678705c20493",            
+     "requirements.txt":                                                        
+ "a8aad90194badac021d738b82477e7c33c5ccf833f402dfc2fe1700495590879",            
+     "search_archive.py":                                                       
+ "90adf8e71eeee603018720d699ffa907e8144b17d2b30d5e1d685de86ed8df7a"             
+   },                                                                           
+   "doc_ids": [                                                                 
+     "fil-027e061e5a9dffc2",                                                    
+     "fil-044b100716ec2d2b",                                                    
+     "fil-0a0ab810bfd25a30",                                                    
+     "fil-0acc50d2582cbc78",                                                    
+     "fil-0b24b1d224980b09",                                                    
+     "fil-0c1a8429c9c00921",                                                    
+     "fil-0df8fae152961b7a",                                                    
+     "fil-0e11c0b26ee593d9",                                                    
+     "fil-0ee75639709a04a9",                                                    
+     "fil-0eec85083746457c",                                                    
+     "fil-0f582d6bf3e9580e",                                                    
+     "fil-100289182394d17a",                                                    
+     "fil-1150820b2c556a98",                                                    
+     "fil-126acd78b483657a",                                                    
+     "fil-12dc558141e0cbe9",                                                    
+     "fil-15e7c0302f1bf1e2",                                                    
+     "fil-16f0138d81211918",                                                    
+     "fil-1756878a690d0eb1",                                                    
+     "fil-1a2bf0d01f25f129",                                                    
+     "fil-1acd2e765d5343d4",                                                    
+     "fil-2256d52600041a2b",                                                    
+     "fil-2700ce6701df0485",                                                    
+     "fil-27064150463dfa7f",                                                    
+     "fil-272725e7966708fc",                                                    
+     "fil-28cf9779f871fe99",                                                    
+     "fil-2901f33ca180340a",                                                    
+     "fil-29f34180216090a6",                                                    
+     "fil-2bb52c540729e266",                                                    
+     "fil-2d9eab69bd1f850c",                                                    
+     "fil-30a9a29352f586ff",                                                    
+     "fil-3139c88d3e2f9810",                                                    
+     "fil-3239c660754f1c78",                                                    
+     "fil-3962c36667917289",                                                    
+     "fil-41b1db7990079a26",                                                    
+     "fil-4349747061f28f09",                                                    
+     "fil-47240c1a749eed64",                                                    
+     "fil-48d4a16ac7385277",                                                    
+     "fil-4b332b55c069f27f",                                                    
+     "fil-4b94b2199cf29ca2",                                                    
+     "fil-4e282e1bf777bb66",                                                    
+     "fil-515d920211f2231c",                                                    
+     "fil-5189dd5249d07c41",                                                    
+     "fil-53d3df4c9ef30224",                                                    
+     "fil-555099d59534da25",                                                    
+     "fil-5875e0cbe12e6388",                                                    
+     "fil-5a7b0182ee3cc976",                                                    
+     "fil-6081fbfd068a1710",                                                    
+     "fil-60dde0b73f9f56a2",                                                    
+     "fil-617b02528cf212b4",                                                    
+     "fil-6685e3dd2a78579d",                                                    
+     "fil-69c35b01a18e52fa",                                                    
+     "fil-6a8a6ad02d4604a9",                                                    
+     "fil-6b876371aae614f3",                                                    
+     "fil-6df1309d44174075",                                                    
+     "fil-7447cb1a15fdaed4",                                                    
+     "fil-79787a8504b2bf31",                                                    
+     "fil-7e32cd9df2bc5d16",                                                    
+     "fil-8078a04842ea5bfd",                                                    
+     "fil-807ae4e5206f5a72",                                                    
+     "fil-8309ddc72b01decd",                                                    
+     "fil-837cdbfceaffe413",                                                    
+     "fil-838a315a5504a07e",                                                    
+     "fil-84afe4bcd009712e",                                                    
+     "fil-859035e1261a92c3",                                                    
+     "fil-866104bbebe7cd7a",                                                    
+     "fil-87acb80497279c8e",                                                    
+     "fil-8a159bc7ca44971b",                                                    
+     "fil-8b11caa6928fb6cc",                                                    
+     "fil-8c74f774efee3c17",                                                    
+     "fil-8f1cf0d9847b6179",                                                    
+     "fil-90955fcdaeaf90cd",                                                    
+     "fil-93cb7e07a02b4b7f",                                                    
+     "fil-94933bfd6ec3617d",                                                    
+     "fil-999ec61bd83d7079",                                                    
+     "fil-9d347c5f31fcf4e9",                                                    
+     "fil-9fe3752d459bbba5",                                                    
+     "fil-a000fc4b70495066",                                                    
+     "fil-a20e0bd0f1974df3",                                                    
+     "fil-a22e88f4f0791d64",                                                    
+     "fil-a407336b461a33e7",                                                    
+     "fil-a4ec17ac2ee0f10f",                                                    
+     "fil-a6ff3084f76c54a0",                                                    
+     "fil-aa7aa649ec95965f",                                                    
+     "fil-aeaeb55eae56ddbe",                                                    
+     "fil-afc207b2e6f08eb7",                                                    
+     "fil-b39c0899b782b468",                                                    
+     "fil-baedb5085e878056",                                                    
+     "fil-c09d6943264b208c",                                                    
+     "fil-c4fccbda485161c6",                                                    
+     "fil-c8580993c51595f2",                                                    
+     "fil-c87e3b44275099cc",                                                    
+     "fil-cbcb5615fca5afce",                                                    
+     "fil-cd95facf02aae5a6",                                                    
+     "fil-ce1ae47c8c035346",                                                    
+     "fil-cf5e3875ba9242d9",                                                    
+     "fil-cf85e87981b785bf",                                                    
+     "fil-d159c592aac0e5f0",                                                    
+     "fil-d41845f7139dc8ee",                                                    
+     "fil-d4415b70fa4f83a4",                                                    
+     "fil-d470c812f5fc3943",                                                    
+     "fil-d5361b7fea82f044",                                                    
+     "fil-d6e9f43e3cbb23f9",                                                    
+     "fil-d852e40b0ba16d01",                                                    
+     "fil-d93f1de9ab243c25",                                                    
+     "fil-d9782b51bbcfaf3a",                                                    
+     "fil-db70c01293290f57",                                                    
+     "fil-de0260608985feb5",                                                    
+     "fil-e5f3c70ebbb12058",                                                    
+     "fil-eaee0ffa80b1efbb",                                                    
+     "fil-eb1bf0f12fcf65f5",                                                    
+     "fil-eec7429b3d08d5e0",                                                    
+     "fil-f1af3fb7a1add181",                                                    
+     "fil-f6a37952062b512e",                                                    
+     "fil-f7039610dde66152",                                                    
+     "fil-f714215dc1785b2a",                                                    
+     "fil-f862ccd31f057960",                                                    
+     "fil-fa33bd156de69766",                                                    
+     "fil-feac6e343eb6e522",                                                    
+     "fil-fece665aa2c365dd",                                                    
+     "fil-feecd6eeed6d45ff"                                                     
+   ],                                                                           
+   "dimension": 1024,                                                           
+   "lexical": {                                                                 
+     "k1": 1.2,                                                                 
+     "b": 0.75,                                                                 
+     "normalization": "NFC lower punctuation-to-space whitespace collapse"      
+   },                                                                           
+   "model_manifest_sha256":                                                     
+ "6e2f913cb4075cebd34683a2c3c6d653e12cd5d648b318de242d678705c20493",            
+   "model_settings": {                                                          
+     "instruction": "Given a web search query, retrieve relevant passages that  
+ answer the query",                                                             
+     "embedding_pooling": "last_nonpadding_token",                              
+     "embedding_normalization": "L2_float32",                                   
+     "text_token_limit": 8192,                                                  
+     "text_truncation": "refuse",                                               
+     "embedding_batch_size": 4,                                                 
+     "reranker_batch_size": 1,                                                  
+     "reranker_prefix": "<|im_start|>system\nJudge whether the Document meets   
+ the requirements based on the Query and the Instruct provided. Note that the   
+ answer can only be \"yes\" or \"no\".<|im_end|>\n<|im_start|>user\n",          
+     "reranker_suffix":                                                         
+ "<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n",                  
+     "reranker_score": "softmax([no,yes])[yes]; not calibrated",                
+     "empty_document_policy": "retain; embedding tokenizer special-token-only   
+ input; reranker empty Document prompt",                                        
+     "asr": {                                                                   
+       "language": "tl",                                                        
+       "task": "transcribe",                                                    
+       "do_sample": false,                                                      
+       "num_beams": 1,                                                          
+       "max_new_tokens": 440,                                                   
+       "condition_on_prev_tokens": false,                                       
+       "return_timestamps": false,                                              
+       "return_dict_in_generate": true,                                         
+       "temperature": 0.0,                                                      
+       "compression_ratio_threshold": null,                                     
+       "logprob_threshold": null,                                               
+       "no_speech_threshold": null                                              
+     }                                                                          
+   },                                                                           
+   "audio": [                                                                   
+     {                                                                          
+       "doc_id": "fil-027e061e5a9dffc2",                                        
+       "path": "audio/fil-027e061e5a9dffc2.wav",                                
+       "sha256":                                                                
+ "f7fa9c47ca481a5a876ff7b0a9ae798da73f6e7c5a075fb4738f77b273493266"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-044b100716ec2d2b",                                        
+       "path": "audio/fil-044b100716ec2d2b.wav",                                
+       "sha256":                                                                
+ "e11af646059f53d964a0fc35d45a7d28413fb5b298f6f7d451998df4399d6ce5"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-0a0ab810bfd25a30",                                        
+       "path": "audio/fil-0a0ab810bfd25a30.wav",                                
+       "sha256":                                                                
+ "594f9f5f5a78579160b8fd102f5e64f23493acf0ceb870a7d868cc708f941b08"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-0acc50d2582cbc78",                                        
+       "path": "audio/fil-0acc50d2582cbc78.wav",                                
+       "sha256":                                                                
+ "70c5e9eae6eee978db1028703c2c08c619e0e05b71888103d54b8239664b9834"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-0b24b1d224980b09",                                        
+       "path": "audio/fil-0b24b1d224980b09.wav",                                
+       "sha256":                                                                
+ "e8950826954bb6c9bb530dcd8f33a48a4032f1ae4013179557d178b5029cee77"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-0c1a8429c9c00921",                                        
+       "path": "audio/fil-0c1a8429c9c00921.wav",                                
+       "sha256":                                                                
+ "87f8fe23b2be95ac64a838d883a09b2fbe0f5ed8b0abb89350cf712fa2670d4d"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-0df8fae152961b7a",                                        
+       "path": "audio/fil-0df8fae152961b7a.wav",                                
+       "sha256":                                                                
+ "ac9cf94d6a4398c09eea96a867fcc0a8c9c1c22c89849c11f06ccd965a27a4ba"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-0e11c0b26ee593d9",                                        
+       "path": "audio/fil-0e11c0b26ee593d9.wav",                                
+       "sha256":                                                                
+ "3e9970d411472396eb88ed2eceafca69fd82ed8f4ac1b9577bf30860ddd7021d"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-0ee75639709a04a9",                                        
+       "path": "audio/fil-0ee75639709a04a9.wav",                                
+       "sha256":                                                                
+ "9cf5c03d14fa2cd1608506304ad36e6137c9a2ebfbcb01e2a3bc8fea923bc970"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-0eec85083746457c",                                        
+       "path": "audio/fil-0eec85083746457c.wav",                                
+       "sha256":                                                                
+ "65743346044b6142dc2a03e71d983b42d6700e0a5f4f4ee755f84f84c140514c"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-0f582d6bf3e9580e",                                        
+       "path": "audio/fil-0f582d6bf3e9580e.wav",                                
+       "sha256":                                                                
+ "56a84d13a7a10177420c27918a8784d4fd7a70075cc8eaec187ae882e7ea38b9"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-100289182394d17a",                                        
+       "path": "audio/fil-100289182394d17a.wav",                                
+       "sha256":                                                                
+ "8a80273f85ad7f5ead91fc19df481b34aa0d24537546948223777c657bc90a99"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-1150820b2c556a98",                                        
+       "path": "audio/fil-1150820b2c556a98.wav",                                
+       "sha256":                                                                
+ "0cc8ed903e0fb0b03e54961931912e826e34193e247bd28e5d21ebf92a264811"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-126acd78b483657a",                                        
+       "path": "audio/fil-126acd78b483657a.wav",                                
+       "sha256":                                                                
+ "a6a8737ffcaf193d514f0beb9e50c5920bdd68ecf8ed26f294193c6f6aaea387"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-12dc558141e0cbe9",                                        
+       "path": "audio/fil-12dc558141e0cbe9.wav",                                
+       "sha256":                                                                
+ "e6b14a547ffac2057d065b257ea29bb1f4fd0266d36fb8d147a165f7adb88ee5"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-15e7c0302f1bf1e2",                                        
+       "path": "audio/fil-15e7c0302f1bf1e2.wav",                                
+       "sha256":                                                                
+ "e563acd86c6d442098846ca364976583952d99cf439c3fd5464d38ee62beed3a"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-16f0138d81211918",                                        
+       "path": "audio/fil-16f0138d81211918.wav",                                
+       "sha256":                                                                
+ "e84c74faaea3fb97c500598b1ece0a81d667244a2108b19e1dca57c2d4e77b84"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-1756878a690d0eb1",                                        
+       "path": "audio/fil-1756878a690d0eb1.wav",                                
+       "sha256":                                                                
+ "1b21274191ad286e78dacda810c4d10abc0226f707afc55317c8d97d53d072c7"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-1a2bf0d01f25f129",                                        
+       "path": "audio/fil-1a2bf0d01f25f129.wav",                                
+       "sha256":                                                                
+ "cf545a01ecb2182ba73b528e50acbf83febd6f09495f5d597f9b2e1a222ae32d"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-1acd2e765d5343d4",                                        
+       "path": "audio/fil-1acd2e765d5343d4.wav",                                
+       "sha256":                                                                
+ "85c5c9a7125ed50dd78d218f858a77b944423885b33d8b8a085641cdd592b3d4"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-2256d52600041a2b",                                        
+       "path": "audio/fil-2256d52600041a2b.wav",                                
+       "sha256":                                                                
+ "d715c277a7bd154244b6074ebaffb9f9ca9b003c3146475ec8956310312dcf7f"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-2700ce6701df0485",                                        
+       "path": "audio/fil-2700ce6701df0485.wav",                                
+       "sha256":                                                                
+ "ff1be5010211e153903bcaf1f0edf9f0b7197e656b15d3a1fb92946bffdbbb08"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-27064150463dfa7f",                                        
+       "path": "audio/fil-27064150463dfa7f.wav",                                
+       "sha256":                                                                
+ "6d1751608e2d58b6d34f991687794a78b28a313b9e93aad693ffe46fc771e8bb"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-272725e7966708fc",                                        
+       "path": "audio/fil-272725e7966708fc.wav",                                
+       "sha256":                                                                
+ "99f41eeb5aee4bf63ea06473f1cf0ad1b74b8416f97b0969d90c08823f828964"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-28cf9779f871fe99",                                        
+       "path": "audio/fil-28cf9779f871fe99.wav",                                
+       "sha256":                                                                
+ "779a421de424dc08172f2be5483da7d960cdee1f780e5409aad0760604b4f6f5"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-2901f33ca180340a",                                        
+       "path": "audio/fil-2901f33ca180340a.wav",                                
+       "sha256":                                                                
+ "22652256253a58e9fa4828f4686d608fe547b4e3720159da7cdad1f7ad5c1a14"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-29f34180216090a6",                                        
+       "path": "audio/fil-29f34180216090a6.wav",                                
+       "sha256":                                                                
+ "be9f0904cb1618f1825e2479750babbc18188585e374b7154519e179713d3b30"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-2bb52c540729e266",                                        
+       "path": "audio/fil-2bb52c540729e266.wav",                                
+       "sha256":                                                                
+ "150587b8900483d246f9466ff6315df77ac87d9271766ab7e72ed9a9edc90faf"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-2d9eab69bd1f850c",                                        
+       "path": "audio/fil-2d9eab69bd1f850c.wav",                                
+       "sha256":                                                                
+ "05b48b70c02d0b7e3915794f7f0e008f0c2bf70dc386d36d46dc2e448457215d"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-30a9a29352f586ff",                                        
+       "path": "audio/fil-30a9a29352f586ff.wav",                                
+       "sha256":                                                                
+ "a48ffd55372a8cb61cd78ad65dabbe26f9d367bd8224aa09839a5463dfa8e869"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-3139c88d3e2f9810",                                        
+       "path": "audio/fil-3139c88d3e2f9810.wav",                                
+       "sha256":                                                                
+ "9817cb0d70e37bb3074fdaac147c32a58289b5fdee5ad599aaa2360a282fa338"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-3239c660754f1c78",                                        
+       "path": "audio/fil-3239c660754f1c78.wav",                                
+       "sha256":                                                                
+ "bd1b490265c7e4af53cf2f4647eb0fbd2171567964d479b7b84c74f0f2611c69"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-3962c36667917289",                                        
+       "path": "audio/fil-3962c36667917289.wav",                                
+       "sha256":                                                                
+ "3e732c0a4825b6a47e2c87152d80e0aa27e3489081f3d9bd3278abfd3d682759"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-41b1db7990079a26",                                        
+       "path": "audio/fil-41b1db7990079a26.wav",                                
+       "sha256":                                                                
+ "47a5402181138b5a992a478413d3d073dd7bbcf3155e55cd78964cd11dcfba6f"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-4349747061f28f09",                                        
+       "path": "audio/fil-4349747061f28f09.wav",                                
+       "sha256":                                                                
+ "20c3baaadf01cc387f01347ac767d0bb2635f11b095d6b9ba308a27f35e04933"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-47240c1a749eed64",                                        
+       "path": "audio/fil-47240c1a749eed64.wav",                                
+       "sha256":                                                                
+ "3056591c22248c8aed3ab2a895f8016e4cfd5c90273f46c4924cdc84ed14dd06"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-48d4a16ac7385277",                                        
+       "path": "audio/fil-48d4a16ac7385277.wav",                                
+       "sha256":                                                                
+ "f661a9c58a567669ea6412a9431a6b0f7397b7501f345b22745e2b2b44d4ca06"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-4b332b55c069f27f",                                        
+       "path": "audio/fil-4b332b55c069f27f.wav",                                
+       "sha256":                                                                
+ "0d632c8dda03255a9b8ae3059d1a95728d7995fed079bc9882785c4d475e1c2f"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-4b94b2199cf29ca2",                                        
+       "path": "audio/fil-4b94b2199cf29ca2.wav",                                
+       "sha256":                                                                
+ "d7fbca276d1b7aab3d5c9267596fca3f4e946df0559402184eadd9c37fe7c51e"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-4e282e1bf777bb66",                                        
+       "path": "audio/fil-4e282e1bf777bb66.wav",                                
+       "sha256":                                                                
+ "672407f1e67267e7c886a257baef1c272e821cc825b73d8ee071750438307da8"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-515d920211f2231c",                                        
+       "path": "audio/fil-515d920211f2231c.wav",                                
+       "sha256":                                                                
+ "6baef32f8636d655be6bfdd71b54bafece2d1469e77a1f5c3123d666294a390f"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-5189dd5249d07c41",                                        
+       "path": "audio/fil-5189dd5249d07c41.wav",                                
+       "sha256":                                                                
+ "286084e3fadc4f53f9e660de9215dd2b736aa703e40c1686bb2e0cf8cda50b7a"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-53d3df4c9ef30224",                                        
+       "path": "audio/fil-53d3df4c9ef30224.wav",                                
+       "sha256":                                                                
+ "d2c053f49ce7d4acf3a607d447efb98794264adbd93ec94327531a9b9d4411b0"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-555099d59534da25",                                        
+       "path": "audio/fil-555099d59534da25.wav",                                
+       "sha256":                                                                
+ "4b9a3eb484de3e53f99d3a84500b9c379c3b5f0cb027c10fdc8b478818390ef1"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-5875e0cbe12e6388",                                        
+       "path": "audio/fil-5875e0cbe12e6388.wav",                                
+       "sha256":                                                                
+ "e10813f0cfe11baa813d1adeb1139550e7ba1bc77c5dcd462dcbf2b64e38737e"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-5a7b0182ee3cc976",                                        
+       "path": "audio/fil-5a7b0182ee3cc976.wav",                                
+       "sha256":                                                                
+ "dd069a4b1e8768e3f0909f6881475ed0f3e9ee24e8b855c555397a72cc14223b"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-6081fbfd068a1710",                                        
+       "path": "audio/fil-6081fbfd068a1710.wav",                                
+       "sha256":                                                                
+ "eccf917b353bc4c38587c06c7a346f993ace622f244c6410bb196aa42e6b4a2f"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-60dde0b73f9f56a2",                                        
+       "path": "audio/fil-60dde0b73f9f56a2.wav",                                
+       "sha256":                                                                
+ "e42de6c66ce33d8dc585a167d8fde816940ebc517dee86f30b7d5e749205d85f"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-617b02528cf212b4",                                        
+       "path": "audio/fil-617b02528cf212b4.wav",                                
+       "sha256":                                                                
+ "778a11c86281a3b3f40b00ba67cc7aa9af1b7ad221b1ce37ed8d77800d84c70e"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-6685e3dd2a78579d",                                        
+       "path": "audio/fil-6685e3dd2a78579d.wav",                                
+       "sha256":                                                                
+ "1c365f1ed9da9eed749fe156ea75eb2e90b38bb13e0bbb58a83b4938c3b5969b"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-69c35b01a18e52fa",                                        
+       "path": "audio/fil-69c35b01a18e52fa.wav",                                
+       "sha256":                                                                
+ "0f208287af5e963419d2dcb61ee2d4bafe7741be3b34a5ed269fbaaa45a6e17f"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-6a8a6ad02d4604a9",                                        
+       "path": "audio/fil-6a8a6ad02d4604a9.wav",                                
+       "sha256":                                                                
+ "48690e96425e02da3895967e4b35e34c1762cbfc56c7d3d5d49383ccd9725dc5"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-6b876371aae614f3",                                        
+       "path": "audio/fil-6b876371aae614f3.wav",                                
+       "sha256":                                                                
+ "7142deb8f44dd71391b7c673f73ce344a4004649bce070fcb09f3a9cfdb1d812"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-6df1309d44174075",                                        
+       "path": "audio/fil-6df1309d44174075.wav",                                
+       "sha256":                                                                
+ "c05a33ab468ed8dc276221052eafa687288abca211164ae1ca262694ba48a459"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-7447cb1a15fdaed4",                                        
+       "path": "audio/fil-7447cb1a15fdaed4.wav",                                
+       "sha256":                                                                
+ "49cf48be97dc2ecd0f42877188513a3bd78470ebe58a3ccdeac9766d675c9359"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-79787a8504b2bf31",                                        
+       "path": "audio/fil-79787a8504b2bf31.wav",                                
+       "sha256":                                                                
+ "70f6fd9b58d7cd294913c82300d0c9c6ff8f2f479dbfcf729e272d0f1430db4c"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-7e32cd9df2bc5d16",                                        
+       "path": "audio/fil-7e32cd9df2bc5d16.wav",                                
+       "sha256":                                                                
+ "30c9dd2db9a5c144e2b9af9481e6ed2a1ede74f8565f9c749240851c91e041eb"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-8078a04842ea5bfd",                                        
+       "path": "audio/fil-8078a04842ea5bfd.wav",                                
+       "sha256":                                                                
+ "ccfc3075ccdd357efa964d132291f90d9a1c39838564673af6003f6827d13ab6"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-807ae4e5206f5a72",                                        
+       "path": "audio/fil-807ae4e5206f5a72.wav",                                
+       "sha256":                                                                
+ "817fc1fae5b329c4083b9290ed46c2e45967145677798c787f3c610b8b2f4c52"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-8309ddc72b01decd",                                        
+       "path": "audio/fil-8309ddc72b01decd.wav",                                
+       "sha256":                                                                
+ "8251ce7e46dca363840d01d976b929eebd6c91102ebf20de4cc8ffddcde80c7d"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-837cdbfceaffe413",                                        
+       "path": "audio/fil-837cdbfceaffe413.wav",                                
+       "sha256":                                                                
+ "35337eac736dad3421dfd366120cfca83eab511efff380149c7936984aa70843"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-838a315a5504a07e",                                        
+       "path": "audio/fil-838a315a5504a07e.wav",                                
+       "sha256":                                                                
+ "8447551f003158c9150f36159868177636db14dc61fb3fc8ef556c83ffd5a00e"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-84afe4bcd009712e",                                        
+       "path": "audio/fil-84afe4bcd009712e.wav",                                
+       "sha256":                                                                
+ "f68f2b9152e58f5e06603ee1ada610c6560c1c250b8527716b23fae5644499f4"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-859035e1261a92c3",                                        
+       "path": "audio/fil-859035e1261a92c3.wav",                                
+       "sha256":                                                                
+ "bdc6b90613ba91fb071a4892dd312430a18fbedd123d03569250796f65b7aed7"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-866104bbebe7cd7a",                                        
+       "path": "audio/fil-866104bbebe7cd7a.wav",                                
+       "sha256":                                                                
+ "644ad9ef087e9abe53f582c3e3a29dcb09ae604d50a00c291323f1d047e942cf"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-87acb80497279c8e",                                        
+       "path": "audio/fil-87acb80497279c8e.wav",                                
+       "sha256":                                                                
+ "ed6212677d7fab2df23fbd4e4d05fc75ce4055a4bd148e8bfd1959fdcebe4b80"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-8a159bc7ca44971b",                                        
+       "path": "audio/fil-8a159bc7ca44971b.wav",                                
+       "sha256":                                                                
+ "868fa6f44f8629fda58ceb4c3674e46055a954153c3e04201255816ec423f488"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-8b11caa6928fb6cc",                                        
+       "path": "audio/fil-8b11caa6928fb6cc.wav",                                
+       "sha256":                                                                
+ "fc319e413f1b60083e93621b6bd53cc9ad62e5de983762b0567bc27c46fed6b2"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-8c74f774efee3c17",                                        
+       "path": "audio/fil-8c74f774efee3c17.wav",                                
+       "sha256":                                                                
+ "30fac72cb67c05f6adc070af2a05550f948f73da86328d526b4ae7467b792983"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-8f1cf0d9847b6179",                                        
+       "path": "audio/fil-8f1cf0d9847b6179.wav",                                
+       "sha256":                                                                
+ "12f314848d8da46eb8b14922696553c56a3a74629ece469b6e415ee0c496f27a"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-90955fcdaeaf90cd",                                        
+       "path": "audio/fil-90955fcdaeaf90cd.wav",                                
+       "sha256":                                                                
+ "5beb64c287ba111e575842b78292c4418fada198344f7855b77438e4b77592c5"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-93cb7e07a02b4b7f",                                        
+       "path": "audio/fil-93cb7e07a02b4b7f.wav",                                
+       "sha256":                                                                
+ "e269c3ffbce8170925318b87ee0dcf2156fe8edda68d6cd0cbee4585ca916262"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-94933bfd6ec3617d",                                        
+       "path": "audio/fil-94933bfd6ec3617d.wav",                                
+       "sha256":                                                                
+ "01669d0d3963bda715ea54956f310cabd74b3b9355ee52afe8c8824290ca9ef7"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-999ec61bd83d7079",                                        
+       "path": "audio/fil-999ec61bd83d7079.wav",                                
+       "sha256":                                                                
+ "a45a486cc1ec3eac11853d7f80d3918d911e5dda6be06cf19735cdfbe5dba1a4"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-9d347c5f31fcf4e9",                                        
+       "path": "audio/fil-9d347c5f31fcf4e9.wav",                                
+       "sha256":                                                                
+ "fce40888908be938534d2ae9a4e9dc53d708b03f8e9654f88bb84b835dc78459"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-9fe3752d459bbba5",                                        
+       "path": "audio/fil-9fe3752d459bbba5.wav",                                
+       "sha256":                                                                
+ "50bb8edbfa6bd70e4618ebf1d4f34854518e6ac56aaebc325c7da319c1d0d947"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-a000fc4b70495066",                                        
+       "path": "audio/fil-a000fc4b70495066.wav",                                
+       "sha256":                                                                
+ "614063055d9eba685c4ed419f2085e10b3238d060bdfd0bdaf60591f0dcb5086"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-a20e0bd0f1974df3",                                        
+       "path": "audio/fil-a20e0bd0f1974df3.wav",                                
+       "sha256":                                                                
+ "458cd4170b2bca055ee2f1ab785d3cab8218a64567f1d594ae1a850d6a978f92"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-a22e88f4f0791d64",                                        
+       "path": "audio/fil-a22e88f4f0791d64.wav",                                
+       "sha256":                                                                
+ "6d784790a2d3e9bf88d64069fb924336cd391aec371ec3269243fb71e3ffba06"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-a407336b461a33e7",                                        
+       "path": "audio/fil-a407336b461a33e7.wav",                                
+       "sha256":                                                                
+ "ed76a309080710ed02c2cd4477a9cd35d6a7a788b5cad907114e733a7827b079"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-a4ec17ac2ee0f10f",                                        
+       "path": "audio/fil-a4ec17ac2ee0f10f.wav",                                
+       "sha256":                                                                
+ "aa41d2ddf2eaba768620eb3cc59383105843a46002f845aaf6370a3033074d82"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-a6ff3084f76c54a0",                                        
+       "path": "audio/fil-a6ff3084f76c54a0.wav",                                
+       "sha256":                                                                
+ "f672a07ec453d849f3aa628fd093296201d7a6b4955d4d423c0934ef45b79d60"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-aa7aa649ec95965f",                                        
+       "path": "audio/fil-aa7aa649ec95965f.wav",                                
+       "sha256":                                                                
+ "bed3eef23f7e83019cb4dd8e6f9b75c199af4ed9ca234905544d8bf594190f85"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-aeaeb55eae56ddbe",                                        
+       "path": "audio/fil-aeaeb55eae56ddbe.wav",                                
+       "sha256":                                                                
+ "57938ce29a5c5b29d92cd8d49cce52fe41b71105f3fa9b1c08eb52a74614065b"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-afc207b2e6f08eb7",                                        
+       "path": "audio/fil-afc207b2e6f08eb7.wav",                                
+       "sha256":                                                                
+ "01f805d5dec555d19b3be634ae9adbf49ca9d3a3aadf4cf48ce4ca4426384046"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-b39c0899b782b468",                                        
+       "path": "audio/fil-b39c0899b782b468.wav",                                
+       "sha256":                                                                
+ "858f1eec478a1b143f1c4dd58f674103b990850091a12c1596ed9991520ab1b5"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-baedb5085e878056",                                        
+       "path": "audio/fil-baedb5085e878056.wav",                                
+       "sha256":                                                                
+ "9f7bdb948795f2c9477efe7728b9cd0143fe4eade5fc41c630574513aeabb991"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-c09d6943264b208c",                                        
+       "path": "audio/fil-c09d6943264b208c.wav",                                
+       "sha256":                                                                
+ "ed9818af6dbffb0dbbfd9ff9319e7967c66f2d8ad0b36364ed52f847e23f4f88"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-c4fccbda485161c6",                                        
+       "path": "audio/fil-c4fccbda485161c6.wav",                                
+       "sha256":                                                                
+ "c11f3dc1365ff74b453e3c09336e697898845dfba7e77324250dd784497af409"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-c8580993c51595f2",                                        
+       "path": "audio/fil-c8580993c51595f2.wav",                                
+       "sha256":                                                                
+ "7f7c17abfb0c15f5d8c7f0472416c5019ee6f5c7e210f21bee79a407a358e083"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-c87e3b44275099cc",                                        
+       "path": "audio/fil-c87e3b44275099cc.wav",                                
+       "sha256":                                                                
+ "107991e9bac50ea4ecbe921cb1729dbf6c13c00d52d1053b3782c2006e19c028"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-cbcb5615fca5afce",                                        
+       "path": "audio/fil-cbcb5615fca5afce.wav",                                
+       "sha256":                                                                
+ "67062330a2b7b52dcf0c0956efe1b264b2bb5438823c8c46448155e124871a80"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-cd95facf02aae5a6",                                        
+       "path": "audio/fil-cd95facf02aae5a6.wav",                                
+       "sha256":                                                                
+ "44fc17fd217ecbee2f2be3994b1270f75017cc2a0d39b581f7386e92fe95f3c2"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-ce1ae47c8c035346",                                        
+       "path": "audio/fil-ce1ae47c8c035346.wav",                                
+       "sha256":                                                                
+ "204ae9a7e0199d6bf60bc611692fe38221c6896ca1f9fb9cb46e50e4716df1e9"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-cf5e3875ba9242d9",                                        
+       "path": "audio/fil-cf5e3875ba9242d9.wav",                                
+       "sha256":                                                                
+ "ec5ae3dead2e51c24f9e38844b6b6b38544a235d0668b71134c7d30601c417bd"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-cf85e87981b785bf",                                        
+       "path": "audio/fil-cf85e87981b785bf.wav",                                
+       "sha256":                                                                
+ "014c3be13809ec0386f37c69ab59a4b6a35d03f4cbc8fe50cf9c508098cb7fe2"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-d159c592aac0e5f0",                                        
+       "path": "audio/fil-d159c592aac0e5f0.wav",                                
+       "sha256":                                                                
+ "a25ba11a4fd399d3162515d4d0a6828c4d4230e0517292e9f0ea2ab297d03843"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-d41845f7139dc8ee",                                        
+       "path": "audio/fil-d41845f7139dc8ee.wav",                                
+       "sha256":                                                                
+ "cf36a0cb001038da9c19a1f43553be7627657f10f04b734a78e9dd6ba0d6a5f8"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-d4415b70fa4f83a4",                                        
+       "path": "audio/fil-d4415b70fa4f83a4.wav",                                
+       "sha256":                                                                
+ "6e2692479ed35831072b502849324d68d71a54b7629ce5569351e975966a8f53"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-d470c812f5fc3943",                                        
+       "path": "audio/fil-d470c812f5fc3943.wav",                                
+       "sha256":                                                                
+ "bbbd20e2f9897b45c593157084aa27e19a7267f64a9ad26229138e64d322ef3a"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-d5361b7fea82f044",                                        
+       "path": "audio/fil-d5361b7fea82f044.wav",                                
+       "sha256":                                                                
+ "b35aa3bdec3fb37b7888a14467bbc5c3ce539d621f566f074339bef4a0fb719f"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-d6e9f43e3cbb23f9",                                        
+       "path": "audio/fil-d6e9f43e3cbb23f9.wav",                                
+       "sha256":                                                                
+ "3331b14256920a5b32449b0c0da45d04597d1c94c67e172019765d084cfc0e3c"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-d852e40b0ba16d01",                                        
+       "path": "audio/fil-d852e40b0ba16d01.wav",                                
+       "sha256":                                                                
+ "7be123046fda491dd82addeb0491104eb20e25a5b6afebceab9b4d24674b4ac3"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-d93f1de9ab243c25",                                        
+       "path": "audio/fil-d93f1de9ab243c25.wav",                                
+       "sha256":                                                                
+ "819476ed36498362b4e804b25621ac7e7ee4545948051f1d346ef4b5a3ad0a63"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-d9782b51bbcfaf3a",                                        
+       "path": "audio/fil-d9782b51bbcfaf3a.wav",                                
+       "sha256":                                                                
+ "12c6cdc0a5de6969d6c60625802e234b2c234aa02f56920960574f62ba1417d5"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-db70c01293290f57",                                        
+       "path": "audio/fil-db70c01293290f57.wav",                                
+       "sha256":                                                                
+ "61c40ed35008ef38bdd2be794130780534b551ad9bc5bedc2a6b37cf07295270"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-de0260608985feb5",                                        
+       "path": "audio/fil-de0260608985feb5.wav",                                
+       "sha256":                                                                
+ "ade44fcebe4c044dc534ebaa8954ec3bd5cd9d7a0b8136b49c2481834dda7d77"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-e5f3c70ebbb12058",                                        
+       "path": "audio/fil-e5f3c70ebbb12058.wav",                                
+       "sha256":                                                                
+ "847fc24b1455c93bfcfc03bbd75720b9908e019bbd2501d86ade075261b2b78a"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-eaee0ffa80b1efbb",                                        
+       "path": "audio/fil-eaee0ffa80b1efbb.wav",                                
+       "sha256":                                                                
+ "3fe6c6a0d1853197e6c7ff71d8307e84461c384eb6231d52ca37d50362ae965a"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-eb1bf0f12fcf65f5",                                        
+       "path": "audio/fil-eb1bf0f12fcf65f5.wav",                                
+       "sha256":                                                                
+ "4e452ef179fd44bae16ec10388c5a6b8c53198903b88982793f1a43ce6f7490d"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-eec7429b3d08d5e0",                                        
+       "path": "audio/fil-eec7429b3d08d5e0.wav",                                
+       "sha256":                                                                
+ "c02f77faf262dd731b26785838ae75583936b4d514b8b6aa7f93eb825719fed7"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-f1af3fb7a1add181",                                        
+       "path": "audio/fil-f1af3fb7a1add181.wav",                                
+       "sha256":                                                                
+ "c90999f6d46f8d06ae1154c7057bf2ed490026c2ab65d8a438a5b55e31c032a0"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-f6a37952062b512e",                                        
+       "path": "audio/fil-f6a37952062b512e.wav",                                
+       "sha256":                                                                
+ "fa96e4e9024cf366803fa7762a3334488a5d591b6c47195849d841c2bd4bc4b5"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-f7039610dde66152",                                        
+       "path": "audio/fil-f7039610dde66152.wav",                                
+       "sha256":                                                                
+ "15b6afc3f2460bfd46162f767f21647c20cdc10d7ade6fd45893d9579b824606"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-f714215dc1785b2a",                                        
+       "path": "audio/fil-f714215dc1785b2a.wav",                                
+       "sha256":                                                                
+ "b8023e51e2c54beae4267dc43400f35a23c8e5c1a2c30876ea430dfc88068ec6"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-f862ccd31f057960",                                        
+       "path": "audio/fil-f862ccd31f057960.wav",                                
+       "sha256":                                                                
+ "ca515c450e5ae00a4d3020089dcc780257bf0c0773db5911df4428895dd284c1"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-fa33bd156de69766",                                        
+       "path": "audio/fil-fa33bd156de69766.wav",                                
+       "sha256":                                                                
+ "53ba4e70c31dc9b49fe3c3a2ef0876c6f523f84804663c2809f31c17d3b3c6f6"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-feac6e343eb6e522",                                        
+       "path": "audio/fil-feac6e343eb6e522.wav",                                
+       "sha256":                                                                
+ "05388036ceec8861ed0753a4ec0e35d30f0d67dd17b2adf59cd5581054994cba"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-fece665aa2c365dd",                                        
+       "path": "audio/fil-fece665aa2c365dd.wav",                                
+       "sha256":                                                                
+ "14d3de7dfa9bfe2c75f52c05454cfee6b906a6a39fbd331bab46d00bdf20df4d"             
+     },                                                                         
+     {                                                                          
+       "doc_id": "fil-feecd6eeed6d45ff",                                        
+       "path": "audio/fil-feecd6eeed6d45ff.wav",                                
+       "sha256":                                                                
+ "0ebb4a829e33b7cbd402db1ef00259aa8c82c54b8aba85f2aa728e38dcddf8a9"             
+     }                                                                          
+   ]                                                                            
+ }                                                                              
+                                                                                
+[colab] Executing cell 9/18 - 4f3f597b711a...
+`torch_dtype` is deprecated! Use `dtype` instead!
+You're using a Qwen2TokenizerFast tokenizer. Please note that with a fast tokenizer, using the `__call__` method is faster than using a method to encode the text followed by a call to the `pad` method to get a padded encoding.
+
+Fetching 13 files:   0%|          | 0/13 [00:00<?, ?it/s]
+Fetching 13 files:  15%|█▌        | 2/13 [00:00<00:01,  6.42it/s]
+Fetching 13 files:  31%|███       | 4/13 [00:00<00:01,  7.18it/s]
+Fetching 13 files:  46%|████▌     | 6/13 [00:00<00:00,  7.38it/s]
+Fetching 13 files:  62%|██████▏   | 8/13 [00:01<00:00,  5.99it/s]
+Fetching 13 files:  77%|███████▋  | 10/13 [00:05<00:01,  1.86it/s]
+Fetching 13 files:  92%|█████████▏| 12/13 [00:06<00:00,  1.95it/s]
+Fetching 13 files:  92%|█████████▏| 12/13 [00:20<00:01,  1.67s/it]
+Fetching 13 files: 100%|██████████| 13/13 [00:23<00:00,  1.78s/it]
+Fetching 13 files: 100%|██████████| 13/13 [00:23<00:00,  1.78s/it]
+You're using a Qwen2TokenizerFast tokenizer. Please note that with a fast tokenizer, using the `__call__` method is faster than using a method to encode the text followed by a call to the `pad` method to get a padded encoding.
+evaluate: PASS
+                                                                                
+ {                                                                              
+   "mode": "engineering_preview_anchor_recovery",                               
+   "not_a_benchmark": true,                                                     
+   "scores": {                                                                  
+     "dev": {                                                                   
+       "reference_bm25": {                                                      
+         "n": 20,                                                               
+         "anchor_hit_at_5": 0.95,                                               
+         "anchor_reciprocal_rank_at_10": 0.93125                                
+       },                                                                       
+       "reference_dense": {                                                     
+         "n": 20,                                                               
+         "anchor_hit_at_5": 1.0,                                                
+         "anchor_reciprocal_rank_at_10": 0.9666666666666666                     
+       },                                                                       
+       "reference_rerank": {                                                    
+         "n": 20,                                                               
+         "anchor_hit_at_5": 1.0,                                                
+         "anchor_reciprocal_rank_at_10": 0.9666666666666666                     
+       },                                                                       
+       "asr_bm25": {                                                            
+         "n": 20,                                                               
+         "anchor_hit_at_5": 0.9,                                                
+         "anchor_reciprocal_rank_at_10": 0.8516666666666666                     
+       },                                                                       
+       "asr_dense": {                                                           
+         "n": 20,                                                               
+         "anchor_hit_at_5": 0.95,                                               
+         "anchor_reciprocal_rank_at_10": 0.8916666666666666                     
+       },                                                                       
+       "asr_rerank": {                                                          
+         "n": 20,                                                               
+         "anchor_hit_at_5": 0.95,                                               
+         "anchor_reciprocal_rank_at_10": 0.9166666666666666                     
+       }                                                                        
+     },                                                                         
+     "test": {                                                                  
+       "reference_bm25": {                                                      
+         "n": 40,                                                               
+         "anchor_hit_at_5": 0.975,                                              
+         "anchor_reciprocal_rank_at_10": 0.9375                                 
+       },                                                                       
+       "reference_dense": {                                                     
+         "n": 40,                                                               
+         "anchor_hit_at_5": 1.0,                                                
+         "anchor_reciprocal_rank_at_10": 0.9458333333333332                     
+       },                                                                       
+       "reference_rerank": {                                                    
+         "n": 40,                                                               
+         "anchor_hit_at_5": 1.0,                                                
+         "anchor_reciprocal_rank_at_10": 1.0                                    
+       },                                                                       
+       "asr_bm25": {                                                            
+         "n": 40,                                                               
+         "anchor_hit_at_5": 0.975,                                              
+         "anchor_reciprocal_rank_at_10": 0.90625                                
+       },                                                                       
+       "asr_dense": {                                                           
+         "n": 40,                                                               
+         "anchor_hit_at_5": 1.0,                                                
+         "anchor_reciprocal_rank_at_10": 0.9625                                 
+       },                                                                       
+       "asr_rerank": {                                                          
+         "n": 40,                                                               
+         "anchor_hit_at_5": 1.0,                                                
+         "anchor_reciprocal_rank_at_10": 1.0                                    
+       }                                                                        
+     }                                                                          
+   }                                                                            
+ }                                                                              
+                                                                                
+<IPython.core.display.Image object>
+
+[Image saved to: /tmp/tmpvcyplgjx.png]
+
+                                                                                
+                                                           95%                  
+ measure      A − B        A            B      difference  interval    interval 
+ ────────────────────────────────────────────────────────────────────────────── 
+ anchor_hit…  asr_rerank   1.000        1.000  +0.000      [+0.000,             
+              −                                                                 
+              reference_…                                                       
+ +0.000]      zero width                                                        
+ anchor_hit…  asr_rerank   1.000        1.000  +0.000      [+0.000,             
+              − asr_dense                                                       
+ +0.000]      zero width                                                        
+ anchor_hit…  asr_dense −  1.000        0.975  +0.025      [+0.000,             
+              asr_bm25                                     +0.075]              
+ width 0.075                                                                    
+ anchor_hit…  asr_bm25 −   0.975        0.975  +0.000      [+0.000,             
+              reference_…                                                       
+ +0.000]      zero width                                                        
+ anchor_hit…  asr_dense −  1.000        1.000  +0.000      [+0.000,             
+              reference_…                                                       
+ +0.000]      zero width                                                        
+ anchor_rec…  asr_bm25 −   0.906        0.938  -0.031                           
+              reference_…                                                       
+ [-0.081,     width 0.081                                                       
+ +0.000]                                                                        
+ anchor_rec…  asr_dense −  0.963        0.946                                   
+              reference_…                                                       
+ +0.017       [-0.025,     width 0.083                                          
+              +0.058]                                                           
+ anchor_rec…  asr_rerank   1.000        1.000                                   
+              −                                                                 
+              reference_…                                                       
+ +0.000       [+0.000,     zero width                                           
+              +0.000]                                                           
+ anchor_rec…  asr_rerank   1.000        0.963  +0.037                           
+              − asr_dense                                                       
+ [+0.000,     width 0.088                                                       
+ +0.088]                                                                        
+ anchor_rec…  asr_dense −  0.963        0.906  +0.056                           
+              asr_bm25                                                          
+ [-0.019,     width 0.156                                                       
+ +0.137]                                                                        
+                                                                                
+Evaluation queries only; whole target families resampled 2,000 times, seed 42. Exploratory differences.
+Read from this run (generated, not written in advance):
+- anchor_hit_at_5: systems at 1.000 on evaluation queries: reference_dense, reference_rerank, asr_dense, asr_rerank
+- anchor_reciprocal_rank_at_10: systems at 1.000 on evaluation queries: reference_rerank, asr_rerank
+- anchor_hit_at_5, asr_rerank_minus_reference_rerank: no difference was observed on this metric and cohort; this bootstrap interval is degenerate and does not establish equivalence.
+- anchor_hit_at_5, asr_rerank_minus_asr_dense: no difference was observed on this metric and cohort; this bootstrap interval is degenerate and does not establish equivalence.
+- anchor_hit_at_5, asr_bm25_minus_reference_bm25: no difference was observed on this metric and cohort; this bootstrap interval is degenerate and does not establish equivalence.
+- anchor_hit_at_5, asr_dense_minus_reference_dense: no difference was observed on this metric and cohort; this bootstrap interval is degenerate and does not establish equivalence.
+- anchor_reciprocal_rank_at_10, asr_rerank_minus_reference_rerank: no difference was observed on this metric and cohort; this bootstrap interval is degenerate and does not establish equivalence.
+query_id| query| nominated_anchor| asr_dense_candidate_missing|                 
+asr_rerank_top5_missing| reference_rerank_top5_missing| annotation_status       
+---|---|---|---|---|---|---                                                     
+test-01| Ano ang naging epekto sa Kanluran ng paghina ng kaalaman nito sa       
+Griyego?| fil-d852e40b0ba16d01| False| False| False| unreviewed_anchor_only     
+test-02| Anu-anong mapaminsalang pangyayari ang binanggit bilang mga anyo o     
+epekto ng matinding panahon?| fil-a22e88f4f0791d64| False| False| False|        
+unreviewed_anchor_only                                                          
+test-03| Ilang sunod na pagkatalo ang dinanas ng Springbooks?|                  
+fil-555099d59534da25| False| False| False| unreviewed_anchor_only               
+test-04| Aling mga insekto ang hindi kayang itiklop ang kanilang mga pakpak?|   
+fil-aa7aa649ec95965f| False| False| False| unreviewed_anchor_only               
+test-05| Ilang miyembro ang bumubuo sa bagong CEP na nanumpa kay Martelly?|     
+fil-f6a37952062b512e| False| False| False| unreviewed_anchor_only               
+test-06| Ano ang pinaniniwalaang sanhi ng pagbagsak na nangyari sa mataas na    
+bulubunduking lugar?| fil-6b876371aae614f3| False| False| False|                
+unreviewed_anchor_only                                                          
+test-07| Kaninong mga pananaw ang tinanggap sa iba't ibang larangan ng siyensya,
+pati sa sikolohiya?| fil-027e061e5a9dffc2| False| False| False|                 
+unreviewed_anchor_only                                                          
+test-08| Paano pinagkaiba sa salaysay ang pangako ng eksperimental na bakuna sa 
+Ebola at ang ebidensya para sa gamot sa umiiral na impeksyon?|                  
+fil-2d9eab69bd1f850c| False| False| False| unreviewed_anchor_only               
+Showing 8/40 rows. Full table: /content/dimer_fil_audio_preview/results/error_trace.csv
+error_trace.csv: evaluation queries with three selected diagnostics only. Complete rankings for every query and system: /content/dimer_fil_audio_preview/results/ranked_runs.json
+[colab] Executing cell 10/18 - 9cdac10f1e7a...
+Inspect a draft anchor missed from the top five by asr_bm25 (evaluation query): 
+Anong dalawang pananaw tungkol sa pakikidigma at pakikialam ang laganap noong   
+dekada 1920?                                                                    
+Reference: Sa panahon ng 1920s, ang nananaig na kaugalian ng karamihan sa mga   
+mamamayan at ng mga bansa ay ang pasipismo at pagbubukod.                       
+Whisper: Sa panahon ng 1920s, ang nananaig na kaugalian ng karamihan sa mga     
+mamamayan at ng mga bansa ay ang pasipismo at pagbubukod.                       
+Your browser does not support the audio element.                                
+reference_bm25 anchor rank: 19 top ten: ['fil-027e061e5a9dffc2', 'fil-7447cb1a15fdaed4', 'fil-838a315a5504a07e', 'fil-ce1ae47c8c035346', 'fil-5189dd5249d07c41', 'fil-515d920211f2231c', 'fil-999ec61bd83d7079', 'fil-eec7429b3d08d5e0', 'fil-8309ddc72b01decd', 'fil-cf85e87981b785bf']
+asr_bm25 anchor rank: 19 top ten: ['fil-027e061e5a9dffc2', 'fil-7447cb1a15fdaed4', 'fil-838a315a5504a07e', 'fil-5189dd5249d07c41', 'fil-515d920211f2231c', 'fil-ce1ae47c8c035346', 'fil-999ec61bd83d7079', 'fil-eec7429b3d08d5e0', 'fil-a4ec17ac2ee0f10f', 'fil-cf85e87981b785bf']
+reference_dense anchor rank: 1 top ten: ['fil-79787a8504b2bf31', 'fil-0a0ab810bfd25a30', 'fil-807ae4e5206f5a72', 'fil-2bb52c540729e266', 'fil-c87e3b44275099cc', 'fil-a4ec17ac2ee0f10f', 'fil-999ec61bd83d7079', 'fil-93cb7e07a02b4b7f', 'fil-12dc558141e0cbe9', 'fil-28cf9779f871fe99']
+asr_dense anchor rank: 1 top ten: ['fil-79787a8504b2bf31', 'fil-12dc558141e0cbe9', 'fil-0a0ab810bfd25a30', 'fil-3139c88d3e2f9810', 'fil-a4ec17ac2ee0f10f', 'fil-41b1db7990079a26', 'fil-a22e88f4f0791d64', 'fil-c87e3b44275099cc', 'fil-807ae4e5206f5a72', 'fil-f1af3fb7a1add181']
+reference_rerank anchor rank: 1 top ten: ['fil-79787a8504b2bf31', 'fil-999ec61bd83d7079', 'fil-807ae4e5206f5a72', 'fil-c87e3b44275099cc', 'fil-93cb7e07a02b4b7f', 'fil-12dc558141e0cbe9', 'fil-0a0ab810bfd25a30', 'fil-a4ec17ac2ee0f10f', 'fil-2bb52c540729e266', 'fil-28cf9779f871fe99']
+asr_rerank anchor rank: 1 top ten: ['fil-79787a8504b2bf31', 'fil-807ae4e5206f5a72', 'fil-a22e88f4f0791d64', 'fil-41b1db7990079a26', 'fil-0a0ab810bfd25a30', 'fil-3139c88d3e2f9810', 'fil-12dc558141e0cbe9', 'fil-c87e3b44275099cc', 'fil-f1af3fb7a1add181', 'fil-a4ec17ac2ee0f10f']
+These ranks locate where the anchor was lost; they do not show that a transcription edit caused it.
+An anchor miss is not proof that every returned recording is irrelevant; all qrels remain unjudged.
+[colab] Executing cell 11/18 - 74a409cdf3f0...
+Top-five anchor misses on evaluation queries, per system: asr_rerank 0/40,      
+asr_dense 0/40, asr_bm25 1/40, reference_rerank 0/40, reference_dense 0/40,     
+reference_bm25 1/40                                                             
+Candidate miss: anchor absent from the 10 ASR dense candidates (reranking cannot
+recover it): 0 of 40 evaluation queries                                         
+Not observed in this run.
+Top-five miss after ASR reranking: anchor not in the first five (including      
+anchors whose rank did not change): 0 of 40 evaluation queries                  
+Not observed in this run.
+Anchor rank demotion: ASR reranking placed the anchor lower than ASR dense did  
+(not necessarily a top-five miss): 0 of 40 evaluation queries                   
+Not observed in this run.
+None of these ASR-rerank observations occurred on evaluation queries in this run (other systems may still miss; see the counts above). Development queries follow as diagnosis; they were not used to change any setting.
+Candidate miss: anchor absent from the 10 ASR dense candidates (reranking cannot
+recover it): 1 of 20 development (diagnosis only) queries                       
+Query: Ayon sa tantiya ng pulisya, gaano katagal nang nasa lugar ang natagpuang 
+bangkay? · draft anchor: fil-53d3df4c9ef30224                                   
+dense rank| doc_id| cosine| rerank rank| reranker score| Whisper transcript     
+(excerpt)                                                                       
+---|---|---|---|---|---                                                         
+1| fil-a22e88f4f0791d64| 0.4631| 7| 0.0007| Malalakas na hangin, graniso, labis 
+na pagulan at mga sunog sa gubat ay mga uri at epekto ng matinding lagay n      
+2| fil-0eec85083746457c| 0.4580| 4| 0.0011| Ang mga buwaya sa maalat na tubig ay
+hindi aktibong nananahan sa karagadan. Ang kanilang pangunahitirahan ay s       
+3| fil-6a8a6ad02d4604a9| 0.4389| 3| 0.0024| Ang pulo ng Hong Kong ang siyang    
+nagkakaloob ng pangalan nito sa teritorya ng Hong Kong at ang lugar na kiniki   
+4| fil-12dc558141e0cbe9| 0.4367| 6| 0.0008| Bagaman sapat na ligtas naman ang   
+goma, anumang pagbisita sa labas ng goma ay dapat nasa liksikin upang mainti    
+5| fil-f1af3fb7a1add181| 0.4323| 5| 0.0009| Ang tatlong kaharian ay isa sa mga  
+pinakamadugong panahon sa kasaysayan ng lumang China. Dibulibong tao ang pu     
+6| fil-0acc50d2582cbc78| 0.4313| 8| 0.0002| Sinalakay din ito ang anumang       
+pumasok sa tubig. Kahit na ang higanting dinasauro gaya ng P. rex ay hindi manan
+7| fil-515d920211f2231c| 0.4308| 2| 0.0026| Noong taong, isang libo siyam na    
+daan at pitumput anim, tatlong porsyento ng Machu Picchu ang naisaayos at nag   
+8| fil-87acb80497279c8e| 0.4297| 9| 0.0002| Mayroon silang mga paang may mga    
+kaliskis at kuko. Nangingitlog sila at naglalakad sila gamit ang dalawa nilan   
+9| fil-15e7c0302f1bf1e2| 0.4297| 10| 0.0002| Ang kanilang madisiplinang depensa,
+mga kasanayan sa paghawak ng bola at napakahusay na pagtutulungan ng kupon      
+10| fil-5875e0cbe12e6388| 0.4282| 1| 0.0029| Kung hindi ka sanay magmanayo sa   
+mga kalyo ng probinsya, maging alerto, matarik, makipot, at biglang may mga l   
+30| fil-53d3df4c9ef30224 ← anchor (outside candidates)| | | | Sinabi ng polisya 
+na mukhang mga isang araw nang naroon ang katawan.                              
+Scores are raw ranking values of different kinds (cosine vs reranker), not probabilities.
+Top-five miss after ASR reranking: anchor not in the first five (including      
+anchors whose rank did not change): 1 of 20 development (diagnosis only) queries
+Query: Ayon sa tantiya ng pulisya, gaano katagal nang nasa lugar ang natagpuang 
+bangkay? · draft anchor: fil-53d3df4c9ef30224                                   
+dense rank| doc_id| cosine| rerank rank| reranker score| Whisper transcript     
+(excerpt)                                                                       
+---|---|---|---|---|---                                                         
+1| fil-a22e88f4f0791d64| 0.4631| 7| 0.0007| Malalakas na hangin, graniso, labis 
+na pagulan at mga sunog sa gubat ay mga uri at epekto ng matinding lagay n      
+2| fil-0eec85083746457c| 0.4580| 4| 0.0011| Ang mga buwaya sa maalat na tubig ay
+hindi aktibong nananahan sa karagadan. Ang kanilang pangunahitirahan ay s       
+3| fil-6a8a6ad02d4604a9| 0.4389| 3| 0.0024| Ang pulo ng Hong Kong ang siyang    
+nagkakaloob ng pangalan nito sa teritorya ng Hong Kong at ang lugar na kiniki   
+4| fil-12dc558141e0cbe9| 0.4367| 6| 0.0008| Bagaman sapat na ligtas naman ang   
+goma, anumang pagbisita sa labas ng goma ay dapat nasa liksikin upang mainti    
+5| fil-f1af3fb7a1add181| 0.4323| 5| 0.0009| Ang tatlong kaharian ay isa sa mga  
+pinakamadugong panahon sa kasaysayan ng lumang China. Dibulibong tao ang pu     
+6| fil-0acc50d2582cbc78| 0.4313| 8| 0.0002| Sinalakay din ito ang anumang       
+pumasok sa tubig. Kahit na ang higanting dinasauro gaya ng P. rex ay hindi manan
+7| fil-515d920211f2231c| 0.4308| 2| 0.0026| Noong taong, isang libo siyam na    
+daan at pitumput anim, tatlong porsyento ng Machu Picchu ang naisaayos at nag   
+8| fil-87acb80497279c8e| 0.4297| 9| 0.0002| Mayroon silang mga paang may mga    
+kaliskis at kuko. Nangingitlog sila at naglalakad sila gamit ang dalawa nilan   
+9| fil-15e7c0302f1bf1e2| 0.4297| 10| 0.0002| Ang kanilang madisiplinang depensa,
+mga kasanayan sa paghawak ng bola at napakahusay na pagtutulungan ng kupon      
+10| fil-5875e0cbe12e6388| 0.4282| 1| 0.0029| Kung hindi ka sanay magmanayo sa   
+mga kalyo ng probinsya, maging alerto, matarik, makipot, at biglang may mga l   
+30| fil-53d3df4c9ef30224 ← anchor (outside candidates)| | | | Sinabi ng polisya 
+na mukhang mga isang araw nang naroon ang katawan.                              
+Scores are raw ranking values of different kinds (cosine vs reranker), not probabilities.
+Anchor rank demotion: ASR reranking placed the anchor lower than ASR dense did  
+(not necessarily a top-five miss): 0 of 20 development (diagnosis only) queries 
+Not observed in this run.
+Competing recordings are unjudged, not negatives: a competitor may also be relevant.
+[colab] Executing cell 12/18 - fb3dd78523a8...
+`torch_dtype` is deprecated! Use `dtype` instead!
+You're using a Qwen2TokenizerFast tokenizer. Please note that with a fast tokenizer, using the `__call__` method is faster than using a method to encode the text followed by a call to the `pad` method to get a padded encoding.
+You're using a Qwen2TokenizerFast tokenizer. Please note that with a fast tokenizer, using the `__call__` method is faster than using a method to encode the text followed by a call to the `pad` method to get a padded encoding.
+You're using a Qwen2TokenizerFast tokenizer. Please note that with a fast tokenizer, using the `__call__` method is faster than using a method to encode the text followed by a call to the `pad` method to get a padded encoding.
+activity: PASS
+Depth 20, dev queries (provisional: True):
+  reference_bm25    n=20  anchor_hit_at_5=0.950  anchor_reciprocal_rank_at_10=0.931
+  reference_dense   n=20  anchor_hit_at_5=1.000  anchor_reciprocal_rank_at_10=0.967
+  reference_rerank  n=20  anchor_hit_at_5=1.000  anchor_reciprocal_rank_at_10=0.963
+  asr_bm25          n=20  anchor_hit_at_5=0.900  anchor_reciprocal_rank_at_10=0.852
+  asr_dense         n=20  anchor_hit_at_5=0.950  anchor_reciprocal_rank_at_10=0.892
+  asr_rerank        n=20  anchor_hit_at_5=0.950  anchor_reciprocal_rank_at_10=0.917
+Full record, including per-query timings: /content/dimer_fil_audio_preview/results/activity_summary.json
+
+                                                                                
+ query_id  group           role  system          anchor_hit_a…  anchor_recipro… 
+ ────────────────────────────────────────────────────────────────────────────── 
+ dev-01    family-5adaee…  dev   reference_bm25  1.0            1.0             
+ dev-01    family-5adaee…  dev   reference_den…  1.0            1.0             
+ dev-01    family-5adaee…  dev   reference_rer…  1.0            1.0             
+ dev-01    family-5adaee…  dev   asr_bm25        1.0            1.0             
+ dev-01    family-5adaee…  dev   asr_dense       1.0            1.0             
+ dev-01    family-5adaee…  dev   asr_rerank      1.0            1.0             
+ dev-02    family-ed13d9…  dev   reference_bm25  1.0            1.0             
+ dev-02    family-ed13d9…  dev   reference_den…  1.0            1.0             
+                                                                                
+Showing 8/120 rows. Full table: /content/dimer_fil_audio_preview/results/activity_results.csv
+
+                                                                                
+ query_id  condition  candidate_…  measure      value  denominator  provisional 
+ ────────────────────────────────────────────────────────────────────────────── 
+ dev-01    reference  10           nominated_…  1.0    1            True        
+ dev-01    reference  20           nominated_…  1.0    1            True        
+ dev-01    asr        10           nominated_…  1.0    1            True        
+ dev-01    asr        20           nominated_…  1.0    1            True        
+ dev-02    reference  10           nominated_…  1.0    1            True        
+ dev-02    reference  20           nominated_…  1.0    1            True        
+ dev-02    asr        10           nominated_…  1.0    1            True        
+ dev-02    asr        20           nominated_…  1.0    1            True        
+                                                                                
+Showing 8/80 rows. Full table: /content/dimer_fil_audio_preview/results/activity_candidates.csv
+Every depth-10 activity ranking equals the canonical development ranking, so these depth-20 scores can be compared with the development scores above.
+Evaluation configuration remains depth 10.
+[colab] Executing cell 13/18 - fa63af60578b...
+transcripts| same dev queries| anchor in candidates @10| anchor in candidates   
+@20| reranked pairs @10| reranked pairs @20| rerank s/query @10| rerank s/query 
+@20                                                                             
+---|---|---|---|---|---|---|---                                                 
+reference| 20| 1.000| 1.000| 200| 400| 0.5485| 1.0431                           
+asr| 20| 0.950| 0.950| 200| 400| 0.5340| 1.0405                                 
+Same development queries, same process and loaded reranker; one untimed warm-up call; depth order alternates per query; excludes model load, query embedding and dense search, which depth does not change. Wall-clock timing of one run, not a benchmark.
+Per-query timings: /content/dimer_fil_audio_preview/results/activity_latency.csv
+transcripts| depth-10 ranking = canonical| anchor_hit_at_5 @ depth 10|          
+anchor_hit_at_5 @ depth 20| anchor_reciprocal_rank_at_10 @ depth 10|            
+anchor_reciprocal_rank_at_10 @ depth 20                                         
+---|---|---|---|---|---                                                         
+reference| 20/20| 1.000| 1.000| 0.967| 0.963                                    
+asr| 20/20| 0.950| 0.950| 0.917| 0.917                                          
+Final ranking quality after reranking the same dense candidates at depth 10 and 20 (one computation; development anchors only; not a benchmark).
+[colab] Executing cell 14/18 - 347aba106e54...
+`torch_dtype` is deprecated! Use `dtype` instead!
+You're using a Qwen2TokenizerFast tokenizer. Please note that with a fast tokenizer, using the `__call__` method is faster than using a method to encode the text followed by a call to the `pad` method to get a padded encoding.
+You're using a Qwen2TokenizerFast tokenizer. Please note that with a fast tokenizer, using the `__call__` method is faster than using a method to encode the text followed by a call to the `pad` method to get a padded encoding.
+`torch_dtype` is deprecated! Use `dtype` instead!
+reload: PASS
+                                                                                
+ {                                                                              
+   "passed": true,                                                              
+   "queries_replayed": 4,                                                       
+   "clips_retranscribed": 3,                                                    
+   "documents_reembedded": 4,                                                   
+   "replay_batch": "first original embedding batch, identical composition",     
+   "fresh_process": true,                                                       
+   "atol": 1e-05,                                                               
+   "rtol": 0.0001                                                               
+ }                                                                              
+                                                                                
+[colab] Executing cell 15/18 - 68bf32b0b5f8...
+report: PASS
+status: Candidate
+annotation_qualified: False
+scope: small read-speech corpus; no operational or speaker independence claim
+mode: engineering_preview_anchor_recovery
+warning: Human query/qrel review incomplete. Scores measure nominated-anchor recovery only.
+Fresh-process reload passed: True (tested scope: 4 queries replayed, 4 documents re-embedded, 3 clips retranscribed)
+  prepare: completed=True, 139.3 s, peak allocated GPU none
+  asr: completed=True, 88.0 s, peak allocated GPU 1.61 GiB
+  index: completed=True, 25.9 s, peak allocated GPU 1.17 GiB
+  evaluate: completed=True, 104.3 s, peak allocated GPU 1.16 GiB
+  activity: completed=True, 130.3 s, peak allocated GPU 1.16 GiB
+  reload: completed=True, 28.0 s, peak allocated GPU 1.61 GiB
+Stage identities and output hashes: /content/dimer_fil_audio_preview/results/run_summary.json
+Evidence bundle: /content/dimer_fil_audio_preview/results/results.zip
+[colab] Executing cell 16/18 - 0681b49b4702...
+[colab] Executing cell 17/18 - a9003e70398c...
+BYOD disabled (RUN_BYOD = False).
+[colab] Executing cell 18/18 - 64aa01367c09...
+No BYOD archive in this session; enable RUN_BYOD above first.
+[colab] Saving notebook with outputs to '/home/kurt/colab-runs/whisper-asr-pipeline-ca5cffb-3c2127/DIMER_Filipino_Audio_Archive_Search_Capstone_ca5cffb_colab-cli-t4_output.ipynb'...

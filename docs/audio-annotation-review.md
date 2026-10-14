@@ -1,14 +1,16 @@
 # Filipino audio-search annotation review
 
-The current notebook is an **engineering preview**, with 60 AI-authored query drafts and **zero human relevance judgements**. All 7,200 query/document cells remain `grade: null, status: unjudged`, including the nominated anchors. Never interpret null as unrelated, or a nominated anchor as the only relevant document.
+The current notebook is an **engineering preview**, with 60 AI-authored query drafts (version `ai-draft-v2`, a draft pending native-speaker review) and **zero human relevance judgements**. All 7,200 query/document cells remain `grade: null, status: unjudged`, including the nominated anchors. Never interpret null as unrelated, or a nominated anchor as the only relevant document.
 
 The frozen 120-document corpus is in `tools/audio_sample.json`. Drafts are in `tools/audio_queries.json`, the full review matrix in `tools/audio_qrels.json`, and draft provenance/hash records in `tools/audio_annotations.json`. Runtime copies are named `audio_manifest.json`, `queries.json`, and `qrels.json`. Preserve UTF-8 and LF when updating these records.
 
 ## How drafts were prepared
 
-From document-ID-sorted role lists, Python `random.Random(42)` selected 20 development anchors, followed by 40 evaluation anchors, without replacement. Each selected source family has one query. Query text was individually drafted from the source reference text before ASR or retrieval results were available. No audio/reference agreement or human naturalness review has been completed.
+From document-ID-sorted role lists, Python `random.Random(42)` selected 20 development anchors, followed by 40 evaluation anchors, without replacement. Each selected source family has one query. No audio/reference agreement or human naturalness review has been completed. Questions are curated rather than sampled from real search logs.
 
-The mix is 20 relationship/action questions, 17 paraphrased facts, and 23 distinctive-entity/term questions. These categories describe drafting intent, not independently validated query characteristics. Questions are curated rather than sampled from real search logs.
+**Version `ai-draft-v2` (current, 2026-10-13).** Same IDs, anchors, families and split as v1. Each query was written from a one-line summary of its anchor's information (recorded in `tools/audio_queries_v2_construction.json`), never from the sentence, as a topic or information need. Its lexical overlap with the anchor is audited (`tools/audit_audio_queries.py`; normalised tokens longer than three characters) against a declared threshold in the annotation manifest: mean anchor overlap at most 0.10 and per-query at most 0.25. The prepare stage recomputes the audit and refuses a query set over the threshold. Measured: mean 0.0101, maximum 0.1429, mean overlap with other references 0.0104; the anchor is the strictly highest-overlap reference for 0 of 60 queries. Limitation: one AI-assisted author saw each sentence when writing its summary, so the summary step is not an independent elicitation. **Native-speaker review is pending**: check that each query is natural Filipino and still points to its anchor, and record that in the review evidence.
+
+**Version `ai-draft-v1` (previous; kept as `tools/audio_queries_v1.json` with `tools/audio_annotations_v1.json`).** Query text was drafted directly from each anchor's reference sentence (20 relationship/action, 17 paraphrased facts, 23 distinctive terms). Audit: mean anchor overlap 0.4193, maximum 0.8000, other references 0.0126; anchor strictly highest for 50 of 60. This made anchor recovery nearly automatic; hosted runs up to 2026-10-12 used this version.
 
 ## Reviewer workflow
 

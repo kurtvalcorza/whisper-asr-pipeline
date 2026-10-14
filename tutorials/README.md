@@ -28,7 +28,9 @@ Generate it with `python tools/build_audio_capstone.py`; use `--check` for parit
 The default path uses 120 FLEURS Filipino clips, three pinned models, six search
 conditions, a development-only candidate-depth experiment, automatic-transcript
 search export and fresh-process replay. BYOD is disabled by default and accepts
-explicitly authorized local 16 kHz mono WAV/FLAC recordings of 2–25 seconds each.
+explicitly authorized local WAV/FLAC recordings of 2–25 seconds each at any sample rate, mono or
+stereo; the BYOD build converts them to 16 kHz mono (recorded and replayed). The default query set
+is `ai-draft-v2` (information-need drafts, pending native-speaker review).
 No adaptation or fine-tuning occurs.
 
 **Engineering preview / Candidate.** Query drafts have not received human review;
@@ -39,8 +41,15 @@ T4 run on 2026-09-28 with every optional journey enabled (reload, export, search
 default Colab T4 `Run all` the same day; both hosts produced byte-identical model outputs. The
 Kaggle BYOD run used public FLEURS recordings as stand-ins, so a BYOD run on the maintainer's own
 recordings and human relevance review remain open. That run took 733 s including installs and downloads, with a peak allocated
-GPU memory of 1.61 GiB; the 60-minute / 12-GiB / 20-GiB free-disk figures remain engineering
-targets. See [capstone evidence](../docs/audio-capstone.md).
+GPU memory of 1.61 GiB; blob `f890d97d` (`e4b3fed`) then passed a Colab CLI T4 default run in 615 s on
+2026-10-03. The 60-minute / 12-GiB / 20-GiB free-disk figures are budgets. The 2026-10-12 review fixes
+(FAS-M1, FAS-M2, FAS-m1 to FAS-m4, plus a peer-review follow-up) change both notebook text and executable
+code (subprocess handling, BYOD validation, diagnostic selection, additional paired comparisons and
+same-candidate depth scoring); blob `6cc75045` (`ca5cffb`) passed a Colab CLI T4 default run in 589 s on
+2026-10-12 with every existing metric unchanged. That run used query version `ai-draft-v1`; after the
+owner decisions FAS-M1 = B (query version `ai-draft-v2`) and BYOD = B (resample/downmix), blob `00cb2948`
+(`816b8dc`) passed a Colab CLI T4 default run in 453 s on 2026-10-14 (19/19 code cells, no errors). A hosted
+BYOD run with one refused input is still open. See [capstone evidence](../docs/audio-capstone.md).
 
 ## Conformance notes
 

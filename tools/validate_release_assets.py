@@ -745,7 +745,13 @@ def validate_audio_capstone(path: Path) -> None:
     expected = (json.dumps(builder.build(), indent=1, ensure_ascii=False) + "\n").encode("utf-8")
     _check(path.read_bytes() == expected, "audio capstone: source-generator parity failure")
     meta = notebook["metadata"]["dimer"]
-    _check(meta["spec_version"] == "2.2" and meta["profile"] == "E2E", "audio capstone: profile")
+    _check(
+        meta.get("notebook_spec") == "2.2"
+        and meta.get("notebook_profile") == "E2E"
+        and meta.get("notebook_mode") == "GUIDED"
+        and meta.get("notebook_kind") == "CAPSTONE",
+        "audio capstone: metadata.dimer declaration (notebook_spec/profile/mode/kind)",
+    )
     for cell in notebook["cells"]:
         if cell["cell_type"] == "code":
             ast.parse("".join(cell["source"]))

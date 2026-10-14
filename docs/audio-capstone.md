@@ -3,8 +3,9 @@
 **Status: Engineering preview / Candidate.** Built for DIMER NOTEBOOK_SPEC 2.2,
 `E2E` / `GUIDED`. The composed workflow is transcription → index construction →
 evaluation → search → export → fresh-process reconstruction. No weight training
-or adaptation is claimed. Hosted execution and human relevance review remain
-open acceptance gates.
+or adaptation is claimed. The default path has hosted runs (see "Hosted runs");
+human relevance review, BYOD on the maintainer's own recordings, a hosted refused-input
+BYOD run and a hosted run of the current revision remain open acceptance gates.
 
 ## Build and run
 
@@ -18,12 +19,13 @@ select a T4 GPU and choose **Run all**. The notebook carries all pipeline source
 and creates an isolated Python 3.12 environment from its hashed Linux lock;
 it does not clone a repository or import DIMER worker code. Public source data
 and model snapshots are acquired at immutable revisions and checked by size and
-SHA-256, including cached files. No paid API, secret or manual restart is needed
-by design; a clean hosted run is still needed to verify that path.
+SHA-256, including cached files. No paid API, secret or manual restart is needed;
+hosted runs are listed under "Hosted runs".
 
-Targets, not measured results: 60 minutes, 20 GiB free disk before setup, and
-12 GiB peak allocated GPU memory. The model families load sequentially. Do not
-reduce the sample after seeing scores to meet these targets.
+Budgets: 60 minutes, 20 GiB free disk before setup, and 12 GiB peak allocated GPU
+memory. Measured: 615.3 s wall for blob `f890d97d` on a fresh Colab T4 (2026-10-03)
+and a highest per-stage peak of 1.61 GiB allocated GPU memory. The model families load
+sequentially. Do not reduce the sample after seeing scores to meet these budgets.
 
 ## Frozen sample and annotation boundary
 
@@ -94,7 +96,19 @@ would be a different computation, not a reconstruction. Rankings must match exac
 tolerances are `atol=1e-5, rtol=1e-4`. No tolerance is widened automatically.
 
 Optional BYOD is disabled by default. Supply an authorized local JSON manifest
-and 1–120 mono 16 kHz WAV/FLAC recordings, each 2–25 seconds and at most 4 MB:
+and 1–120 WAV/FLAC recordings, each 2–25 seconds and at most 16 MB, at any sample
+rate, mono or stereo. Since 2026-10-13 (owner decision) the build converts inputs that
+are not 16 kHz mono before validation: channel mean, `scipy.signal.resample_poly` to
+16 kHz (SciPy 1.17.1, already in the hash lock), rounded 16-bit PCM WAV.
+`audio_acquisition.json` records the original identity (`sha256`, `original`: sample
+rate, channels, frames) and the converted identity (`converted`: sha256, 16 kHz, mono,
+frames, method), and the fresh-process check replays the conversion and must reproduce
+the converted hash. Missing files, clips outside 2–25 s or over 16 MB, and unreadable
+or silent audio are still refused. A refused input ends the BYOD command
+with exit status 3 and one line, `BYOD input refused: <doc_id> (<path>): <problem>.
+Fix: <action>`, before any model loads; the notebook then prints "Nothing was built"
+and clears the active notebook `BYOD` handle instead of raising (earlier bundles under
+`byod/` and `byod/latest.json` stay on disk):
 
 ```json
 {
@@ -167,6 +181,8 @@ pretrained-model or relevance evidence.
 
 | Date (UTC) | Commit / notebook blob | Result |
 | --- | --- | --- |
+| 2026-10-14 | `816b8dc` / `00cb2948c6e9` | **PASSED via the Colab CLI on a fresh Colab Tesla T4.** All 19 code cells in order, no errors, 452.6 s wall, default path only, query version `ai-draft-v2`. ASR WER/CER output equals the `ca5cffb` run; every retrieval number changed with the query set (evaluation anchor hit@5: BM25 0.075 on both transcripts, dense 0.425, rerank 0.450 reference / 0.475 ASR). See [release verification](release-verification.md#filipino-audio-archive-search-capstone). |
+| 2026-10-12 | `ca5cffb` / `6cc750453096` | **PASSED via the Colab CLI on a fresh Colab Tesla T4.** All 18 code cells in order, no errors, 589.2 s wall, default path only. Every existing metric (WER/CER, retrieval scores, the three hit@5 comparisons, depth-20 development scores) equals the 2026-10-03 run; the additional comparisons and same-candidate depth scores appear as intended. See [release verification](release-verification.md#filipino-audio-archive-search-capstone). |
 | 2026-10-03 | `e4b3fed` / `f890d97d43fd` | **PASSED via the Colab CLI on a fresh Colab Tesla T4.** All 18 code cells in order, no errors, 615.3 s wall. Every output equals the `ad42d18` Colab run except model-download progress bars. See [release verification](release-verification.md#filipino-audio-archive-search-capstone). |
 | 2026-09-28 | `ad42d18` (`main`) / `47da982901db` | **PASSED on Colab Tesla T4** (maintainer-supplied). Default `Run all`, toggles off, 18/18 cells. Reload passed; stage-output digests are byte-identical to the Kaggle run of `5664f61`. See [release verification](release-verification.md#maintainer-supplied-colab-execution-of-ad42d18--2026-09-28). |
 | 2026-09-28 | `5664f61` / `47da982901db` | **PASSED on Kaggle Tesla T4.** Blob-verified serial test-suite execution, 21/21 cells, with search, competitor playback and BYOD on plus harness cells for BYOD re-query, export re-run, a no-reference build and clean-directory reuse. Reload passed (4 queries, 4 documents, 3 clips replayed; tolerances unchanged); metrics equal the `d58ab28` run; peak allocated GPU 1.61 GiB. BYOD used FLEURS train clips as stand-ins. See [release verification](release-verification.md#kaggle-execution-of-5664f61--2026-09-28). |
@@ -186,6 +202,38 @@ changes from `47da982901db` to `f890d97d43fd` (602,389 to 817,776 bytes, still
 under the 1 MB GitHub contents limit). The hosted runs above were of blob
 `47da982901db`; blob `f890d97d43fd` was re-run on 2026-10-03 (first row).
 
+## Review fixes (2026-10-12)
+
+The Notebook Review Framework v1 review of `629a98f` (blob `f890d97d`) found two
+major and four minor issues (FAS-M1, FAS-M2, FAS-m1 to FAS-m4) and one suggestion
+(FAS-S1, not addressed). The changes are both narrative (notebook text) and executable
+(subprocess handling, BYOD validation, diagnostic selection, additional comparisons). All are in the generator, the carried
+`audio_byod.py` and `audio_runtime.py` (additive outputs only) and the validator;
+no existing computed result changes.
+
+Owner decisions (Kurt, 2026-10-13): **FAS-M1 = B** (redesign now) and **BYOD = B**
+(convert inside the build). Both are implemented; no owner decision is pending.
+
+- FAS-M1 = B: new frozen query version `ai-draft-v2` (information-need drafts written
+  from one-line summaries, never from the anchor sentence; same IDs, anchors and split;
+  draft pending native-speaker review). Declared threshold: mean anchor overlap at most 0.10,
+  per query at most 0.25 (normalised tokens longer than three characters). v2: mean 0.0101,
+  max 0.1429, anchor strictly highest for 0 of 60. v1: 0.4193, 0.8000, 50 of 60. The prepare
+  stage writes `query_audit.json` and refuses a set over the threshold. v1 stays as
+  `tools/audio_queries_v1.json` + `tools/audio_annotations_v1.json`. All retrieval numbers
+  change; the distractor pool is unchanged (120 recordings).
+- BYOD = B: see the BYOD section above.
+
+| Finding | Change |
+| --- | --- |
+| FAS-M1 (first round, before the owner decision; superseded by B) | Discloses that each query paraphrases its anchor's reference sentence (41.9% vs 1.3% overlap of normalised tokens longer than three characters; anchor highest or tied for 56 of 60 queries; computed from the carried files at review time), interprets the saturated evaluation comparison in §6 and §9, and lets the failure-tracing cells fall back to development misses labelled as diagnosis. The query/distractor redesign is left to the owner, tied to the human relevance review re-freeze. |
+| FAS-M2 | BYOD input contract (16 kHz mono, 2–25 s, ≤4 MB, 1–120 clips), conversion recipe and Files-pane upload route in §11. `audio_byod.py` validates first and reports a refusal as one line naming the clip, the rule and the fix (exit status 3); `command()` returns that status instead of raising; the cell prints a recovery line and clears the active notebook `BYOD` handle (earlier bundles stay on disk). Audio is still not resampled automatically. |
+| FAS-m1 | Stale "hosted run pending" text replaced with the recorded runs and the real open gates (notebook, `README.md`, `tutorials/README.md`, this page). |
+| FAS-m2 | `metadata.dimer` uses `notebook_spec` (kept at 2.2), `notebook_profile`, `notebook_mode` and `notebook_kind: CAPSTONE`; problem statement, use notice, closing recommendation with evidence levels and References added. |
+| FAS-m3 | Troubleshooting table (runtime/GPU, disk, downloads and hashes, stage logs, reload mismatch, BYOD refusals). |
+| FAS-m4 | The activity and export cells print compact summaries and the record paths instead of whole JSON records. |
+| Peer-review follow-up | `paired_comparisons.json` keeps its three hit@5 entries unchanged and gains `additional_comparisons`: ASR minus reference for BM25 and dense, and anchor reciprocal rank@10 (MRR@10 when qualified) for all five comparisons. `activity_summary.json` gains `same_candidate_depth_quality`: depth-10 and depth-20 rerankings of the same dense candidates from the paired-timing pass, scored side by side, with the count of depth-10 rankings equal to canonical. The notebook prints its ceiling reading from the current outputs (per metric; a zero-width interval is called degenerate, not equivalence), labels the earlier run's numbers with their revision, traces the first top-five miss under any system and names it, separates candidate misses, top-five misses and anchor rank demotions, uses observational stage language, explains what `benchmark_qualified` means, gives the 0/1/2 grade rubric and adds a worked example. No existing output value changes. |
+
 ## Release evidence still required
 
 Local validation on 2026-09-27: the pre-change suite had **53 passed, 1 skipped**.
@@ -204,10 +252,12 @@ fixtures and are not stored as notebook outputs or scientific results.
 
 1. Filipino-language query review, full relevance annotation, independent review
    or disclosed single-reviewer limitation, and a frozen review record.
-2. Fresh Colab T4 default Run all against the exact notebook bytes, retaining the
-   executed notebook, all six real-model outputs and complete evidence ZIP.
-3. Real-model BYOD execution (with and without references, a repeat query and
-   clean-directory reuse), artifact replay and resource measurements.
+2. Reviewer confirmation of the hosted default run of the current notebook blob
+   (`00cb2948` at `816b8dc`, query version `ai-draft-v2`, Colab CLI T4, 2026-10-14:
+   PASS; a CLI sequential execution, not a browser Run all).
+3. A hosted BYOD run on the maintainer's own recordings (so far only FLEURS
+   stand-ins on Kaggle at `5664f61`), including one refused input showing the
+   single-line refusal.
 
 Model superiority is not required. Do not claim production readiness, verified
 speaker independence, real meeting performance, or a causal relationship between

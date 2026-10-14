@@ -48,7 +48,15 @@ Filipino FLEURS clips. This standalone `E2E` / `GUIDED` notebook targets a
 fresh Colab T4 and performs no weight training. It is an **engineering preview**:
 60 query drafts and all 7,200 relevance pairs still need human review, so the
 default retrieval scores describe nominated-anchor recovery, not benchmark
-relevance. Hosted execution is also pending. See the
+relevance. The query set is now `ai-draft-v2`: information-need drafts that avoid their anchors'
+wording, a draft pending native-speaker review. Default Run all passed on a fresh Colab T4 for blobs
+`f890d97d` (2026-10-03, 615 s) and `6cc75045` (2026-10-12, Colab CLI, 589 s) with the previous
+paraphrase query version `ai-draft-v1`; the current blob `00cb2948` (`ai-draft-v2`) passed a Colab CLI
+T4 default run on 2026-10-14 (453 s). Under `ai-draft-v2` keyword search recovers few anchors (hit@5
+0.075 on evaluation queries) while dense and reranked search recover 0.425 to 0.475. Other open
+gates are native-speaker review, human relevance review, a BYOD run on the maintainer's own recordings
+and a hosted run with a refused BYOD input (see
+[release verification](docs/release-verification.md#filipino-audio-archive-search-capstone)). See the
 [build and validation guide](docs/audio-capstone.md) and
 [annotation review protocol](docs/audio-annotation-review.md).
 

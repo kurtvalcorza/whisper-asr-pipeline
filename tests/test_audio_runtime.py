@@ -286,3 +286,87 @@ def test_reload_replays_original_embedding_batch(experiment, monkeypatch):
     verification = rt.read(rt.out(root) / "verification.json")
     assert verification["passed"] is True
     assert verification["documents_reembedded"] == verification["queries_replayed"] == size
+
+
+def test_additional_paired_comparisons_keep_existing_hit_entries(experiment, monkeypatch):
+    # 2026-10-12 peer review (CX3): additive comparisons; the three original hit@5 entries are unchanged.
+    queries, _, _ = rt.annotations(experiment)
+    corpus_ids = [d["doc_id"] for d in rt.corpus(experiment)]
+    runs = {}
+    for number, q in enumerate(queries):
+        others = [d for d in corpus_ids if d != q["anchor_doc_id"]]
+        runs[q["query_id"]] = {}
+        for k, system in enumerate(rt.SYSTEMS):
+            position = (number * (k + 1)) % 8  # anchor ranks 1..8 vary by query and system
+            ids = [*others[:position], q["anchor_doc_id"], *others[position:]]
+            runs[q["query_id"]][system] = [{"doc_id": d, "score": float(-i)} for i, d in enumerate(ids)]
+    monkeypatch.setattr(rt, "run_search", lambda root, queries, depth: (runs, []))
+    rt.evaluate(experiment)
+    paired = rt.read(rt.out(experiment) / "paired_comparisons.json")
+    evaluation = [q for q in queries if q["role"] == "test"]
+
+    def values(system, measure):
+        rows = []
+        for q in evaluation:
+            ranking = [p["doc_id"] for p in runs[q["query_id"]][system]]
+            rows.append(rt.ranking_measures(q, [], ranking, False)[measure])
+        return rows
+
+    groups = [q["group_id"] for q in evaluation]
+    assert set(paired["comparisons"]) == {
+        "asr_rerank_minus_reference_rerank", "asr_rerank_minus_asr_dense", "asr_dense_minus_asr_bm25"
+    }
+    for name, entry in paired["comparisons"].items():
+        expected = rt.core.paired_bootstrap(
+            values(entry["a_system"], "anchor_hit_at_5"), values(entry["b_system"], "anchor_hit_at_5"), groups
+        )
+        assert {k: entry[k] for k in expected} == expected, name
+    extra = paired["additional_comparisons"]
+    assert set(extra["anchor_hit_at_5"]) == {
+        "asr_bm25_minus_reference_bm25", "asr_dense_minus_reference_dense"
+    }
+    assert set(extra["anchor_reciprocal_rank_at_10"]) == {
+        "asr_bm25_minus_reference_bm25", "asr_dense_minus_reference_dense",
+        "asr_rerank_minus_reference_rerank", "asr_rerank_minus_asr_dense", "asr_dense_minus_asr_bm25",
+    }
+    bm25 = extra["anchor_reciprocal_rank_at_10"]["asr_bm25_minus_reference_bm25"]
+    expected = rt.core.paired_bootstrap(
+        values("asr_bm25", "anchor_reciprocal_rank_at_10"),
+        values("reference_bm25", "anchor_reciprocal_rank_at_10"),
+        groups,
+    )
+    assert bm25["difference"] == expected["difference"] and bm25["difference"] != 0
+
+
+def test_activity_scores_same_candidate_depths_side_by_side(experiment):
+    # 2026-10-12 peer review (CX5): depth 10 and 20 scored on the same dense candidates.
+    rt.asr(experiment)
+    rt.index(experiment)
+    rt.evaluate(experiment)
+    rt.activity(experiment)
+    summary = rt.read(rt.out(experiment) / "activity_summary.json")
+    same = summary["same_candidate_depth_quality"]
+    canonical = rt.read(rt.out(experiment) / "retrieval_results.json")["scores"]["dev"]
+    for condition in ("reference", "asr"):
+        assert same[condition]["queries"] == 20 and same[condition]["depth10_matches_canonical"] == 20
+        assert set(same[condition]) == {"queries", "depth10_matches_canonical", "depth10", "depth20"}
+        # Every depth-10 ranking matched canonical, so its scores equal the canonical rerank scores.
+        expected = {k: v for k, v in canonical[condition + "_rerank"].items() if k != "n"}
+        assert same[condition]["depth10"] == pytest.approx(expected)
+
+
+def test_prepare_writes_query_audit_and_enforces_the_declared_threshold(experiment):
+    # FAS-M1 option B (2026-10-13): query set ai-draft-v2 is audited and gated at prepare.
+    audit = rt.read(rt.out(experiment) / "query_audit.json")
+    assert audit["annotation_version"] == "ai-draft-v2" and audit["within_threshold"] is True
+    assert audit["mean_anchor_overlap"] <= audit["declared_threshold"]["mean_anchor_overlap_max"] == 0.10
+    tools = Path(rt.__file__).parent
+    v1 = rt.core.query_overlap_audit(
+        rt.read(tools / "audio_queries_v1.json"), rt.read(tools / "audio_sample.json")["records"]
+    )
+    assert v1["mean_anchor_overlap"] > 0.4 and v1["anchor_strictly_highest"] == 50
+    manifest = rt.read(experiment / "annotation_manifest.json")
+    manifest["overlap_threshold"]["per_query_anchor_overlap_max"] = 0.0
+    rt.write(experiment / "annotation_manifest.json", manifest)
+    with pytest.raises(ValueError, match="overlap threshold"):
+        rt.prepare(experiment)

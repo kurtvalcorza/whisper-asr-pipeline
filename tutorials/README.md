@@ -46,7 +46,10 @@ GPU memory of 1.61 GiB; blob `f890d97d` (`e4b3fed`) then passed a Colab CLI T4 d
 (FAS-M1, FAS-M2, FAS-m1 to FAS-m4, plus a peer-review follow-up) change both notebook text and executable
 code (subprocess handling, BYOD validation, diagnostic selection, additional paired comparisons and
 same-candidate depth scoring); blob `6cc75045` (`ca5cffb`) passed a Colab CLI T4 default run in 589 s on
-2026-10-12 with every existing metric unchanged. A hosted BYOD run with one refused input is still open. See [capstone evidence](../docs/audio-capstone.md).
+2026-10-12 with every existing metric unchanged. That run used query version `ai-draft-v1`; after the
+owner decisions FAS-M1 = B (query version `ai-draft-v2`) and BYOD = B (resample/downmix), blob `00cb2948`
+(`816b8dc`) passed a Colab CLI T4 default run in 453 s on 2026-10-14 (19/19 code cells, no errors). A hosted
+BYOD run with one refused input is still open. See [capstone evidence](../docs/audio-capstone.md).
 
 ## Conformance notes
 

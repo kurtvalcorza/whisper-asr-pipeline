@@ -387,6 +387,8 @@ def test_show_results_plays_the_selected_examples(
     _show_results_namespace(root, recorded)["show_results"]("evaluate")
     played = [item[1] for item in recorded if isinstance(item, tuple) and item[0] == "audio"]
     assert str(root / "bad.wav") in played and str(root / "good.wav") in played
+    # ASR2 peer review: the fixed first example has its own player in the evaluate stage.
+    assert str(root / "zfirst.wav") in played
 
     byod_rows = [{**rows[1], "id": "0", "file": "mine.wav", "role": "byod"}]
     _write_stage(root, workshop, "byod", byod_rows)

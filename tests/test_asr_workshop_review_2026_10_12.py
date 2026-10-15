@@ -222,14 +222,89 @@ def test_opening_quotes_the_recorded_run_with_its_revision() -> None:
 # ASR2-m4, ASR2-S1, ASR2-S2 --------------------------------------------------------------------------
 
 
-def test_paired_counts_and_exact_match_rate_are_defined() -> None:
+def test_paired_counts_and_exact_match_rate_are_documented() -> None:
     cells = _cells()
     assert "Unchanged means equal per-clip WER, not identical text" in cells["md-13"]
     assert "subtracts its clean WER from its noisy WER" in cells["md-13"]
-    assert "**Exact-match rate (`exact_match_rate`):**" in cells["md-19"]
-    workshop = _carried()["workshop.py"]
-    assert '"unchanged": sum(d == 0 for d in deltas)' in workshop
-    assert 'r["normalized_reference"] == r["normalized_hypothesis"]' in workshop
+    assert "exactly equals the normalized reference" in cells["md-19"]
+    assert "word for word" not in cells["md-19"]
+
+
+@pytest.fixture
+def workshop_module(carried_root: Path, monkeypatch: pytest.MonkeyPatch):
+    """The carried workshop.py imported in-process with stand-ins for torch, resource and the model."""
+    import importlib.util
+
+    monkeypatch.syspath_prepend(str(carried_root))
+    spec = importlib.util.spec_from_file_location("asr2_workshop_carried", carried_root / "workshop.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    torch = types.ModuleType("torch")
+    torch.cuda = types.SimpleNamespace(max_memory_allocated=lambda: 0)
+    monkeypatch.setitem(sys.modules, "torch", torch)
+    resource = types.ModuleType("resource")
+    resource.RUSAGE_SELF = 0
+    resource.getrusage = lambda _who: types.SimpleNamespace(ru_maxrss=0)
+    monkeypatch.setitem(sys.modules, "resource", resource)
+    return module
+
+
+def test_exact_match_is_equality_of_normalized_text(workshop_module) -> None:
+    rows = [
+        {**workshop_module.score("Pay my bill.", "pay  MY bill"), "reference": "Pay my bill."},
+        {**workshop_module.score("pay my e-bill", "pay my e bill"), "reference": "pay my e-bill"},
+        {**workshop_module.score("pay my bill", "pay the bill"), "reference": "pay my bill"},
+    ]
+    # Case, punctuation and spacing are normalized away; an internal hyphen is kept, so "e-bill" != "e bill".
+    assert [r["normalized_reference"] == r["normalized_hypothesis"] for r in rows] == [True, False, False]
+    assert workshop_module.aggregate(rows)["exact_match_rate"] == pytest.approx(1 / 3)
+
+
+def test_paired_counts_compare_per_recording_wer(
+    workshop_module, carried_root: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # (clean, noisy) transcripts of "pay my bill": identical; different text with equal WER; worse; better.
+    pairs = [
+        ("pay my bill", "pay my bill"),
+        ("pay my pill", "pay a bill"),
+        ("pay my bill", "pay my"),
+        ("pay the bills", "pay my bills"),
+    ]
+    texts = iter(["warm-up"] + [text for pair in pairs for text in pair])
+
+    def transcriber(_weights):
+        def infer(_audio):
+            return {"text": next(texts), "inference_seconds": 0.01, "truncated": False, "sequence_tokens": 4}
+
+        return infer, {"device": "stand-in", "dtype": "float32"}
+
+    monkeypatch.setattr(workshop_module, "transcriber", transcriber)
+    prepared = []
+    for index in range(len(pairs)):
+        audio = (0.3 * np.sin(2 * np.pi * (300 + 100 * index) * np.arange(32000) / 16000)).astype("float32")
+        path = carried_root / f"clip{index}.wav"
+        sf.write(path, audio, 16000, subtype="FLOAT")
+        prepared.append(
+            {
+                "id": f"clip{index}",
+                "role": "activity",
+                "reference": "pay my bill",
+                "seconds": 2.0,
+                "audio_path": str(path),
+                "waveform_sha256": workshop_module.digest(audio.astype("<f4").tobytes()),
+            }
+        )
+    (carried_root / "prepared.json").write_text(json.dumps(prepared), encoding="utf-8")
+    workshop_module.run_stage(carried_root, "activity")
+    output = Path(json.loads((carried_root / "activity_output.json").read_text())["path"])
+    metrics = json.loads((output / "metrics.json").read_text(encoding="utf-8"))
+    assert metrics["paired"] == {"improved": 1, "unchanged": 2, "worsened": 1, "n": 4}
+    rows = json.loads((output / "transcripts.json").read_text(encoding="utf-8"))
+    by_key = {(r["id"], r["condition"]): r for r in rows}
+    clean, noisy = by_key[("clip1", "clean")], by_key[("clip1", "noisy")]
+    # Unchanged means equal per-clip WER, not identical text.
+    assert clean["wer"] == noisy["wer"] and clean["hypothesis"] != noisy["hypothesis"]
+    assert metrics["clean"]["exact_match_rate"] == 0.5 and metrics["noisy"]["exact_match_rate"] == 0.25
 
 
 def test_exploration_prints_the_canonical_10_db_rates_beside_the_chosen_setting(

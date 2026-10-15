@@ -1,0 +1,475 @@
+[colab] Parsing notebook '/home/kurt/colab-runs/whisper-asr-pipeline-904cbe7-7e78cd/DIMER_Whisper_Speech_Recognition_Workshop_904cbe7_colab-cli-t4.ipynb'...
+[colab] Executing cell 1/10 - code-02...
+Tesla T4
+[colab] Executing cell 2/10 - code-03...
+Carried code, sample manifest, model manifest and lock verified.
+[colab] Executing cell 3/10 - code-04...
+[colab] Executing cell 4/10 - code-06...
+Running prepare; progress and diagnostics are saved to its log.
+{"counts": {"evaluation": 64, "activity": 16}, "seconds": 597.353125, "data_seconds": 5.535247002999995}
+
+Your browser does not support the audio element.                                
+Reference: hello I need to deposit money into my account
+{'id': 'en-US~CASH_DEPOSIT/602ba2c05f67b421554f63da.wav', 'role': 'activity', 'seconds': 7.936, 'input_rate': 8000, 'input_channels': 1, 'sampling_rate': 16000}
+[colab] Executing cell 5/10 - code-08...
+{
+  "reference": "pay my bill",
+  "hypothesis": "pay the bills now",
+  "normalized_reference": "pay my bill",
+  "normalized_hypothesis": "pay the bills now",
+  "S": 2,
+  "D": 0,
+  "I": 1,
+  "N": 3,
+  "alignment": [
+    {
+      "op": "=",
+      "reference": "pay",
+      "hypothesis": "pay"
+    },
+    {
+      "op": "I",
+      "reference": null,
+      "hypothesis": "the"
+    },
+    {
+      "op": "S",
+      "reference": "my",
+      "hypothesis": "bills"
+    },
+    {
+      "op": "S",
+      "reference": "bill",
+      "hypothesis": "now"
+    }
+  ],
+  "character_edits": 7,
+  "character_N": 9,
+  "wer": 1.0,
+  "cer": 0.7777777777777778,
+  "reason": null
+}
+
+[colab] Executing cell 6/10 - code-10...
+Running model; progress and diagnostics are saved to its log.
+Pinned model snapshot verified
+
+Running evaluate; progress and diagnostics are saved to its log.
+evaluate: 1/64
+evaluate: 2/64
+evaluate: 3/64
+evaluate: 4/64
+evaluate: 5/64
+evaluate: 6/64
+evaluate: 7/64
+evaluate: 8/64
+evaluate: 9/64
+evaluate: 10/64
+evaluate: 11/64
+evaluate: 12/64
+evaluate: 13/64
+evaluate: 14/64
+evaluate: 15/64
+evaluate: 16/64
+evaluate: 17/64
+evaluate: 18/64
+evaluate: 19/64
+evaluate: 20/64
+evaluate: 21/64
+evaluate: 22/64
+evaluate: 23/64
+evaluate: 24/64
+evaluate: 25/64
+evaluate: 26/64
+evaluate: 27/64
+evaluate: 28/64
+evaluate: 29/64
+evaluate: 30/64
+evaluate: 31/64
+evaluate: 32/64
+evaluate: 33/64
+evaluate: 34/64
+evaluate: 35/64
+evaluate: 36/64
+evaluate: 37/64
+evaluate: 38/64
+evaluate: 39/64
+evaluate: 40/64
+evaluate: 41/64
+evaluate: 42/64
+evaluate: 43/64
+evaluate: 44/64
+evaluate: 45/64
+evaluate: 46/64
+evaluate: 47/64
+evaluate: 48/64
+evaluate: 49/64
+evaluate: 50/64
+evaluate: 51/64
+evaluate: 52/64
+evaluate: 53/64
+evaluate: 54/64
+evaluate: 55/64
+evaluate: 56/64
+evaluate: 57/64
+evaluate: 58/64
+evaluate: 59/64
+evaluate: 60/64
+evaluate: 61/64
+evaluate: 62/64
+evaluate: 63/64
+evaluate: 64/64
+{
+  "output": "/content/outputs/whisper_speech_recognition/0e6725c3df4e/outputs/evaluate-9cf6dfd2d7f7",
+  "report": "/content/outputs/whisper_speech_recognition/0e6725c3df4e/outputs/evaluate-9cf6dfd2d7f7/report.zip",
+  "metrics": {
+    "clean": {
+      "S": 56,
+      "D": 5,
+      "I": 122,
+      "N": 924,
+      "character_edits": 589,
+      "character_N": 3578,
+      "wer": 0.19805194805194806,
+      "cer": 0.1646171045276691,
+      "evaluated": 64,
+      "labelled": 64,
+      "missing_reference": 0,
+      "empty_reference": 0,
+      "exact_match_rate": 0.453125,
+      "failed": 0,
+      "truncated": 0,
+      "audio_seconds": 494.4435,
+      "inference_seconds": 16.671991095999942,
+      "real_time_factor": 0.03371869808380521
+    },
+    "empty_transcript_baseline": {
+      "S": 0,
+      "D": 924,
+      "I": 0,
+      "N": 924,
+      "character_edits": 3578,
+      "character_N": 3578,
+      "wer": 1.0,
+      "cer": 1.0,
+      "evaluated": 64,
+      "labelled": 64,
+      "missing_reference": 0,
+      "empty_reference": 0,
+      "exact_match_rate": 0.0,
+      "failed": 0,
+      "truncated": 0,
+      "audio_seconds": 494.4435,
+      "inference_seconds": 0,
+      "real_time_factor": 0.0
+    }
+  }
+}
+
+
+                                                                
+ Condition                  Clips     WER     CER   S    D    I 
+ ────────────────────────────────────────────────────────────── 
+ clean                         64  0.1981  0.1646  56    5  122 
+ empty_transcript_baseline     64  1.0000  1.0000   0  924    0 
+                                                                
+Coverage and timing: {
+  "clean": {
+    "S": 56,
+    "D": 5,
+    "I": 122,
+    "N": 924,
+    "character_edits": 589,
+    "character_N": 3578,
+    "wer": 0.19805194805194806,
+    "cer": 0.1646171045276691,
+    "evaluated": 64,
+    "labelled": 64,
+    "missing_reference": 0,
+    "empty_reference": 0,
+    "exact_match_rate": 0.453125,
+    "failed": 0,
+    "truncated": 0,
+    "audio_seconds": 494.4435,
+    "inference_seconds": 16.671991095999942,
+    "real_time_factor": 0.03371869808380521
+  },
+  "empty_transcript_baseline": {
+    "S": 0,
+    "D": 924,
+    "I": 0,
+    "N": 924,
+    "character_edits": 3578,
+    "character_N": 3578,
+    "wer": 1.0,
+    "cer": 1.0,
+    "evaluated": 64,
+    "labelled": 64,
+    "missing_reference": 0,
+    "empty_reference": 0,
+    "exact_match_rate": 0.0,
+    "failed": 0,
+    "truncated": 0,
+    "audio_seconds": 494.4435,
+    "inference_seconds": 0,
+    "real_time_factor": 0.0
+  }
+}
+Fixed first example: en-US~PAY_BILL/602baa7805f96973d67944ac.wav / clean
+Reference: I would like to make a payment
+Prediction: I would like to make a payment.
+Normalized reference: i would like to make a payment
+Normalized prediction: i would like to make a payment
+WER: 0.0 CER: 0.0 Ceiling flag: False
+Alignment: [{'op': '=', 'reference': 'i', 'hypothesis': 'i'}, {'op': '=', 'reference': 'would', 'hypothesis': 'would'}, {'op': '=', 'reference': 'like', 'hypothesis': 'like'}, {'op': '=', 'reference': 'to', 'hypothesis': 'to'}, {'op': '=', 'reference': 'make', 'hypothesis': 'make'}, {'op': '=', 'reference': 'a', 'hypothesis': 'a'}, {'op': '=', 'reference': 'payment', 'hypothesis': 'payment'}]
+Fixed first example: listen. Do both transcripts match what you hear?           
+Your browser does not support the audio element.                                
+Lowest WER: en-US~ADDRESS/602ba0fe5f67b421554f63cc.wav / clean
+Reference: I want to change my address
+Prediction: I want to change my address.
+Normalized reference: i want to change my address
+Normalized prediction: i want to change my address
+WER: 0.0 CER: 0.0 Ceiling flag: False
+Alignment: [{'op': '=', 'reference': 'i', 'hypothesis': 'i'}, {'op': '=', 'reference': 'want', 'hypothesis': 'want'}, {'op': '=', 'reference': 'to', 'hypothesis': 'to'}, {'op': '=', 'reference': 'change', 'hypothesis': 'change'}, {'op': '=', 'reference': 'my', 'hypothesis': 'my'}, {'op': '=', 'reference': 'address', 'hypothesis': 'address'}]
+Lowest WER: listen. Do both transcripts match what you hear?                    
+Your browser does not support the audio element.                                
+Highest WER: en-US~JOINT_ACCOUNT/602bafa95f67b421554f64dc.wav / clean
+Reference: yes I'd like to set up a joint account I'm allowed to anyone
+Prediction: Yes, I'd like to set up a joint account. I'm allowed to set up a joint account with anyone. And where on the app is the option for me to sign up for a joint account?
+Normalized reference: yes i'd like to set up a joint account i'm allowed to anyone
+Normalized prediction: yes i'd like to set up a joint account i'm allowed to set up a joint account with anyone and where on the app is the option for me to sign up for a joint account
+WER: 1.7692307692307692 CER: 1.625 Ceiling flag: False
+Alignment: [{'op': '=', 'reference': 'yes', 'hypothesis': 'yes'}, {'op': '=', 'reference': "i'd", 'hypothesis': "i'd"}, {'op': '=', 'reference': 'like', 'hypothesis': 'like'}, {'op': '=', 'reference': 'to', 'hypothesis': 'to'}, {'op': '=', 'reference': 'set', 'hypothesis': 'set'}, {'op': '=', 'reference': 'up', 'hypothesis': 'up'}, {'op': '=', 'reference': 'a', 'hypothesis': 'a'}, {'op': '=', 'reference': 'joint', 'hypothesis': 'joint'}, {'op': '=', 'reference': 'account', 'hypothesis': 'account'}, {'op': '=', 'reference': "i'm", 'hypothesis': "i'm"}, {'op': '=', 'reference': 'allowed', 'hypothesis': 'allowed'}, {'op': '=', 'reference': 'to', 'hypothesis': 'to'}, {'op': 'I', 'reference': None, 'hypothesis': 'set'}, {'op': 'I', 'reference': None, 'hypothesis': 'up'}, {'op': 'I', 'reference': None, 'hypothesis': 'a'}, {'op': 'I', 'reference': None, 'hypothesis': 'joint'}, {'op': 'I', 'reference': None, 'hypothesis': 'account'}, {'op': 'I', 'reference': None, 'hypothesis': 'with'}, {'op': '=', 'reference': 'anyone', 'hypothesis': 'anyone'}, {'op': 'I', 'reference': None, 'hypothesis': 'and'}, {'op': 'I', 'reference': None, 'hypothesis': 'where'}, {'op': 'I', 'reference': None, 'hypothesis': 'on'}, {'op': 'I', 'reference': None, 'hypothesis': 'the'}, {'op': 'I', 'reference': None, 'hypothesis': 'app'}, {'op': 'I', 'reference': None, 'hypothesis': 'is'}, {'op': 'I', 'reference': None, 'hypothesis': 'the'}, {'op': 'I', 'reference': None, 'hypothesis': 'option'}, {'op': 'I', 'reference': None, 'hypothesis': 'for'}, {'op': 'I', 'reference': None, 'hypothesis': 'me'}, {'op': 'I', 'reference': None, 'hypothesis': 'to'}, {'op': 'I', 'reference': None, 'hypothesis': 'sign'}, {'op': 'I', 'reference': None, 'hypothesis': 'up'}, {'op': 'I', 'reference': None, 'hypothesis': 'for'}, {'op': 'I', 'reference': None, 'hypothesis': 'a'}, {'op': 'I', 'reference': None, 'hypothesis': 'joint'}, {'op': 'I', 'reference': None, 'hypothesis': 'account'}]
+Highest WER: listen. Whisper supported, reference supported, both wrong, or     
+uncertain?                                                                      
+Your browser does not support the audio element.                                
+First recording: clean (scored gain, no playback normalization)                 
+Your browser does not support the audio element.                                
+[colab] Executing cell 7/10 - code-12...
+Running activity; progress and diagnostics are saved to its log.
+activity: 1/16
+activity: 2/16
+activity: 3/16
+activity: 4/16
+activity: 5/16
+activity: 6/16
+activity: 7/16
+activity: 8/16
+activity: 9/16
+activity: 10/16
+activity: 11/16
+activity: 12/16
+activity: 13/16
+activity: 14/16
+activity: 15/16
+activity: 16/16
+{
+  "output": "/content/outputs/whisper_speech_recognition/0e6725c3df4e/outputs/activity-34fe24ddec2f",
+  "report": "/content/outputs/whisper_speech_recognition/0e6725c3df4e/outputs/activity-34fe24ddec2f/report.zip",
+  "metrics": {
+    "clean": {
+      "S": 6,
+      "D": 1,
+      "I": 25,
+      "N": 173,
+      "character_edits": 109,
+      "character_N": 695,
+      "wer": 0.18497109826589594,
+      "cer": 0.15683453237410072,
+      "evaluated": 16,
+      "labelled": 16,
+      "missing_reference": 0,
+      "empty_reference": 0,
+      "exact_match_rate": 0.6875,
+      "failed": 0,
+      "truncated": 0,
+      "audio_seconds": 102.909625,
+      "inference_seconds": 3.8655881579998095,
+      "real_time_factor": 0.03756294086194376
+    },
+    "noisy": {
+      "S": 7,
+      "D": 1,
+      "I": 28,
+      "N": 173,
+      "character_edits": 121,
+      "character_N": 695,
+      "wer": 0.20809248554913296,
+      "cer": 0.17410071942446043,
+      "evaluated": 16,
+      "labelled": 16,
+      "missing_reference": 0,
+      "empty_reference": 0,
+      "exact_match_rate": 0.625,
+      "failed": 0,
+      "truncated": 0,
+      "audio_seconds": 102.909625,
+      "inference_seconds": 3.8763626520000116,
+      "real_time_factor": 0.037667639465210484
+    },
+    "empty_transcript_baseline": {
+      "S": 0,
+      "D": 173,
+      "I": 0,
+      "N": 173,
+      "character_edits": 695,
+      "character_N": 695,
+      "wer": 1.0,
+      "cer": 1.0,
+      "evaluated": 16,
+      "labelled": 16,
+      "missing_reference": 0,
+      "empty_reference": 0,
+      "exact_match_rate": 0.0,
+      "failed": 0,
+      "truncated": 0,
+      "audio_seconds": 102.909625,
+      "inference_seconds": 0,
+      "real_time_factor": 0.0
+    },
+    "paired": {
+      "improved": 0,
+      "unchanged": 12,
+      "worsened": 4,
+      "n": 16
+    }
+  }
+}
+
+
+                                                              
+ Condition                  Clips     WER     CER  S    D   I 
+ ──────────────────────────────────────────────────────────── 
+ clean                         16  0.1850  0.1568  6    1  25 
+ noisy                         16  0.2081  0.1741  7    1  28 
+ empty_transcript_baseline     16  1.0000  1.0000  0  173   0 
+                                                              
+Coverage and timing: {
+  "clean": {
+    "S": 6,
+    "D": 1,
+    "I": 25,
+    "N": 173,
+    "character_edits": 109,
+    "character_N": 695,
+    "wer": 0.18497109826589594,
+    "cer": 0.15683453237410072,
+    "evaluated": 16,
+    "labelled": 16,
+    "missing_reference": 0,
+    "empty_reference": 0,
+    "exact_match_rate": 0.6875,
+    "failed": 0,
+    "truncated": 0,
+    "audio_seconds": 102.909625,
+    "inference_seconds": 3.8655881579998095,
+    "real_time_factor": 0.03756294086194376
+  },
+  "noisy": {
+    "S": 7,
+    "D": 1,
+    "I": 28,
+    "N": 173,
+    "character_edits": 121,
+    "character_N": 695,
+    "wer": 0.20809248554913296,
+    "cer": 0.17410071942446043,
+    "evaluated": 16,
+    "labelled": 16,
+    "missing_reference": 0,
+    "empty_reference": 0,
+    "exact_match_rate": 0.625,
+    "failed": 0,
+    "truncated": 0,
+    "audio_seconds": 102.909625,
+    "inference_seconds": 3.8763626520000116,
+    "real_time_factor": 0.037667639465210484
+  },
+  "empty_transcript_baseline": {
+    "S": 0,
+    "D": 173,
+    "I": 0,
+    "N": 173,
+    "character_edits": 695,
+    "character_N": 695,
+    "wer": 1.0,
+    "cer": 1.0,
+    "evaluated": 16,
+    "labelled": 16,
+    "missing_reference": 0,
+    "empty_reference": 0,
+    "exact_match_rate": 0.0,
+    "failed": 0,
+    "truncated": 0,
+    "audio_seconds": 102.909625,
+    "inference_seconds": 0,
+    "real_time_factor": 0.0
+  },
+  "paired": {
+    "improved": 0,
+    "unchanged": 12,
+    "worsened": 4,
+    "n": 16
+  }
+}
+Fixed first example: en-US~CASH_DEPOSIT/602ba2c05f67b421554f63da.wav / clean
+Reference: hello I need to deposit money into my account
+Prediction: Hello, I need to deposit money into my account.
+Normalized reference: hello i need to deposit money into my account
+Normalized prediction: hello i need to deposit money into my account
+WER: 0.0 CER: 0.0 Ceiling flag: False
+Alignment: [{'op': '=', 'reference': 'hello', 'hypothesis': 'hello'}, {'op': '=', 'reference': 'i', 'hypothesis': 'i'}, {'op': '=', 'reference': 'need', 'hypothesis': 'need'}, {'op': '=', 'reference': 'to', 'hypothesis': 'to'}, {'op': '=', 'reference': 'deposit', 'hypothesis': 'deposit'}, {'op': '=', 'reference': 'money', 'hypothesis': 'money'}, {'op': '=', 'reference': 'into', 'hypothesis': 'into'}, {'op': '=', 'reference': 'my', 'hypothesis': 'my'}, {'op': '=', 'reference': 'account', 'hypothesis': 'account'}]
+Lowest WER: en-US~ADDRESS/602ba79f05f96973d6794473.wav / clean
+Reference: hi I just moved and I need to change my address on file
+Prediction: Hi, I just moved and I need to change my address on file.
+Normalized reference: hi i just moved and i need to change my address on file
+Normalized prediction: hi i just moved and i need to change my address on file
+WER: 0.0 CER: 0.0 Ceiling flag: False
+Alignment: [{'op': '=', 'reference': 'hi', 'hypothesis': 'hi'}, {'op': '=', 'reference': 'i', 'hypothesis': 'i'}, {'op': '=', 'reference': 'just', 'hypothesis': 'just'}, {'op': '=', 'reference': 'moved', 'hypothesis': 'moved'}, {'op': '=', 'reference': 'and', 'hypothesis': 'and'}, {'op': '=', 'reference': 'i', 'hypothesis': 'i'}, {'op': '=', 'reference': 'need', 'hypothesis': 'need'}, {'op': '=', 'reference': 'to', 'hypothesis': 'to'}, {'op': '=', 'reference': 'change', 'hypothesis': 'change'}, {'op': '=', 'reference': 'my', 'hypothesis': 'my'}, {'op': '=', 'reference': 'address', 'hypothesis': 'address'}, {'op': '=', 'reference': 'on', 'hypothesis': 'on'}, {'op': '=', 'reference': 'file', 'hypothesis': 'file'}]
+Lowest WER: listen. Do both transcripts match what you hear?                    
+Your browser does not support the audio element.                                
+Highest WER: en-US~APP_ERROR/602baddbbb1e6d0fbce92215.wav / noisy
+Reference: hi good morning to you don't like to make a complaint I've been trying to look up my house I don't know why thank you
+Prediction: Hi Good morning Please I would like to make a complaint. The time I've been trying to look up my house and everyone is nodding. I don't know what it is. Why are you asking me to look into this? Thank you
+Normalized reference: hi good morning to you don't like to make a complaint i've been trying to look up my house i don't know why thank you
+Normalized prediction: hi good morning please i would like to make a complaint the time i've been trying to look up my house and everyone is nodding i don't know what it is why are you asking me to look into this thank you
+WER: 0.8 CER: 0.7956989247311828 Ceiling flag: False
+Alignment: [{'op': '=', 'reference': 'hi', 'hypothesis': 'hi'}, {'op': '=', 'reference': 'good', 'hypothesis': 'good'}, {'op': '=', 'reference': 'morning', 'hypothesis': 'morning'}, {'op': 'S', 'reference': 'to', 'hypothesis': 'please'}, {'op': 'S', 'reference': 'you', 'hypothesis': 'i'}, {'op': 'S', 'reference': "don't", 'hypothesis': 'would'}, {'op': '=', 'reference': 'like', 'hypothesis': 'like'}, {'op': '=', 'reference': 'to', 'hypothesis': 'to'}, {'op': '=', 'reference': 'make', 'hypothesis': 'make'}, {'op': '=', 'reference': 'a', 'hypothesis': 'a'}, {'op': '=', 'reference': 'complaint', 'hypothesis': 'complaint'}, {'op': 'I', 'reference': None, 'hypothesis': 'the'}, {'op': 'I', 'reference': None, 'hypothesis': 'time'}, {'op': '=', 'reference': "i've", 'hypothesis': "i've"}, {'op': '=', 'reference': 'been', 'hypothesis': 'been'}, {'op': '=', 'reference': 'trying', 'hypothesis': 'trying'}, {'op': '=', 'reference': 'to', 'hypothesis': 'to'}, {'op': '=', 'reference': 'look', 'hypothesis': 'look'}, {'op': '=', 'reference': 'up', 'hypothesis': 'up'}, {'op': '=', 'reference': 'my', 'hypothesis': 'my'}, {'op': '=', 'reference': 'house', 'hypothesis': 'house'}, {'op': 'I', 'reference': None, 'hypothesis': 'and'}, {'op': 'I', 'reference': None, 'hypothesis': 'everyone'}, {'op': 'I', 'reference': None, 'hypothesis': 'is'}, {'op': 'I', 'reference': None, 'hypothesis': 'nodding'}, {'op': '=', 'reference': 'i', 'hypothesis': 'i'}, {'op': '=', 'reference': "don't", 'hypothesis': "don't"}, {'op': '=', 'reference': 'know', 'hypothesis': 'know'}, {'op': 'I', 'reference': None, 'hypothesis': 'what'}, {'op': 'I', 'reference': None, 'hypothesis': 'it'}, {'op': 'I', 'reference': None, 'hypothesis': 'is'}, {'op': '=', 'reference': 'why', 'hypothesis': 'why'}, {'op': 'I', 'reference': None, 'hypothesis': 'are'}, {'op': 'I', 'reference': None, 'hypothesis': 'you'}, {'op': 'I', 'reference': None, 'hypothesis': 'asking'}, {'op': 'I', 'reference': None, 'hypothesis': 'me'}, {'op': 'I', 'reference': None, 'hypothesis': 'to'}, {'op': 'I', 'reference': None, 'hypothesis': 'look'}, {'op': 'I', 'reference': None, 'hypothesis': 'into'}, {'op': 'I', 'reference': None, 'hypothesis': 'this'}, {'op': '=', 'reference': 'thank', 'hypothesis': 'thank'}, {'op': '=', 'reference': 'you', 'hypothesis': 'you'}]
+Highest WER: listen (clean source; the scored version also had the synthetic    
+noise). Whisper supported, reference supported, both wrong, or uncertain?       
+Your browser does not support the audio element.                                
+First recording: clean (scored gain, no playback normalization)                 
+Your browser does not support the audio element.                                
+First recording: noisy (scored gain, no playback normalization)                 
+Your browser does not support the audio element.                                
+id,seed,target_snr,actual_snr,gain,clean_sha256,noisy_sha256,clean_wer,noisy_wer,delta_wer
+en-US~CASH_DEPOSIT/602ba2c05f67b421554f63da.wav,10860696557326770377,10,10.00000000336902,1.0,97f0fa0b4ff8259523fc2450f0ae2e7d3519d3d4eab9297da25e7857a74c8bfb,bc5bdac75dc14b689bd53d422724bbb5044e93a20b1ea63b3e3126637d98d329,0.0,0.0,0.0
+en-US~DIRECT_DEBIT/602ba4d0963e11ccd901cc9f.wav,3331883760160396916,10,9.999999942593425,0.9696163388341604,213ade18448097b81a429bd640501df067316f562b85e0044ac71c0e0289db62,4c4ce3cdd23bed79aebb269ee3435d2683dc8ca7d1d77490e45dfb582608fc7e,0.0,0.05,0.05
+en-US~LATEST_TRANSACTIONS/602baeea963e11ccd901ce14.wav,5607538979575575441,10,10.00000000374053,1.0,ec1df37c15d49f58fc65f9ad6c7acef0d76d934d1fc83ab412e0608346a73916,9c365f5402e1dda28300ca7104c704f0b60f272eed36596c92876b76fb41d535,0.0,0.0,0.0
+en-US~APP_ERROR/602baddbbb1e6d0fbce92215.wav,9720659805278479329,10,10.00000000168886,1.0,a7c39ed9c60f387161d60d7f552b12be21715058fccfba5572b58e7f9ac9a789,33308a32483b15aacfe4c95712ce0c590a6599d152df88bea983b17d1eb64609,0.76,0.8,0.040000000000000036
+en-US~BUSINESS_LOAN/602b9026963e11ccd901cb62.wav,3800933054982198714,10,9.999999999627533,1.0,ae1ffc47a0fffe8bc7df8b368f86750e52046acf3f8017ccd030a887be92bc2e,1dc68b0e479fc5730fcfcbf20e1dcd1c238db580ab30f839c4b41f6890497bf0,0.0,0.0,0.0
+en-US~BALANCE/602baec5963e11ccd901ce0b.wav,3989544479657520341,10,10.00000000046388,0.9732806260332061,2fb9b83a7a6cf9d0750df3fa2520d997e44c33cbdc9bff85ea43e98aae611dae,4f9ec8763296d6d8bb451ec34bc357ed286b20f151f4cd2ec3fda85f19edcf83,0.0,0.0,0.0
+en-US~DIRECT_DEBIT/602baf1a05f96973d6794511.wav,3475550722879710500,10,9.999999996998584,1.0,5f9ae9ff384555cd2f867f7ce5f9453502ae93cdcb017e3980a4e8d6ab6e9cda,d3d1219f6d6c7173d7227bc515afdc437f9563a39a3e418c9448aae8fa4aa6c0,0.0,0.0,0.0
+en-US~JOINT_ACCOUNT/602bad57bb1e6d0fbce921f2.wav,15713808412272864087,10,9.999999999966882,1.0,c7c76b1171091dbf9da2d31a9a59649ccc394594c29ffff3a57df7bdf43460de,a06f97ce57f152c0cf028757ee87e16bcd10977a2bffc6c349f72f23e24e20bd,0.0,0.0,0.0
+en-US~LATEST_TRANSACTIONS/602ba44005f96973d6794427.wav,2844788020560845812,10,10.00000000286121,1.0,2ca59470af1c211800ae600a66048089ccdd323bb2c52a7bfee139c8e92fd8fc,a0f99ba737190dbac09b32b28811d192acc0aca7f99cf0d8a88097f4e860c73d,0.14285714285714285,0.2857142857142857,0.14285714285714285
+en-US~ABROAD/602ba3f25f67b421554f63ea.wav,265809743174083388,10,9.99999999896592,1.0,a29c3005e9a72191b9dbf0a51f99643618c66ab2cbeb2dfa781afe61ab0f145e,3037ac48eb938f1d7c1c530244c83f54ed6f07b803d4543fa5848dccb32eb3e0,0.35294117647058826,0.4117647058823529,0.05882352941176466
+en-US~CASH_DEPOSIT/602b9c95963e11ccd901cc00.wav,2029568609454165794,10,9.999999995369306,1.0,2f22c05306d91791b8f203ec25ffbdc390af483decd992cb6f95e380b62ba166,34f7ba47b2df63b48d2044c14f51b5856aa6cbe27dd849a66de894d334e11ac8,0.0,0.0,0.0
+en-US~JOINT_ACCOUNT/602ba6b8963e11ccd901ccda.wav,7805147135829766894,10,10.00000000138968,1.0,99f2959c34ff9075d64e332a606b04ecfd35bf200be073a6cae555d5aa1cc31a,5702457139e5415e52b2b9554153d2880e033e5b7549fd1cf3d934b327dd697e,0.5,0.5,0.0
+en-US~ADDRESS/602ba79f05f96973d6794473.wav,13474568546611888540,10,9.999999997867913,1.0,37d0342e529b2abe850962516fdd5b7dd5cfc82ecafa65d92d57f03e694f56cd,51bf079ffd4fcdcf630d628d2505638fd63fe407586d178f616338c9e3bfacf1,0.0,0.0,0.0
+en-US~DIRECT_DEBIT/602badbd963e11ccd901cde8.wav,8837846660309459545,10,9.999999996503979,1.0,148167c9f4d82cb41c5653b1c1b74703d1803cd6735e28bdb0b8c82c0e277338,346e56edd8891de090877696a6b413902c521a6d7073228f1e653e5840a01861,0.0,0.0,0.0
+en-US~HIGH_VALUE_PAYMENT/602b99f6963e11ccd901cbc2.wav,7443708685230339307,10,10.000000000944098,1.0,a48b6e78831b1abaa862ab5896485c367c6bf1801913ddadea057d2c1117b498,ca93f4a80f8790405bf000de8e1db2e1940cccc8f3184695ed2732fdf83ff8d5,0.09375,0.09375,0.0
+en-US~BALANCE/602badf5bb1e6d0fbce92224.wav,5322079052222505235,10,10.00000000034882,1.0,e612f16da370fffb01baa23d26442445cf837b45922563e2e91024aa1aa7d1bf,067dfb814ede182b95b679c6bc2fd42d7f4cf9fa75ac751f494183641888a89a,0.0,0.0,0.0
+
+[colab] Executing cell 8/10 - code-14...
+evaluate {'sha256': 'f9e39eafe595b073b579fc1090bd7cd0d71512b8ac88d434ed387441141e24db', 'bytes': 41667, 'reload_verified': True}
+/content/outputs/whisper_speech_recognition/0e6725c3df4e/outputs/evaluate-9cf6df
+d2d7f7/report.zip                                                               
+activity {'sha256': '378005e6d2c4e49c8f4920bf4c65f75fb878f43d3cd8c9b6bdc8837218367c20', 'bytes': 19512, 'reload_verified': True}
+/content/outputs/whisper_speech_recognition/0e6725c3df4e/outputs/activity-34fe24
+ddec2f/report.zip                                                               
+{'bootstrap_seconds': 72.28870119499993, 'model_acquisition_seconds': 18.249482295999996, 'elapsed_seconds': 169.39561713599994, 'stage_outputs': {'evaluate': '/content/outputs/whisper_speech_recognition/0e6725c3df4e/outputs/evaluate-9cf6dfd2d7f7', 'activity': '/content/outputs/whisper_speech_recognition/0e6725c3df4e/outputs/activity-34fe24ddec2f'}, 'status': 'executed locally in this hosted runtime; maintainer qualification pending'}
+[colab] Executing cell 9/10 - code-16...
+Optional exploration disabled; canonical results complete.
+[colab] Executing cell 10/10 - code-18...
+BYOD disabled. No upload or reference is required to finish this unit.
+[colab] Saving notebook with outputs to '/home/kurt/colab-runs/whisper-asr-pipeline-904cbe7-7e78cd/DIMER_Whisper_Speech_Recognition_Workshop_904cbe7_colab-cli-t4_output.ipynb'...

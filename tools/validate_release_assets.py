@@ -162,10 +162,15 @@ FINETUNE_MARKDOWN_MARKERS = (
     "## Troubleshooting",
     "## Conclusion (your notes)",
 )
-# WORKSHOP-mode notebooks (DIMER Notebook Specification 2.2). They carry their own reference source,
+# WORKSHOP-mode notebooks (DIMER Notebook Specification 2.5, notebook_kind WORKSHOP). They carry their own reference source,
 # dependency lock and runner and execute in an isolated environment, so they are checked for
 # carried-source integrity and for byte parity of the carried reference module and manifest with the package.
-WORKSHOP_SPEC = "2.2"
+WORKSHOP_SPEC = "2.5"
+# DOC17-DOC21: the use notice before the first code cell must keep these canonical clauses.
+WORKSHOP_NOTICE_CLAUSES = ("**⚠️ Notice.**", "Not validated for production", "safety-critical", '"as is"', "accept no liability")
+# DOC14-DOC16: numbered IEEE in-text citations such as [2] or [2, Sec. 4], and "[n] " reference entries.
+CITATION = re.compile(r"\[(\d+)(?:,[^\]]*)?\]")
+REFERENCE_ENTRY = re.compile(r"^\[(\d+)\] ", re.M)
 WORKSHOP_NOTEBOOKS = {
     "DIMER_Whisper_Speech_Recognition_Workshop.ipynb": {
         "profile": "TASK-INFERENCE",
@@ -835,6 +840,7 @@ def validate_workshop_notebooks() -> None:
             "notebook_spec": WORKSHOP_SPEC,
             "notebook_profile": spec["profile"],
             "notebook_mode": "WORKSHOP",
+            "notebook_kind": "WORKSHOP",
             "standalone": True,
             "release_status": "Candidate",
         }
@@ -845,6 +851,17 @@ def validate_workshop_notebooks() -> None:
         opening = _cell_source(notebook["cells"][0])
         for needle in (f"`{spec['profile']}`", "`WORKSHOP`", f"`{WORKSHOP_SPEC}`"):
             _check(needle in opening, f"{name}: opening cell must declare {needle}")
+        first_code = next(i for i, c in enumerate(notebook["cells"]) if c["cell_type"] == "code")
+        preamble = "\n".join(_cell_source(c) for c in notebook["cells"][:first_code] if c["cell_type"] == "markdown")
+        for clause in WORKSHOP_NOTICE_CLAUSES:
+            _check(clause in preamble, f"{name}: the use notice before the first code cell must contain {clause!r} (DOC17-DOC21)")
+        markdown = "\n".join(_cell_source(c) for c in notebook["cells"] if c["cell_type"] == "markdown")
+        _check("## References and attribution" in markdown, f"{name}: a References and attribution section is required")
+        body, references = markdown.split("## References and attribution", 1)
+        cited = {int(n) for n in CITATION.findall(body)}
+        entries = [int(n) for n in REFERENCE_ENTRY.findall(references)]
+        _check(entries == list(range(1, len(entries) + 1)) and entries, f"{name}: references must be numbered [1]..[n] (DOC14)")
+        _check(cited == set(entries), f"{name}: in-text citations {sorted(cited)} and reference entries {entries} must correspond one to one (DOC16)")
         for index, cell in enumerate(notebook["cells"]):
             if cell["cell_type"] != "code":
                 continue

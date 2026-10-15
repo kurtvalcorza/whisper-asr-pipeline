@@ -286,9 +286,62 @@ def test_control_workshop_persisted_output_is_rejected(tree: Path) -> None:
         module.validate_workshop_notebooks()
 
 
-@pytest.mark.parametrize("key", ["notebook_profile", "notebook_mode"])
+@pytest.mark.parametrize("key", ["notebook_profile", "notebook_mode", "notebook_kind"])
 def test_control_workshop_metadata_key_is_required(tree: Path, key: str) -> None:
     module = _load_validator(tree)
     _edit_workshop(module, lambda notebook: notebook["metadata"]["dimer"].pop(key))
     with pytest.raises(module.ValidationError, match=key):
+        module.validate_workshop_notebooks()
+
+
+def test_workshop_declares_notebook_spec_2_5() -> None:
+    module = _load_validator(ROOT)
+    assert module.WORKSHOP_SPEC == "2.5"
+    notebook = json.loads((ROOT / "tutorials" / WORKSHOP).read_text(encoding="utf-8"))
+    assert notebook["metadata"]["dimer"]["notebook_spec"] == "2.5"
+
+
+def test_control_workshop_stale_spec_declaration_is_rejected(tree: Path) -> None:
+    module = _load_validator(tree)
+    _edit_workshop(module, lambda notebook: notebook["metadata"]["dimer"].update(notebook_spec="2.2"))
+    with pytest.raises(module.ValidationError, match="notebook_spec must be '2.5'"):
+        module.validate_workshop_notebooks()
+
+
+def test_control_workshop_missing_use_notice_is_rejected(tree: Path) -> None:
+    module = _load_validator(tree)
+
+    def mutate(notebook: dict) -> None:
+        cell = notebook["cells"][0]
+        cell["source"] = ["".join(cell["source"]).replace("Not validated for production", "Not checked", 1)]
+
+    _edit_workshop(module, mutate)
+    with pytest.raises(module.ValidationError, match="use notice"):
+        module.validate_workshop_notebooks()
+
+
+def test_control_workshop_citation_without_reference_is_rejected(tree: Path) -> None:
+    module = _load_validator(tree)
+
+    def mutate(notebook: dict) -> None:
+        for cell in notebook["cells"]:
+            text = "".join(cell["source"])
+            if "[2, Sec. 4]" in text:
+                cell["source"] = [text.replace("[2, Sec. 4]", "[5, Sec. 4]", 1)]
+
+    _edit_workshop(module, mutate)
+    with pytest.raises(module.ValidationError, match="correspond one to one"):
+        module.validate_workshop_notebooks()
+
+
+def test_control_workshop_uncited_reference_is_rejected(tree: Path) -> None:
+    module = _load_validator(tree)
+
+    def mutate(notebook: dict) -> None:
+        for cell in notebook["cells"]:
+            text = "".join(cell["source"])
+            cell["source"] = [text.replace("[1]", "", 2) if "[1] A. Radford" not in text else text]
+
+    _edit_workshop(module, mutate)
+    with pytest.raises(module.ValidationError, match="correspond one to one"):
         module.validate_workshop_notebooks()

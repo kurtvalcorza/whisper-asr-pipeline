@@ -1,4 +1,4 @@
-"""Per-repository template for tools/build_notebook.py (NOTEBOOK_SPEC 2.2 §4 standalone carrier).
+"""Per-repository template for tools/build_notebook.py (NOTEBOOK_SPEC 2.5 §4 standalone carrier).
 
 Only the task-specific prose and stage cells live here. Runtime install, the embedded pipeline
 module, and the model pin/stage/verify cells are produced by the generator from repository
@@ -36,8 +36,8 @@ TEMPLATE = {
         "input manifest before the model runs, transcribes it through the carried pipeline, writes the evaluation report (word error rate beside "
         "the empty-transcript baseline), exports machine-readable outputs with provenance, and finally runs a short activity on generated silence. "
         "No repository clone, DIMER worker or service, credential, upload dialog, configuration edit or runtime restart is required "
-        "(NOTEBOOK_SPEC 2.2 §5). No run of this revision is recorded yet: the recorded Kaggle runs (2026-09-11) executed an earlier, "
-        "repository-installing version of this notebook."
+        "(NOTEBOOK_SPEC 2.5 §5). Hosted runs are recorded per notebook blob in `docs/release-verification.md`: the previous blob `75cc521b` "
+        "completed one pass on a fresh Colab T4 on 2026-10-10 (120.4 s), and Kaggle runs of an earlier, repository-installing version are history."
     ),
     "byod": (
         "Optional and off by default: set `USE_BYOD = True` in Section 4 and either give a file path in `BYOD_PATH` or upload exactly one "
@@ -84,7 +84,11 @@ TEMPLATE = {
         "feature-extractor configuration, and the carried module adds snapshot verification, the input contract, a "
         "fixed output contract, a BYOD decoder that names the file it refuses (`decode_audio`), and the `word_error_rate`, `validate_inputs` and `evaluation_report` helpers. The "
         "default sample is one public LibriSpeech utterance with its reference transcript, fetched at a pinned "
-        "dataset revision; its WER is demonstration (plumbing) evidence for one utterance, not a benchmark claim."
+        "dataset revision; its WER is demonstration (plumbing) evidence for one utterance, not a benchmark claim. **Overlap with the "
+        "training data:** Whisper's training audio is not published (about 680,000 hours of web audio for the original models and "
+        "several million hours for large-v3 [1], model card), and LibriSpeech is read LibriVox audiobooks that are widely available on "
+        "the web, so this utterance or its source audio may be in the training data. The paper uses LibriSpeech as an evaluation set; "
+        "the overlap is unknown, inferred possible, not verified. Read the 0.0588 WER with that in mind."
     ),
     "learning_objectives": (
         "install the pinned runtime, read what the carried pipeline module guarantees, resolve and digest-verify the "
@@ -124,8 +128,8 @@ TEMPLATE = {
             "evidence is produced and how to read it. **[Engineering]** — reproducibility, provenance and packaging.\n\n"
             "**Predict, then check.** Before each principal result a **Predict before running** prompt asks you to commit to an expectation; after "
             "it, **What to notice** describes normal output and a collapsed **Check your reasoning** block gives a worked answer. Write your own answer "
-            "first, then open it. The transcript and WER the answers quote come from the recorded runs of an earlier version of this notebook on the "
-            "same pinned model and utterance (Kaggle CPU, 11 September 2026); no run of this revision is recorded yet."
+            "first, then open it. The transcript and WER the answers quote come from the Colab T4 run of blob `75cc521b` (commit `9a9c39f`, 2026-10-10), "
+            "which printed the same transcript and WER as the Kaggle CPU runs of an earlier version (11 September 2026); neither was re-run for this revision."
         ),
         (
             "## The task: Input → Model/System → Output\n\n"
@@ -301,7 +305,7 @@ TEMPLATE = {
         {
             "md": (
                 "**What to notice (Section 6):** the transcript next to the reference; with `RETURN_TIMESTAMPS = True`, timed segments below it.\n\n"
-                "<details><summary>Check your reasoning</summary>The recorded runs of the earlier notebook on the same model and utterance wrote "
+                "<details><summary>Check your reasoning</summary>In the Colab T4 run of blob `75cc521b` (commit `9a9c39f`, 2026-10-10) the model wrote "
                 "\"Mr. Quilter is the apostle of the middle classes, and we are glad to welcome his gospel.\" Every word is right; it differs from "
                 "the reference in style — case, punctuation and `Mr.` for `MISTER`. Case and punctuation are removed before scoring, `Mr.` is not, "
                 "so Section 7 will count exactly one error. A transcript can therefore be correct and still score above zero.</details>\n\n"
@@ -331,7 +335,7 @@ TEMPLATE = {
         {
             "md": (
                 "**What to notice (Section 7):** `word_error_rate` beside the `empty_transcript` baseline of 1.0, and the verdict `sample-sanity`.\n\n"
-                "<details><summary>Check your reasoning</summary>1/17 ≈ 0.0588, the figure the earlier runs recorded. Against the 1.0 of an empty "
+                "<details><summary>Check your reasoning</summary>1/17 ≈ 0.0588, the figure the Colab T4 run of blob `75cc521b` (commit `9a9c39f`, 2026-10-10) printed. Against the 1.0 of an empty "
                 "transcript that looks excellent, and here it is: the one \"error\" is a spelling convention. But it is one utterance of clean read "
                 "speech, so it says nothing about accents, noise, other languages or your microphones — and a WER near 0.06 on such audio would not "
                 "stop the same model from hallucinating on silence (Section 9).</details>\n\n"
@@ -422,6 +426,7 @@ TEMPLATE = {
         "| Symptom | Likely cause | What to do |\n"
         "|---|---|---|\n"
         "| Section 1 stops with `This notebook needs a Linux x86_64 runtime` | a local Windows or macOS kernel, or an ARM machine | Use Google Colab, Kaggle or a Linux x86_64 Jupyter; the lock holds manylinux x86_64 wheels. |\n"
+        "| You want the isolated environment somewhere other than `dimer_isolated_env/` | Section 1 builds it in the working directory by default | Set the environment variable `DIMER_ISOLATED_ENV` to a path before running Section 1. |\n"
         "| Section 1 fails while downloading, or `The pinned uv wheel failed its size/SHA-256 check` | a network failure, or an altered download | Run the Section 1 install cell again; a repeated mismatch means the download is being altered — never edit the digest. |\n"
         "| `holds Python …, not 3.12.12` in Section 1 | an older `dimer_isolated_env/` folder from another notebook version | Delete that folder (or start a fresh runtime) and run the install cell again. |\n"
         "| `The isolated environment's Python process exited` | the worker ran out of memory | Restart the session and choose *Runtime → Run all* again. |\n"
@@ -438,12 +443,8 @@ TEMPLATE = {
         "4. What one referenced utterance can show about this model, and what it cannot: ___.\n"
         "5. What I would need before trusting its transcripts of my own recordings: ___.\n\n"
         "## References\n\n"
-        "- Repository README: https://github.com/kurtvalcorza/whisper-asr-pipeline/blob/main/README.md\n"
-        "- Repository model card: https://github.com/kurtvalcorza/whisper-asr-pipeline/blob/main/MODEL_CARD.md\n"
-        "- Weight provenance: https://github.com/kurtvalcorza/whisper-asr-pipeline/blob/main/docs/WEIGHTS.md\n"
-        "- Upstream model: https://huggingface.co/{MODEL_ID}\n"
-        "- Upstream code: https://github.com/openai/whisper\n"
-        "- Whisper paper: https://arxiv.org/abs/2212.04356\n"
-        "- Public sample: https://huggingface.co/datasets/hf-internal-testing/librispeech_asr_dummy"
+        "[1] A. Radford, J. W. Kim, T. Xu, G. Brockman, C. McLeavey, and I. Sutskever, \"Robust speech recognition via large-scale weak supervision,\" in *Proc. Int. Conf. Mach. Learn. (ICML)*, 2023. [Online]. Available: https://arxiv.org/abs/2212.04356\n\n"
+        "[2] V. Panayotov, G. Chen, D. Povey, and S. Khudanpur, \"LibriSpeech: An ASR corpus based on public domain audio books,\" in *Proc. IEEE Int. Conf. Acoust., Speech Signal Process. (ICASSP)*, 2015; sample: https://huggingface.co/datasets/hf-internal-testing/librispeech_asr_dummy\n\n"
+        "[3] K. Valcorza, \"whisper-asr-pipeline,\" README and weight provenance; OpenAI, \"whisper,\" GitHub repository; upstream checkpoint. [Online]. Available: https://github.com/kurtvalcorza/whisper-asr-pipeline/blob/main/README.md, https://github.com/kurtvalcorza/whisper-asr-pipeline/blob/main/docs/WEIGHTS.md, https://github.com/openai/whisper, https://huggingface.co/{MODEL_ID}; model card: https://github.com/kurtvalcorza/whisper-asr-pipeline/blob/main/MODEL_CARD.md"
     ),
 }

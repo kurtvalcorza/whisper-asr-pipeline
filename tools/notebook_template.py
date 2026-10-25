@@ -36,8 +36,8 @@ TEMPLATE = {
         "input manifest before the model runs, transcribes it through the carried pipeline, writes the evaluation report (word error rate beside "
         "the empty-transcript baseline), exports machine-readable outputs with provenance, and finally runs a short activity on generated silence. "
         "No repository clone, DIMER worker or service, credential, upload dialog, configuration edit or runtime restart is required "
-        "(NOTEBOOK_SPEC 2.5 §5). Hosted runs are recorded per notebook blob in `docs/release-verification.md`: the previous blob `75cc521b` "
-        "completed one pass on a fresh Colab T4 on 2026-10-10 (120.4 s), and Kaggle runs of an earlier, repository-installing version are history."
+        "(NOTEBOOK_SPEC 2.5 §5). Hosted runs are recorded per notebook blob in `docs/release-verification.md`: this version "
+        "completes one pass on a fresh Colab T4 in about two minutes (120.4 s for blob `75cc521b` on 2026-10-10, 117.3 s for blob `41314708` on 2026-10-25), and Kaggle runs of an earlier, repository-installing version are history."
     ),
     "byod": (
         "Optional and off by default: set `USE_BYOD = True` in Section 4 and either give a file path in `BYOD_PATH` or upload exactly one "
@@ -176,7 +176,7 @@ TEMPLATE = {
         ),
     ],
     "prerequisites": [
-        "- **Runtime:** a fresh **Linux x86_64** runtime (Google Colab, Kaggle or Linux Jupyter). The default path runs on CPU (float32) and uses CUDA automatically when available (float16). The kernel's own Python version does not matter: Section 1 builds a separate environment with CPython 3.12.12 from the hash-locked pins and every later cell runs there. The lock carries the Linux build of `torch==2.6.0` with its CUDA libraries (several GB of disk) and the checkpoint is 1.6 GB; these are the largest downloads. Timing: the earlier, repository-installing version of this notebook took 273.6–328.9 s end to end on a Kaggle CPU (11 September 2026), about 210–260 s of it the install, 35 s the snapshot fetch and load and 22–34 s the transcription; this version has not been timed yet.",
+        "- **Runtime:** a fresh **Linux x86_64** runtime (Google Colab, Kaggle or Linux Jupyter). The default path runs on CPU (float32) and uses CUDA automatically when available (float16). The kernel's own Python version does not matter: Section 1 builds a separate environment with CPython 3.12.12 from the hash-locked pins and every later cell runs there. The lock carries the Linux build of `torch==2.6.0` with its CUDA libraries (several GB of disk) and the checkpoint is 1.6 GB; these are the largest downloads. Timing: the earlier, repository-installing version of this notebook took 273.6–328.9 s end to end on a Kaggle CPU (11 September 2026), about 210–260 s of it the install, 35 s the snapshot fetch and load and 22–34 s the transcription; this version took about two minutes of session wall on a fresh Colab T4 (120.4 s for blob `75cc521b` on 2026-10-10, 117.3 s for blob `41314708` on 2026-10-25), and it has not been timed on CPU.",
         "- **Knowledge:** basic Python; what a waveform, a sampling rate and a word error rate are. The glossary above covers the rest.",
         "- **Data:** the default sample is the first validation utterance of the public `hf-internal-testing/librispeech_asr_dummy` dataset (a few seconds of read English speech with its reference transcript), fetched from the Hugging Face Hub at a pinned dataset revision with the pinned `datasets==4.4.0` and decoded with the pinned `soundfile` — no private data is needed. Optional BYOD is gated off by default so the sample path runs top-to-bottom without interaction. Expected BYOD input: one audio file `soundfile` can read (WAV/FLAC/OGG/MP3, mono or stereo, any rate), by path (`BYOD_PATH`) or through the upload dialog; if you know its transcript, paste it into `REFERENCE_TEXT` so the evaluation step can compute `word_error_rate`. Do not upload confidential or restricted data to a hosted notebook environment unless you are authorized to do so. Uploaded inputs remain in the notebook runtime; this pipeline does not send them to a third-party inference API.",
         "- **Credentials:** none. The pinned model and the sample are public.",
@@ -335,7 +335,7 @@ TEMPLATE = {
         {
             "md": (
                 "**What to notice (Section 7):** `word_error_rate` beside the `empty_transcript` baseline of 1.0, and the verdict `sample-sanity`.\n\n"
-                "<details><summary>Check your reasoning</summary>1/17 ≈ 0.0588, the figure the Colab T4 run of blob `75cc521b` (commit `9a9c39f`, 2026-10-10) printed. Against the 1.0 of an empty "
+                "<details><summary>Check your reasoning</summary>1/17 ≈ 0.0588, the figure both recorded Colab T4 runs of this version printed (blob `75cc521b`, 2026-10-10, and blob `41314708`, 2026-10-25). Against the 1.0 of an empty "
                 "transcript that looks excellent, and here it is: the one \"error\" is a spelling convention. But it is one utterance of clean read "
                 "speech, so it says nothing about accents, noise, other languages or your microphones — and a WER near 0.06 on such audio would not "
                 "stop the same model from hallucinating on silence (Section 9).</details>\n\n"

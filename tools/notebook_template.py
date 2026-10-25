@@ -36,8 +36,8 @@ TEMPLATE = {
         "input manifest before the model runs, transcribes it through the carried pipeline, writes the evaluation report (word error rate beside "
         "the empty-transcript baseline), exports machine-readable outputs with provenance, and finally runs a short activity on generated silence. "
         "No repository clone, DIMER worker or service, credential, upload dialog, configuration edit or runtime restart is required "
-        "(NOTEBOOK_SPEC 2.5 §5). Hosted runs are recorded per notebook blob in `docs/release-verification.md`: this version "
-        "completes one pass on a fresh Colab T4 in about two minutes (120.4 s for blob `75cc521b` on 2026-10-10, 117.3 s for blob `41314708` on 2026-10-25), and Kaggle runs of an earlier, repository-installing version are history."
+        "(NOTEBOOK_SPEC 2.5 §5). Hosted runs are recorded per notebook blob in `docs/release-verification.md`: the recorded runs "
+        "completed one pass on a fresh Colab T4 in 117.3 s to 124.5 s (120.4 s for blob `75cc521b` on 2026-10-10, 117.3 s for blob `41314708` and 124.5 s for blob `acd03796` on 2026-10-25; yours may differ), and Kaggle runs of an earlier, repository-installing version are history."
     ),
     "byod": (
         "Optional and off by default: set `USE_BYOD = True` in Section 4 and either give a file path in `BYOD_PATH` or upload exactly one "
@@ -128,8 +128,8 @@ TEMPLATE = {
             "evidence is produced and how to read it. **[Engineering]** — reproducibility, provenance and packaging.\n\n"
             "**Predict, then check.** Before each principal result a **Predict before running** prompt asks you to commit to an expectation; after "
             "it, **What to notice** describes normal output and a collapsed **Check your reasoning** block gives a worked answer. Write your own answer "
-            "first, then open it. The transcript and WER the answers quote come from the Colab T4 run of blob `75cc521b` (commit `9a9c39f`, 2026-10-10), "
-            "which printed the same transcript and WER as the Kaggle CPU runs of an earlier version (11 September 2026); neither was re-run for this revision."
+            "first, then open it. The transcript and WER the answers quote come from the Colab T4 run of blob `75cc521b` (commit `9a9c39f`, 2026-10-10); "
+            "the Colab T4 runs of blobs `41314708` and `acd03796` (2026-10-25) and the Kaggle CPU runs of an earlier version (11 September 2026) printed the same transcript."
         ),
         (
             "## The task: Input → Model/System → Output\n\n"
@@ -335,7 +335,7 @@ TEMPLATE = {
         {
             "md": (
                 "**What to notice (Section 7):** `word_error_rate` beside the `empty_transcript` baseline of 1.0, and the verdict `sample-sanity`.\n\n"
-                "<details><summary>Check your reasoning</summary>1/17 ≈ 0.0588, the figure both recorded Colab T4 runs of this version printed (blob `75cc521b`, 2026-10-10, and blob `41314708`, 2026-10-25). Against the 1.0 of an empty "
+                "<details><summary>Check your reasoning</summary>1/17 ≈ 0.0588, the figure the three recorded Colab T4 runs printed (blob `75cc521b`, 2026-10-10, and blobs `41314708` and `acd03796`, 2026-10-25). Against the 1.0 of an empty "
                 "transcript that looks excellent, and here it is: the one \"error\" is a spelling convention. But it is one utterance of clean read "
                 "speech, so it says nothing about accents, noise, other languages or your microphones — and a WER near 0.06 on such audio would not "
                 "stop the same model from hallucinating on silence (Section 9).</details>\n\n"

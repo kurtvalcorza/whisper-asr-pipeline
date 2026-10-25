@@ -19,7 +19,8 @@ def _markdown(path):
 def test_finetune_expectations_are_gone_and_the_confirming_run_is_recorded():
     md = _markdown(NB_FT)
     for stale in ("this version takes about 13 to 15 minutes", "Expect a high number",
-                  "That is about five to seven points", "so expect a smaller change", "a point or"):
+                  "That is about five to seven points", "so expect a smaller change",
+                  "two of WER is within what another seed can produce"):
         assert stale not in md, stale
     assert "0.3707, 0.3553 and 0.2943 on 100 clips" in md
     assert "insertions fell from 424 to 346, 333 and 239" in md

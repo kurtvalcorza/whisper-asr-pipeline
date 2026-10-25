@@ -21,11 +21,13 @@ def test_finetune_claims_hold_for_both_runs():
     for stale in ("loss can rise in epoch 2 (0.4814 → 0.5016 there)", "That is about five points",
                   "so loss alone would favour one epoch", "it was not re-run for this revision"):
         assert stale not in md, stale
-    assert "rose in epoch 2 in the first (0.4814 → 0.5016) and the third (0.498 → 0.5329) and fell in the second (0.5267 → 0.5084)" in md
+    assert ("rose in epoch 2 in the first (0.4814 → 0.5016) and the third (0.498 → 0.5329) "
+            "and fell in the second (0.5267 → 0.5084)") in md
     assert "0.3707, 0.3553 and 0.2943" in md and "861.8 s, 766.1 s and 825.9 s" in md
 
 
 def test_inference_timing_is_stated_with_its_runs():
     md = _markdown(NB_ASR)
     assert "this version has not been timed yet" not in md
-    assert "120.4 s for blob `75cc521b` on 2026-10-10, 117.3 s for blob `41314708` and 124.5 s for blob `acd03796`" in md
+    assert ("120.4 s for blob `75cc521b` on 2026-10-10, 117.3 s for blob `41314708` "
+            "and 124.5 s for blob `acd03796`") in md

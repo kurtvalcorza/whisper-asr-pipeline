@@ -23,14 +23,22 @@ from .pipeline import (
     word_error_rate,
 )
 from .tutorial_support import (
+    clip_error_records,
     decode_audio,
+    longest_repeated_ngram,
     normalise_transcript,
+    per_clip_summary,
+    top_insertion_clips,
     with_empty_transcript_baseline,
     word_error_breakdown,
 )
 
 __all__ = [
+    "clip_error_records",
     "decode_audio",
+    "longest_repeated_ngram",
+    "per_clip_summary",
+    "top_insertion_clips",
     "normalise_transcript",
     "with_empty_transcript_baseline",
     "word_error_breakdown",

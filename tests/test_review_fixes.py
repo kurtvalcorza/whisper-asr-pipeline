@@ -134,7 +134,7 @@ def test_wsp_M1_wsf_M1_registry_no_longer_claims_runs_of_these_blobs() -> None:
     assert "REL1/REL8 satisfied" not in registry
     record = (ROOT / "docs" / "release-verification.md").read_text(encoding="utf-8")
     assert "Both the task-inference and fine-tuning standalone notebooks have now completed clean-room execution" not in record
-    assert "no run of the current blobs is recorded" in record
+    assert "no run of the then-current blobs was recorded at that date" in record
 
 
 # ---- WSP-M2: datasets is pinned and locked ------------------------------------------------------------------------

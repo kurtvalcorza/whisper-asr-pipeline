@@ -1,4 +1,4 @@
-"""E2E template for tools/build_notebook.py (NOTEBOOK_SPEC 2.2 §4 standalone carrier): LoRA fine-tuning.
+"""E2E template for tools/build_notebook.py (NOTEBOOK_SPEC 2.5 §4 standalone carrier): LoRA fine-tuning.
 
 Only the task-specific prose and stage cells live here. Runtime install (pins from
 tools/finetune-pins.txt), the embedded pipeline module, and the model pin/stage/verify cells are
@@ -59,7 +59,7 @@ TEMPLATE = {
     ],
     "capability": "parameter-efficient (LoRA) domain adaptation of the pinned `openai/whisper-large-v3-turbo` weights for automatic speech recognition, evaluated by corpus word error rate before and after adaptation and after a fresh reload of the exported adapter bundle",
     "run_all": (
-        "This notebook needs a 16 GiB-class CUDA GPU (Colab: Runtime > Change runtime type > T4 GPU; Kaggle P100/T4 also works) — the earlier version of this notebook took 1002 s end to end on a Kaggle **T4** (14 September 2026, after one manual restart, which this version no longer needs) and 1617.7 s with 4.48 GiB peak GPU memory on a Kaggle P100 (11 September 2026); this version has not been timed yet (RUN11/RUN12; on CPU it runs but takes hours, so reduce `TRAIN_CLIPS`, `EVAL_CLIPS` and `EPOCHS` first). Once that runtime is selected, **Run all** builds an isolated Python environment from the hash-locked pins (the kernel's own packages are left alone, so no restart is needed; a second Run all reuses it), stages and digest-verifies the pinned snapshot, downloads one locale of the public `PolyAI/minds14` corpus at a pinned dataset revision and decodes/resamples it with the pinned `soundfile`/`torchaudio`, draws a seeded train/held-out split and validates every clip into an input manifest, records the zero-shot **baseline** corpus WER through the carried pipeline, attaches LoRA adapters to the verified base weights and trains them for two bounded epochs with AdamW under mixed precision, evaluates the adapted model on the held-out split through the same pipeline and writes the evaluation report, exports the manifested adapter bundle, and reloads it against the verified base snapshot with a weight-level merge check and a transcript agreement check. No repository clone, DIMER worker or service, credential, upload dialog, configuration edit or runtime restart is required (NOTEBOOK_SPEC 2.2 §5)."
+        "This notebook needs a 16 GiB-class CUDA GPU (Colab: Runtime > Change runtime type > T4 GPU; Kaggle P100/T4 also works) — the earlier version of this notebook took 1002 s end to end on a Kaggle **T4** (14 September 2026, after one manual restart, which this version no longer needs) and 1617.7 s with 4.48 GiB peak GPU memory on a Kaggle P100 (11 September 2026); the recorded Colab T4 runs of this version took between 12.8 and 14.4 minutes of session wall (861.8 s, 766.1 s and 825.9 s, training 595.1 s, 512.4 s and 562.6 s, 4.48 GiB peak GPU memory in each; blob `5f91ee7d`, 2026-10-10, and blobs `f74abf5c` and `472225cf`, 2026-10-25; yours may differ) (RUN11/RUN12; on CPU it runs but takes hours, so reduce `TRAIN_CLIPS`, `EVAL_CLIPS` and `EPOCHS` first). Once that runtime is selected, **Run all** builds an isolated Python environment from the hash-locked pins (the kernel's own packages are left alone, so no restart is needed; a second Run all reuses it), stages and digest-verifies the pinned snapshot, downloads one locale of the public `PolyAI/minds14` corpus at a pinned dataset revision and decodes/resamples it with the pinned `soundfile`/`torchaudio`, draws a seeded train/held-out split and validates every clip into an input manifest, records the zero-shot **baseline** corpus WER through the carried pipeline, attaches LoRA adapters to the verified base weights and trains them for two bounded epochs with AdamW under mixed precision, evaluates the adapted model on the held-out split through the same pipeline and writes the evaluation report, exports the manifested adapter bundle, and reloads it against the verified base snapshot with a weight-level merge check and a transcript agreement check. No repository clone, DIMER worker or service, credential, upload dialog, configuration edit or runtime restart is required (NOTEBOOK_SPEC 2.2 §5)."
     ),
     "byod": (
         "After the sample workflow completes, set `USE_BYOD = True` in Section 4 and choose *Runtime → Run after* from that cell. Supply a `.csv` with `file,text` columns plus the audio files it names, either as a folder or `.zip` in `BYOD_PATH` or through the upload dialog; they enter the same decoding, validation, seeded split, baseline, LoRA training, evaluation, export and fresh-reload cells as the public sample (DAT14). For BYOD the split is derived from what you supply (`BYOD_TRAIN_FRACTION`, 80 / 20 by default) and at least `BYOD_MIN_CLIPS` (10) usable clips are needed; `TRAIN_CLIPS` and `EVAL_CLIPS` apply to the public sample only. Clips longer than 30 seconds are dropped before the split and listed as a finding. Uploads stay inside this runtime. BYOD is optional and never part of the default path."
@@ -120,8 +120,8 @@ TEMPLATE = {
             "the evidence is produced and how to read it. **[Engineering]** — reproducibility, provenance and packaging.\n\n"
             "**Predict, then check.** Before each principal result a **Predict before running** prompt asks you to commit to an expectation; after "
             "it, **What to notice** describes normal output and a collapsed **Check your reasoning** block gives a worked answer. Write your own "
-            "answer first, then open it. The numbers the answers quote come from the recorded P100 run of an earlier version of this notebook "
-            "with the same defaults (11 September 2026); no run of this revision is recorded yet."
+            "answer first, then open it. The numbers the answers quote come from the three recorded Colab T4 runs of this version (blob `5f91ee7d`, 2026-10-10, and blobs `f74abf5c` and `472225cf`, 2026-10-25), "
+            "recorded in `docs/release-verification.md`; where the runs differ the answer gives each, so compare them with your own printed output. An earlier P100 run of a previous version printed different numbers."
         ),
         (
             "## The task: Input → Model/System → Output\n\n"
@@ -171,8 +171,11 @@ TEMPLATE = {
         ),
     ],
     "prerequisites": [
-        "- **Runtime:** a fresh **Linux x86_64** runtime with a 16 GiB-class CUDA GPU (Google Colab **T4** or Kaggle P100/T4). The kernel's own Python version does not matter: Section 1 builds a separate environment with CPython 3.12.12 from the hash-locked pins and every later cell runs there. Timing of earlier versions of this notebook with the default configuration: 1002 s end to end on a Kaggle T4 (14 September 2026, the standalone version before this one; it needed one manual restart after the install cell); 1617.7 s on a Kaggle P100 (11 September 2026: 236 s install, 109 s baseline, 1106.7 s training for 100 optimizer steps, 72 s adapted evaluation, 75 s export and reload; 4.48 GiB peak GPU memory). This version has not been timed yet; the isolated-environment build replaces the in-kernel install. CPU execution is supported only as a reduced smoke test: lower `TRAIN_CLIPS`, `EVAL_CLIPS` and `EPOCHS` first, or the training cell will take hours.",
+        "- **Runtime:** a fresh **Linux x86_64** runtime with a 16 GiB-class CUDA GPU (Google Colab **T4** or Kaggle P100/T4). The kernel's own Python version does not matter: Section 1 builds a separate environment with CPython 3.12.12 from the hash-locked pins and every later cell runs there. Timing of earlier versions of this notebook with the default configuration: 1002 s end to end on a Kaggle T4 (14 September 2026, the standalone version before this one; it needed one manual restart after the install cell); 1617.7 s on a Kaggle P100 (11 September 2026: 236 s install, 109 s baseline, 1106.7 s training for 100 optimizer steps, 72 s adapted evaluation, 75 s export and reload; 4.48 GiB peak GPU memory). This version took 861.8 s, 766.1 s and 825.9 s of session wall on a Colab T4 (training 595.1 s, 512.4 s and 562.6 s, baseline evaluation 40.1 s, 35.9 s and 37.5 s, 4.48 GiB peak GPU memory in each of the three recorded Colab T4 runs of this version (blob `5f91ee7d`, 2026-10-10, blob `f74abf5c`, 2026-10-25, and blob `472225cf`, 2026-10-25)); your run may take a different time. The isolated-environment build replaces the in-kernel install. CPU execution is supported only as a reduced smoke test: lower `TRAIN_CLIPS`, `EVAL_CLIPS` and `EPOCHS` first, or the training cell will take hours (an estimate).",
         "- **Knowledge:** basic Python and PyTorch; what a waveform, a sampling rate, a log-mel spectrogram, teacher forcing and a word error rate are; the idea of a low-rank adapter.",
+        "- **Overlap with the training data:** Whisper's training audio is not published (model card, [1]), and MINDS-14 [3] has been "
+        "public on the Hugging Face Hub since 2021, so its clips may or may not be in large-v3-turbo's training data; the overlap is unknown "
+        "and not verified. Within this notebook, 3 held-out transcripts also occur in the training split (printed in Section 9).",
         "- **Data:** the default sample is one locale of the public `PolyAI/minds14` banking-intent corpus (CC-BY-4.0), fetched from the Hugging Face Hub at the pinned dataset revision `40ce77cb32a384e4d50a568e1ec39ac804019d33` and decoded with the pinned `soundfile`/`torchaudio` — no private data is needed. Optional BYOD upload is gated off by default so the sample path can run top-to-bottom without interaction. Expected BYOD input: one `.csv` with `file,text` columns plus the audio files it names (WAV/FLAC/OGG readable by `soundfile`, any rate, mono or stereo, each at most 30 seconds; longer clips are dropped and listed), as a folder or `.zip` in `BYOD_PATH` or all selected in one upload dialog; at least 10 usable clips, split 80 / 20 by default (`BYOD_TRAIN_FRACTION`); set `BYOD_LANGUAGE` to the ISO code Whisper should decode in. A few dozen clips are enough to run the pipeline end to end, not to measure a reliable gain. Do not upload confidential or restricted data to a hosted notebook environment unless you are authorized to do so. Uploaded inputs remain in the notebook runtime; this pipeline does not send them to a third-party inference API. An adapter trained on the default sample inherits CC-BY-4.0 attribution obligations.",
     ],
     "cells": [
@@ -374,9 +377,11 @@ TEMPLATE = {
             "md": (
                 "**What to notice (Section 6):** the baseline WER, the three edit counts that add up to it, and how the three example "
                 "transcripts differ from their references.\n\n"
-                "<details><summary>Check your reasoning</summary>Expect a high number: the earlier recorded P100 run of this notebook measured "
-                "0.4387 on the same default split. Much of it is not mis-heard speech: the references are noisy, informal transcriptions, so "
-                "Whisper's spelling, numbers and contractions count as substitutions even when the words were understood. That is why the "
+                "<details><summary>Check your reasoning</summary>In the recorded runs, a high number: the three recorded Colab T4 runs of this version (blob `5f91ee7d`, 2026-10-10, and blobs `f74abf5c` and `472225cf`, 2026-10-25) measured "
+                "0.4211 on the same default split, and **insertions** dominated: 424 of the 518 edits (82 substitutions, 12 deletions, "
+                "1,230 reference words), about four extra words per clip. The three example clips were transcribed correctly apart from case "
+                "and punctuation, so most of the error is words Whisper wrote that the references do not have; whether those are real speech "
+                "the short references leave out, or repeated or invented text, was not checked clip by clip in that run. That is why the "
                 "baseline matters: the adapted number is read against it, on the same clips and references, not against zero.</details>\n\n"
                 "## 7. Attach LoRA adapters to the verified base weights · [Concept]\n\n"
                 "`load_model(weights_dir=WEIGHTS_DIR)` re-reads the **same digest-verified snapshot** Section 3 staged (no "
@@ -507,14 +512,14 @@ TEMPLATE = {
             "md": (
                 "**What to notice (Section 8):** one row per epoch with training loss, validation loss and optimizer steps; the training "
                 "time and peak GPU memory.\n\n"
-                "<details><summary>Check your reasoning</summary>Training loss falls (0.517 → 0.283 in the earlier recorded run). Validation "
-                "loss can rise in epoch 2 (0.578 → 0.612 there) while WER still improves: loss scores the probability of every reference "
-                "token under teacher forcing, WER scores the words beam search actually writes, and a model can grow over-confident on "
+                "<details><summary>Check your reasoning</summary>Read the two epoch lines printed above. Training loss fell in the three recorded Colab T4 runs (0.511 → 0.2832 in the Colab T4 run of blob `5f91ee7d` (commit `9a9c39f`, 2026-10-10), 0.5054 → 0.2793 in the Colab T4 run of blob `f74abf5c` (commit `bca2542`, 2026-10-25), 0.5077 → 0.2817 in the Colab T4 run of blob `472225cf` (commit `e162ef6`, 2026-10-25)). Validation "
+                "loss did not move the same way in every run: it rose in epoch 2 in the first (0.4814 → 0.5016) and the third (0.498 → 0.5329) and fell in the second (0.5267 → 0.5084), while WER improved in all three; this can vary between runs. It can rise while WER still improves because loss scores the probability of every reference "
+                "token under teacher forcing, WER scores the words greedy decoding actually writes, and a model can grow over-confident on "
                 "tokens it gets wrong while writing more matching words. A rising validation loss is a warning about overfitting, not a "
                 "verdict; the WER in Section 9 is the measurement.</details>\n\n"
                 "## 9. Evaluate the adapted model → evaluation report · [Evaluation practice]\n\n"
                 "The live LoRA model is wrapped in the same pipeline that produced the baseline (`WhisperASRPipeline.from_model`), "
-                "so the adapted transcripts come from exactly the decoding path a user of the package gets (5-beam search, the "
+                "so the adapted transcripts come from exactly the decoding path a user of the package gets (greedy decoding — the pinned `generation_config.json` sets no `num_beams` — and the "
                 "model's 448-token limit) — not from a hand-rolled `generate` call with different settings, which can disagree "
                 "with the pipeline on near-tie clips (EVAL8). On CUDA the model is first cast to float16, the precision the "
                 "pipeline serves at. `adaptation_report` then writes `outputs/{stem}_evaluation_report.json`: baseline and "
@@ -556,10 +561,11 @@ TEMPLATE = {
             "md": (
                 "**What to notice (Section 9):** the adapted WER beside the baseline, both edit breakdowns, the duplicate count, and the "
                 "changed clips.\n\n"
-                "<details><summary>Check your reasoning</summary>In the earlier recorded run WER fell from 0.4387 to 0.4066 on 100 clips. "
-                "That is about three points on one seeded split, a size another seed can reverse, and the changed clips showed the "
-                "transcripts adopting the references' style. If substitutions fall while deletions and insertions barely move, the "
-                "adapter mostly changed how words are written. If many held-out transcripts also occur in training, part of the gain may be "
+                "<details><summary>Check your reasoning</summary>Read the WER line printed above. In the three recorded Colab T4 runs of this version (blob `5f91ee7d`, 2026-10-10, and blobs `f74abf5c` and `472225cf`, 2026-10-25) WER fell from 0.4211 to 0.3707, 0.3553 and 0.2943 on 100 clips: "
+                "about five, seven and thirteen points on one seeded split, and the runs differ by up to 7.6 points, so the size varies between runs and another seed can change it, and the example clips showed the "
+                "transcripts adopting the references' style (lower case, no punctuation). The edit breakdown says where the gain came from: "
+                "insertions fell from 424 to 346, 333 and 239 while substitutions went 82 → 81, 80 and 92 and deletions rose from 12 to 29, 24 and 31, so in those runs the adapter "
+                "mostly learned to write less than the base model, not to spell words differently. If many held-out transcripts also occur in training, part of the gain may be "
                 "memorised phrasing. Either way, it is evidence about this corpus's conventions, not that recognition improved in general.</details>\n\n"
                 "## 10. Export the adapter bundle, then prove it reloads against the verified base · [Engineering]\n\n"
                 "The deliverable is the **adapter bundle**, not a copy of the base model (ART1/ART4): `export_adapter_bundle` "
@@ -663,10 +669,10 @@ TEMPLATE = {
         "4. **Observe:** compare the loss history, the adapted WER, the edit breakdown and the number of changed clips with your first run.\n"
         "5. **Explain:** in one sentence, why can one epoch give a WER close to two epochs while the validation loss tells a different story, "
         "and why does a difference of a point or two on 100 clips not settle which setting is better?\n\n"
-        "<details><summary>Check your reasoning</summary>With half the optimizer steps the adapter moves less, so expect a smaller change from "
-        "the baseline; in the earlier run the epoch-1 validation loss (0.578) was lower than the epoch-2 one (0.612), so loss alone would "
-        "favour one epoch while WER favoured two. Loss and WER measure different things (Section 8). With 100 clips and one seed, a point or "
-        "two of WER is within what another seed can produce; to choose a setting you would need several seeds, and the choice must not be "
+        "<details><summary>Check your reasoning</summary>With half the optimizer steps the adapter takes fewer updates; whether the change from "
+        "the baseline is smaller is what your run shows; in the Colab T4 run of blob `5f91ee7d` (commit `9a9c39f`, 2026-10-10) the epoch-1 validation loss (0.4814) was lower than the epoch-2 one (0.5016), so loss alone would "
+        "have favoured one epoch while WER favoured two, but in the Colab T4 run of blob `f74abf5c` (commit `bca2542`, 2026-10-25) it was the other way round (0.5267 → 0.5084), and in the Colab T4 run of blob `472225cf` (commit `e162ef6`, 2026-10-25) epoch 1 was again lower (0.498 → 0.5329), so neither the loss nor one run settles it. Loss and WER measure different things (Section 8). With 100 clips, the recorded runs of the same seed "
+        "already differ by up to 7.6 points of WER; to choose a setting you would need several seeds, and the choice must not be "
         "made on the same clips you report as the final result.</details>\n\n"
         "## Interpretation and limits\n\n"
         "The adapted transcripts are model-generated. The baseline, adapted and reloaded WER figures are corpus-level numbers on one seeded "
@@ -692,6 +698,7 @@ TEMPLATE = {
         "## Troubleshooting\n\n"
         "| Symptom | Likely cause | What to do |\n"
         "|---|---|---|\n"
+        "| You want the isolated environment somewhere other than `dimer_isolated_env/` | Section 1 builds it in the working directory by default | Set the environment variable `DIMER_ISOLATED_ENV` to a path before running Section 1. |\n"
         "| Section 1 stops with `This notebook needs a Linux x86_64 runtime` | a local Windows or macOS kernel, or an ARM machine | Use Google Colab or Kaggle; the lock holds manylinux x86_64 wheels. |\n"
         "| Section 1 fails while downloading, or `The pinned uv wheel failed its size/SHA-256 check` | a network failure, or an altered download | Run the Section 1 install cell again; a repeated mismatch means the download is being altered — never edit the digest. |\n"
         "| `holds Python …, not 3.12.12` in Section 1 | an older `dimer_isolated_env/` folder from another notebook version | Delete that folder (or start a fresh runtime) and run the install cell again. |\n"
@@ -713,13 +720,9 @@ TEMPLATE = {
         "4. What this result can show about LoRA adaptation on this corpus, and what it cannot: ___.\n"
         "5. What I would need before using such an adapter on my own recordings: ___.\n\n"
         "## References\n\n"
-        "- Repository README: https://github.com/kurtvalcorza/whisper-asr-pipeline/blob/main/README.md\n"
-        "- Repository model card: https://github.com/kurtvalcorza/whisper-asr-pipeline/blob/main/MODEL_CARD.md\n"
-        "- Weight provenance: https://github.com/kurtvalcorza/whisper-asr-pipeline/blob/main/docs/WEIGHTS.md\n"
-        "- Upstream model: https://huggingface.co/{MODEL_ID}\n"
-        "- Upstream code: https://github.com/openai/whisper\n"
-        "- Whisper paper: https://arxiv.org/abs/2212.04356\n"
-        "- LoRA paper: https://arxiv.org/abs/2106.09685\n"
-        "- Public sample: https://huggingface.co/datasets/PolyAI/minds14"
+        "[1] A. Radford, J. W. Kim, T. Xu, G. Brockman, C. McLeavey, and I. Sutskever, \"Robust speech recognition via large-scale weak supervision,\" in *Proc. Int. Conf. Mach. Learn. (ICML)*, 2023. [Online]. Available: https://arxiv.org/abs/2212.04356\n\n"
+        "[2] E. J. Hu *et al.*, \"LoRA: Low-rank adaptation of large language models,\" in *Proc. Int. Conf. Learn. Represent. (ICLR)*, 2022. [Online]. Available: https://arxiv.org/abs/2106.09685\n\n"
+        "[3] D. Gerz *et al.*, \"Multilingual and cross-lingual intent detection from spoken data,\" arXiv:2104.08524, 2021 (MINDS-14). [Online]. Available: https://huggingface.co/datasets/PolyAI/minds14\n\n"
+        "[4] K. Valcorza, \"whisper-asr-pipeline,\" README and weight provenance; OpenAI, \"whisper,\" GitHub repository; upstream checkpoint. [Online]. Available: https://github.com/kurtvalcorza/whisper-asr-pipeline/blob/main/README.md, https://github.com/kurtvalcorza/whisper-asr-pipeline/blob/main/docs/WEIGHTS.md, https://github.com/openai/whisper, https://huggingface.co/{MODEL_ID}; model card: https://github.com/kurtvalcorza/whisper-asr-pipeline/blob/main/MODEL_CARD.md"
     ),
 }

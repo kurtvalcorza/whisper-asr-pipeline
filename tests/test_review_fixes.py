@@ -223,8 +223,10 @@ def test_wsp_m1_cancelled_or_multi_file_upload_stops_with_the_rule(monkeypatch, 
     ns = _namespace(monkeypatch, tmp_path)
     _colab_upload(monkeypatch, uploads)
     source = _cell(INFERENCE, "USE_BYOD = False").replace("USE_BYOD = False", "USE_BYOD = True")
-    with pytest.raises(RuntimeError, match=rf"Upload exactly one audio file \(received {len(uploads)}\)"):
+    rule = "the upload was cancelled or empty" if not uploads else rf"upload exactly one audio file \(received {len(uploads)}\)"
+    with pytest.raises(ValueError, match=rule) as caught:
         exec(source, ns)  # noqa: S102
+    assert caught.value.dimer_refusal  # DAT20: one Refused: line, not a traceback
 
 
 # ---- WSP-m2: the empty-transcript baseline --------------------------------------------------------------------------

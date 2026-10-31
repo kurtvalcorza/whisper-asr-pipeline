@@ -116,7 +116,7 @@ FINETUNE_CODE_MARKERS = (
     "input_manifest['findings'].append({'input': 'clips-over-30s', 'verdict': 'dropped before the split', 'count': len(DROPPED_OVER_30S), 'ids': DROPPED_OVER_30S})",
     "if 'pipe' not in globals():",
     "    pipe = WhisperASRPipeline.from_pretrained(weights_dir=WEIGHTS_DIR, allow_download=False)",
-    "uploaded = read_byod_files(BYOD_PATH)",
+    "uploaded = read_byod_files(BYOD_PATH.strip())",
     "TRAIN_CLIPS = min(len(clips) - 1, max(1, round(BYOD_TRAIN_FRACTION * len(clips))))",
     "EVAL_TRANSCRIPTS_IN_TRAIN = sum(normalise_transcript(c['text']) in train_texts for c in eval_clips)",
     "adapted_edits = word_error_breakdown(eval_references, adapted_transcripts)",

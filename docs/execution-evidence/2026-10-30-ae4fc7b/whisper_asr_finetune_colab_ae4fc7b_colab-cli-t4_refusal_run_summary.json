@@ -1,0 +1,71 @@
+{
+  "repo": "whisper-asr-pipeline",
+  "sha": "ae4fc7bd46b354e56e4f3911aa259d0ab5d84dd0",
+  "notebook": "tutorials/whisper_asr_finetune_colab.ipynb",
+  "blob": "5ca181d9e5897b5eb66058bb68c2c9b19afe0a4b",
+  "gpu": "T4",
+  "session": "suite-whisper-ae4fc7b-2f94",
+  "started_utc": "2026-10-30T20:45:20+00:00",
+  "runner": "Colab CLI `colab exec -f` on a fresh session (not a browser Run all)",
+  "overrides": [
+    {
+      "name": "USE_BYOD",
+      "from": "False",
+      "to": "True"
+    },
+    {
+      "name": "BYOD_PATH",
+      "from": "''",
+      "to": "'/etc'"
+    }
+  ],
+  "run_copy_blob": "9eb9bd893fe03a08015096ebd1b9d6278dd27317",
+  "run_copy_sha256": "296d40f0e7a0145d9c7373eb94fef4dd129101220c252f6fab384b596c8d4647",
+  "run_copy_note": "refusal run: the run copy is the committed notebook with the listed assignment overrides, cut immediately after the refusal cell and re-serialised (nbformat layout); input_unchanged compares against that copy",
+  "truncated_after_cell": "whisper_asr_finetune-18",
+  "refusal_cell_ref": "whisper_asr_finetune-18",
+  "refusal_cell_index": 7,
+  "cells_dropped": 13,
+  "code_cells_dropped": 6,
+  "original_sha256": "f614a3f1f9be4d1d334a3d41421dc736e9628534f373994b46dc01b7ae05f89b",
+  "status": "[suite-whisper-ae4fc7b-2f94] gpu-t4-s-usw4a3-2h31ypvtmeoag | Hardware: T4 | Shape: Standard | Variant: GPU | Status: IDLE",
+  "exec_exit_code": 0,
+  "stopped": true,
+  "stop_verified": true,
+  "wall_s": 123.9,
+  "input_unchanged": true,
+  "executed_file": "whisper_asr_finetune_colab_ae4fc7b_colab-cli-t4_output.ipynb",
+  "log_cells": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "log_total": 7,
+  "code_cells": 7,
+  "executed_cells": 5,
+  "errors": [
+    {
+      "cell": "whisper_asr_finetune-18",
+      "ename": "IsolatedCellRefusal",
+      "evalue": "etc: BYOD needs exactly one .csv with file,text columns; found none among 85 file(s); fix the files, then run this cell and every cell after it again (the earlier results of this session and their outputs/ files were removed)."
+    }
+  ],
+  "execution_counts": [],
+  "sequential": null,
+  "executed_sha256": "06b4bd37e09a1937dbf9632a12bb57fef1e6f5f3898eae68acc8468de371f3e3",
+  "log_sequential_complete": true,
+  "mode": "expect_refusal",
+  "refusal_line": "Refused: etc: BYOD needs exactly one .csv with file,text columns; found none among 85 file(s); fix the files, then run this cell and every cell after it again (the earlier results of this session and their outputs/ files were removed).",
+  "halting_cell_index": 7,
+  "halting_cell_id": "whisper_asr_finetune-18",
+  "error_cells": [
+    7
+  ],
+  "refusal_fail_reasons": [],
+  "refusal_ok": true,
+  "verdict": "PASS"
+}

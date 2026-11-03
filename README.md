@@ -51,8 +51,8 @@ default retrieval scores describe nominated-anchor recovery, not benchmark
 relevance. The query set is now `ai-draft-v2`: information-need drafts that avoid their anchors'
 wording, a draft pending native-speaker review. Default Run all passed on a fresh Colab T4 for blobs
 `f890d97d` (2026-10-03, 615 s) and `6cc75045` (2026-10-12, Colab CLI, 589 s) with the previous
-paraphrase query version `ai-draft-v1`; the current blob `00cb2948` (`ai-draft-v2`) passed a Colab CLI
-T4 default run on 2026-10-14 (453 s). Under `ai-draft-v2` keyword search recovers few anchors (hit@5
+paraphrase query version `ai-draft-v1`; the blob `00cb2948` (`ai-draft-v2`; the current capstone blob on 2026-10-14, history) passed a Colab CLI
+T4 default run on 2026-10-14 (453 s). The current capstone blob `699da9a1` (`main` at `d47256f`, after the 2026-11 lock upgrades) has no hosted run yet, so its default-path gate is open. Under `ai-draft-v2` keyword search recovers few anchors (hit@5
 0.075 on evaluation queries) while dense and reranked search recover 0.425 to 0.475. Other open
 gates are native-speaker review, human relevance review, a BYOD run on the maintainer's own recordings
 and a hosted run with a refused BYOD input (see
@@ -76,7 +76,7 @@ off by default.
 
 ## Release status
 
-**Candidate.** Static/unit checks do not constitute clean-runtime notebook evidence. Complete `docs/release-verification.md` against the exact release revision of each notebook before calling it release-grade.
+**Candidate.** The current blob of `tutorials/whisper_asr_colab.ipynb`, `8d8d01b8` (`main` at `d47256f`, after the 2026-11 lock upgrades) shows a refused BYOD input as exactly one `Refused: <file>: <reason>` line, with no traceback, and stops Run all at that cell. Its default path (2026-11-03; 12 code cells, exit 0, 0 errors) and its scripted DAT20 refusal (2026-11-03; `USE_BYOD=True;BYOD_PATH=/etc/hostname`: exactly one `Refused:` line at cell `whisper_asr-18`, no traceback, earlier cells clean, VM released) both passed on a hosted Colab Tesla T4 (Colab CLI `colab exec -f`, not a browser `Run all`), and the hosted runs of earlier blobs, including `4b74ff57`, are history for it (REL14). REL12 (a hosted BYOD run with one accepted and one refused input), REL2 (a browser Run all) and the noise activity stay open for this blob. The current blob of `tutorials/whisper_asr_finetune_colab.ipynb`, `566c559d` (`main` at `d47256f`, after the 2026-11 lock upgrades) shows a refused BYOD input as exactly one `Refused: <file>: <reason>` line, with no traceback, and stops Run all at that cell. Its default path (2026-11-03; 13 code cells, exit 0, 0 errors) and its scripted DAT20 refusal (2026-11-03; `USE_BYOD=True;BYOD_PATH=/etc`: exactly one `Refused:` line at cell `whisper_asr_finetune-18`, no traceback, earlier cells clean, VM released) both passed on a hosted Colab Tesla T4 (Colab CLI `colab exec -f`, not a browser `Run all`), and the hosted runs of earlier blobs, including `5ca181d9`, are history for it (REL14). REL12 (a hosted BYOD run with one accepted and one refused input) and REL2 (a browser Run all) stay open for this blob. Static/unit checks do not constitute clean-runtime notebook evidence. Complete `docs/release-verification.md` against the exact release revision of each notebook before calling it release-grade.
 
 ## Licensing
 

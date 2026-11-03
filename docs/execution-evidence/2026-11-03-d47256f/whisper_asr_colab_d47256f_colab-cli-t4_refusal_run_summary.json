@@ -1,0 +1,71 @@
+{
+  "repo": "whisper-asr-pipeline",
+  "sha": "d47256fc11e7fcc8c04e88e350080f6a26c9bdeb",
+  "notebook": "tutorials/whisper_asr_colab.ipynb",
+  "blob": "8d8d01b8b41eed279a769cace2874a13f799f9ea",
+  "gpu": "T4",
+  "session": "suite-whisper-d47256f-e41e",
+  "started_utc": "2026-11-03T14:17:29+00:00",
+  "runner": "Colab CLI `colab exec -f` on a fresh session (not a browser Run all)",
+  "overrides": [
+    {
+      "name": "USE_BYOD",
+      "from": "False",
+      "to": "True"
+    },
+    {
+      "name": "BYOD_PATH",
+      "from": "''",
+      "to": "'/etc/hostname'"
+    }
+  ],
+  "run_copy_blob": "3450de2b1997420ddd1e34321d48aa67e9ea3477",
+  "run_copy_sha256": "36331da36ed96c9dec72eb49825ae87b4ea8ccf7667537d9b52a74dce06b1ebe",
+  "run_copy_note": "refusal run: the run copy is the committed notebook with the listed assignment overrides, cut immediately after the refusal cell and re-serialised (nbformat layout); input_unchanged compares against that copy",
+  "truncated_after_cell": "whisper_asr-18",
+  "refusal_cell_ref": "whisper_asr-18",
+  "refusal_cell_index": 7,
+  "cells_dropped": 11,
+  "code_cells_dropped": 5,
+  "original_sha256": "ee7818fd712939526761fed76380a85cb085252af328c28debc8fa159d530a4f",
+  "status": "[suite-whisper-d47256f-e41e] gpu-t4-s-ass1a0-kynhqouvbcqq | Hardware: T4 | Shape: Standard | Variant: GPU | Status: IDLE",
+  "exec_exit_code": 0,
+  "stopped": true,
+  "stop_verified": true,
+  "wall_s": 209.7,
+  "input_unchanged": true,
+  "executed_file": "whisper_asr_colab_d47256f_colab-cli-t4_output.ipynb",
+  "log_cells": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "log_total": 7,
+  "code_cells": 7,
+  "executed_cells": 5,
+  "errors": [
+    {
+      "cell": "whisper_asr-18",
+      "ename": "IsolatedCellRefusal",
+      "evalue": "hostname: not an audio file soundfile can read (WAV, FLAC, OGG, MP3 ...): Error opening <_io.BytesIO object at 0x7f3169b92430>: Format not recognised; fix the file, then run this cell and every cell after it again (the earlier results of this session and their outputs/ files were removed)."
+    }
+  ],
+  "execution_counts": [],
+  "sequential": null,
+  "executed_sha256": "c47f97bb43efe39057cb6bd98ee459bc084d77bafe5f3ec8c22f62ac8effc6f7",
+  "log_sequential_complete": true,
+  "mode": "expect_refusal",
+  "refusal_line": "Refused: hostname: not an audio file soundfile can read (WAV, FLAC, OGG, MP3 ...): Error opening <_io.BytesIO object at 0x7f3169b92430>: Format not recognised; fix the file, then run this cell and every cell after it again (the earlier results of this session and their outputs/ files were removed).",
+  "halting_cell_index": 7,
+  "halting_cell_id": "whisper_asr-18",
+  "error_cells": [
+    7
+  ],
+  "refusal_fail_reasons": [],
+  "refusal_ok": true,
+  "verdict": "PASS"
+}

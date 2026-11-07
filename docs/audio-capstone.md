@@ -252,7 +252,9 @@ fixtures and are not stored as notebook outputs or scientific results.
 
 1. Filipino-language query review, full relevance annotation, independent review
    or disclosed single-reviewer limitation, and a frozen review record.
-2. Reviewer confirmation of the hosted default run of the current notebook blob
+2. A hosted default run of the current notebook blob `699da9a1` (after the 2026-11 lock
+   upgrades; no hosted run yet) and reviewer confirmation of it. History (REL14): the last hosted
+   run is of the earlier blob
    (`00cb2948` at `816b8dc`, query version `ai-draft-v2`, Colab CLI T4, 2026-10-14:
    PASS; a CLI sequential execution, not a browser Run all).
 3. A hosted BYOD run on the maintainer's own recordings (so far only FLEURS
